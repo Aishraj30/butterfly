@@ -85,7 +85,7 @@ export function Header() {
         <div className="flex justify-center">
           <Link href="/" className="flex-shrink-0">
             <span className={`font-serif text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.9em] italic whitespace-nowrap transition-colors ${logoColor}`}>
-              B U T T E R F L Y
+              BUTTERFLY
             </span>
           </Link>
         </div>
@@ -115,43 +115,50 @@ export function Header() {
             </Link>
 
             {/* Auth/Account */}
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="hover:opacity-70 transition-opacity flex items-center gap-1">
-                    <User size={20} strokeWidth={1.5} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 mt-4">
-                  <div className="px-2 py-1.5 text-sm font-medium border-b mb-1">
-                    Hi, {user.name}
-                  </div>
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer w-full">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/orders" className="cursor-pointer w-full">Orders</Link>
-                  </DropdownMenuItem>
-                  {user.role === 'admin' && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin" className="cursor-pointer w-full text-blue-600 font-medium">Admin Dashboard</Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link href="/account" className="hover:opacity-70 transition-opacity">
-                <User size={20} strokeWidth={1.5} />
-              </Link>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="hover:opacity-70 transition-opacity flex items-center gap-1">
+                  <User size={20} strokeWidth={1.5} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 mt-4">
+                {user ? (
+                  <>
+                    <div className="px-2 py-1.5 text-sm font-medium border-b mb-1">
+                      Hi, {user.name}
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer w-full">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/orders" className="cursor-pointer w-full">Orders</Link>
+                    </DropdownMenuItem>
+                    {user.role === 'admin' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin" className="cursor-pointer w-full text-blue-600 font-medium">Admin Dashboard</Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/login" className="cursor-pointer w-full">Login</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/signup" className="cursor-pointer w-full">Sign Up</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <button
               onClick={() => setIsCartOpen(true)}
