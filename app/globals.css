@@ -6,48 +6,49 @@
 :root {
   /* Butterfly Couture - Luxury Fashion Brand */
   /* Primary: Cream/Beige base, Accent: Dark Brown/Black */
-  
+
+  /* No changes needed yet */
   /* Background & Base Colors */
   --background: oklch(0.98 0.01 70);
   --foreground: oklch(0.15 0.01 0);
-  
+
   /* Card & Popover */
   --card: oklch(0.99 0.008 70);
   --card-foreground: oklch(0.15 0.01 0);
   --popover: oklch(0.99 0.008 70);
   --popover-foreground: oklch(0.15 0.01 0);
-  
+
   /* Primary & Secondary */
   --primary: oklch(0.15 0.01 0);
   --primary-foreground: oklch(0.98 0.01 70);
   --secondary: oklch(0.93 0.015 70);
   --secondary-foreground: oklch(0.15 0.01 0);
-  
+
   /* Muted & Accents */
   --muted: oklch(0.88 0.01 70);
   --muted-foreground: oklch(0.45 0.01 0);
   --accent: oklch(0.20 0.01 0);
   --accent-foreground: oklch(0.98 0.01 70);
-  
+
   /* States */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.98 0.01 70);
-  
+
   /* Borders & Input */
   --border: oklch(0.92 0.01 70);
   --input: oklch(0.95 0.01 70);
   --ring: oklch(0.15 0.01 0);
-  
+
   /* Charts */
   --chart-1: oklch(0.20 0.01 0);
   --chart-2: oklch(0.45 0.01 0);
   --chart-3: oklch(0.65 0.01 0);
   --chart-4: oklch(0.80 0.01 70);
   --chart-5: oklch(0.88 0.01 70);
-  
+
   /* Spacing */
   --radius: 0.375rem;
-  
+
   /* Sidebar */
   --sidebar: oklch(0.98 0.01 70);
   --sidebar-foreground: oklch(0.15 0.01 0);
@@ -137,9 +138,14 @@
 }
 
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

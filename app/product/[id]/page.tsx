@@ -1,262 +1,109 @@
-'use client'
+'use client';
 
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
-import { ProductGallery } from '@/components/product/ProductGallery'
-import { useCart } from '@/hooks/useCart'
-import { getProductById } from '@/lib/db'
-import { Heart, Share2, ShoppingBag, Minus, Plus } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState } from 'react';
+import Image from 'next/image';
+import { Star, Minus, Plus, ShoppingCart, Heart } from 'lucide-react';
 
-export default function ProductPage({ params }: { params: { id: string } }) {
-  const [quantity, setQuantity] = useState(1)
-  const [selectedSize, setSelectedSize] = useState<string | null>(null)
-  const [selectedColor, setSelectedColor] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
-  const { addToCart } = useCart()
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState('M');
 
-  const product = getProductById(params.id)
-
-  if (!product) {
-    return (
-      <>
-        <Header />
-        <main className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-xl text-foreground/60 mb-6">Product not found</p>
-            <Link
-              href="/shop"
-              className="inline-block px-8 py-3 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary/90 transition-colors"
-            >
-              Back to Shop
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </>
-    )
-  }
-
-  const handleAddToCart = async () => {
-    if (!selectedSize) {
-      setMessage('Please select a size')
-      return
-    }
-    if (!selectedColor) {
-      setMessage('Please select a color')
-      return
-    }
-
-    setLoading(true)
-    setMessage('')
-
-    try {
-      await addToCart(product.id, quantity, selectedSize, selectedColor)
-      setMessage(`✓ Added to cart!`)
-      setTimeout(() => setMessage(''), 2000)
-    } catch (error) {
-      setMessage('Failed to add to cart')
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Mock data - would normally fetch based on params.id
+  const product = {
+    name: 'WHITE CASUAL T-SHIRT',
+    price: 'IDR 100.000',
+    originalPrice: 'IDR 200.000',
+    description: 'Lorem ipsum dolor sit amet consectetur. Metus nibh dictum vel enim sollicitudin. Metus nibh a leo orci aliquam diam. Metus pretium purus augue malesuada metus. Nec suspendisse proin aliquam dolor ipsum. Quis id enim viverra et.',
+    sizes: ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    images: [
+      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80',
+      'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80',
+      'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80'
+    ]
+  };
 
   return (
-    <>
-      <Header />
-      <main className="min-h-screen bg-background">
-        {/* Breadcrumb */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex gap-2 text-sm text-foreground/60">
-            <Link href="/" className="hover:text-foreground transition-colors">
-              Home
-            </Link>
-            <span>/</span>
-            <Link href="/shop" className="hover:text-foreground transition-colors">
-              Shop
-            </Link>
-            <span>/</span>
-            <span className="text-foreground">{product.name}</span>
+    <main className="pt-40 pb-20 max-w-[1400px] mx-auto px-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Left: Image Gallery */}
+        <div className="space-y-4">
+          <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
+            <div className="absolute top-4 right-4 z-10 bg-yellow-400 text-xs font-bold px-2 py-1 flex items-center gap-1 rounded-sm">
+              <Star size={12} fill="currentColor" /> 4.95
+            </div>
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            {product.images.map((img, i) => (
+              <div key={i} className="relative aspect-square bg-gray-100 cursor-pointer hover:opacity-80 transition-opacity">
+                <Image src={img} alt="Thumbnail" fill className="object-cover" />
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Product Images */}
-            <ProductGallery productName={product.name} />
-
-            {/* Product Info */}
-            <div className="space-y-6">
-              {/* Header */}
-              <div>
-                <h1 className="font-serif text-4xl font-bold text-primary mb-2">
-                  {product.name}
-                </h1>
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl font-bold text-foreground">
-                    ${product.price.toLocaleString()}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <div className="flex text-accent">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-lg">★</span>
-                      ))}
-                    </div>
-                    <span className="text-sm text-foreground/60">
-                      ({product.reviews} reviews)
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="text-foreground/70 leading-relaxed">
-                {product.description}
-              </p>
-
-              {/* Size Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-3">
-                  Size
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-3 font-medium text-sm rounded-sm transition-colors ${
-                        selectedSize === size
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'border border-border text-foreground hover:border-primary'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Color Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-3">
-                  Color
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-3 font-medium text-sm rounded-sm transition-colors ${
-                        selectedColor === color
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'border border-border text-foreground hover:border-primary'
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quantity */}
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-3">
-                  Quantity
-                </label>
-                <div className="flex items-center gap-2 border border-border rounded-sm w-fit">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 hover:bg-secondary transition-colors"
-                  >
-                    <Minus size={18} />
-                  </button>
-                  <span className="px-4 font-medium">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 hover:bg-secondary transition-colors"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Add to Cart */}
-              <div className="flex gap-3">
-              <button
-                onClick={handleAddToCart}
-                disabled={loading}
-                className="w-full px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <ShoppingBag size={20} />
-                {loading ? 'Adding...' : 'Add to Bag'}
-              </button>
-              {message && (
-                <p className={`text-sm font-medium text-center ${message.includes('✓') ? 'text-green-600' : 'text-red-600'}`}>
-                  {message}
-                </p>
-              )}
-                <button className="p-4 border border-border rounded-sm hover:bg-secondary transition-colors">
-                  <Heart size={20} />
-                </button>
-                <button className="p-4 border border-border rounded-sm hover:bg-secondary transition-colors">
-                  <Share2 size={20} />
-                </button>
-              </div>
-
-              {/* Details */}
-              <div className="border-t border-border pt-6">
-                <h3 className="font-semibold text-foreground mb-3">Product Details</h3>
-                <ul className="space-y-2">
-                  {product.details.map((detail, i) => (
-                    <li key={i} className="text-sm text-foreground/70 flex gap-3">
-                      <span className="text-primary">•</span>
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Shipping Info */}
-              <div className="bg-secondary border border-border rounded-sm p-4 space-y-3">
-                <div className="font-semibold text-sm">Free Shipping & Easy Returns</div>
-                <p className="text-xs text-foreground/70">
-                  Complimentary worldwide shipping on orders over $500. Returns accepted within 30 days.
-                </p>
-              </div>
+        {/* Right: Info */}
+        <div className="space-y-8">
+          <div>
+            <p className="text-gray-500 text-sm tracking-widest mb-2">MAN T-SHIRT</p>
+            <h1 className="font-serif text-5xl text-[#4A4A4A] mb-4">{product.name}</h1>
+            <div className="flex items-center gap-4">
+              <span className="text-gray-400 line-through text-lg">{product.originalPrice}</span>
+              <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">-50%</span>
             </div>
+            <p className="text-3xl font-bold text-[#8B5E34] mt-2">{product.price}</p>
           </div>
 
-          {/* Related Products */}
-          <div className="mt-20">
-            <h2 className="font-serif text-3xl font-bold text-primary mb-8">
-              Related Products
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {product.relatedProducts.map((prod) => (
-                <Link
-                  key={prod.id}
-                  href={`/product/${prod.id}`}
-                  className="group"
+          <div className="prose prose-sm text-gray-500">
+            <p>{product.description}</p>
+            <p className="mt-4">{product.description}</p>
+          </div>
+
+          {/* Size Selector */}
+          <div>
+            <h3 className="text-gray-500 mb-3">Size</h3>
+            <div className="flex flex-wrap gap-2">
+              {product.sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => setSelectedSize(size)}
+                  className={`w-12 h-12 flex items-center justify-center border text-sm transition-colors ${selectedSize === size
+                    ? 'bg-[#8B5E34] text-white border-[#8B5E34]'
+                    : 'border-gray-200 text-gray-500 hover:border-[#8B5E34]'
+                    }`}
                 >
-                  <div className="aspect-square bg-secondary rounded-sm mb-4 flex items-center justify-center group-hover:shadow-lg transition-shadow">
-                    <span className="text-foreground/20">Product Image</span>
-                  </div>
-                  <h3 className="font-medium text-foreground group-hover:text-primary transition-colors mb-1">
-                    {prod.name}
-                  </h3>
-                  <p className="text-foreground/60 text-sm">
-                    ${prod.price.toLocaleString()}
-                  </p>
-                </Link>
+                  {size}
+                </button>
               ))}
             </div>
           </div>
+
+          {/* Quantity & Add to Cart */}
+          <div className="space-y-3">
+            <h3 className="text-gray-500">Quantity</h3>
+            <div className="flex gap-4">
+              <div className="flex items-center border border-gray-200 w-32 justify-between px-2 py-3">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-1 hover:text-[#8B5E34]">
+                  <Minus size={16} />
+                </button>
+                <span className="font-medium">{quantity}</span>
+                <button onClick={() => setQuantity(quantity + 1)} className="p-1 hover:text-[#8B5E34]">
+                  <Plus size={16} />
+                </button>
+              </div>
+
+              <button className="flex-1 bg-[#8B5E34] text-white font-bold tracking-widest flex items-center justify-center gap-2 hover:bg-[#7A5229] transition-colors">
+                ADD TO CART <ShoppingCart size={20} />
+              </button>
+            </div>
+          </div>
         </div>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </main>
   )
 }

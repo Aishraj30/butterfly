@@ -2,7 +2,10 @@ import React from "react"
 import type { Metadata, Viewport } from 'next'
 import { Geist, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import SmoothScroll from '@/components/SmoothScroll'
 import { ChatBot } from '@/components/chat/ChatBot'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
 import './globals.css'
 
 const geist = Geist({ subsets: ["latin"], variable: '--font-sans' })
@@ -45,7 +48,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable} ${playfair.variable}`}>
       <body className={`font-sans antialiased bg-background text-foreground`}>
+        <SmoothScroll />
+        <Header />
         {children}
+        <Footer />
         <ChatBot />
         <Analytics />
       </body>
