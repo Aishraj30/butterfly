@@ -1,194 +1,96 @@
-'use client'
+'use client';
 
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
-import { useCart } from '@/hooks/useCart'
-import { getProductById } from '@/lib/db'
-import Link from 'next/link'
-import { Trash2, ArrowRight } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Minus, Plus, Trash2 } from 'lucide-react';
 
 export default function CartPage() {
-  const { cart, isLoading, removeFromCart, updateQuantity } = useCart()
-  const [mounted, setMounted] = useState(false)
-  const [products, setProducts] = useState<any>({})
+  const [cartItems, setCartItems] = useState([
+    { id: 1, name: 'WHITE CASUAL T-SHIRT', price: 100000, qty: 1, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80' },
+    { id: 2, name: 'WHITE CASUAL T-SHIRT', price: 100000, qty: 1, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80' },
+    { id: 3, name: 'WHITE CASUAL T-SHIRT', price: 100000, qty: 1, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80' },
+  ]);
 
-  useEffect(() => {
-    setMounted(true)
-    // Fetch product details for items in cart
-    const loadProducts = async () => {
-      const productDetails: any = {}
-      for (const item of cart.items) {
-        const product = getProductById(item.productId)
-        if (product) {
-          productDetails[item.productId] = product
-        }
-      }
-      setProducts(productDetails)
-    }
-    loadProducts()
-  }, [cart.items])
+  const updateQty = (id: number, delta: number) => {
+    setCartItems(cartItems.map(item =>
+      item.id === id ? { ...item, qty: Math.max(1, item.qty + delta) } : item
+    ));
+  };
 
-  if (!mounted || isLoading) {
-    return (
-      <>
-        <Header />
-        <main className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-foreground/60">Loading cart...</p>
-        </main>
-        <Footer />
-      </>
-    )
-  }
+  const removeItem = (id: number) => {
+    setCartItems(cartItems.filter(item => item.id !== id));
+  };
+
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const total = subtotal - 50000; // Mock discount
 
   return (
-    <>
-      <Header />
-      <main className="min-h-screen bg-background">
-        {/* Page Header */}
-        <div className="bg-secondary border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary">
-              Shopping Bag
-            </h1>
+    <main className="pt-40 pb-20 max-w-[1400px] mx-auto px-6">
+      <h1 className="font-serif text-5xl text-[#4A4A4A] mb-12">CART</h1>
+
+      <div className="flex flex-col lg:flex-row gap-12">
+        {/* Cart Items */}
+        <div className="flex-1 space-y-8">
+          {cartItems.map((item) => (
+            <div key={item.id} className="flex gap-6 border-b border-gray-100 pb-8">
+              <div className="w-32 aspect-[3/4] relative bg-gray-100 flex-shrink-0">
+                <Image src={item.image} alt={item.name} fill className="object-cover" />
+              </div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-serif text-xl text-gray-800">{item.name}</h3>
+                  <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 flex items-center gap-1 text-sm">
+                    <Trash2 size={16} /> Delete
+                  </button>
+                </div>
+                <p className="text-gray-500 mb-6">IDR {item.price.toLocaleString()}</p>
+                <div className="flex items-center border border-gray-200 w-32 justify-between px-2 py-2">
+                  <button onClick={() => updateQty(item.id, -1)} className="p-1 hover:text-[#8B5E34]">
+                    <Minus size={14} />
+                  </button>
+                  <span className="font-medium text-sm">{item.qty}</span>
+                  <button onClick={() => updateQty(item.id, 1)} className="p-1 hover:text-[#8B5E34]">
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <div className="bg-[#FDF6E9] p-4 text-gray-600 border border-[#E5D3B3] rounded-sm">
+            <p className="text-sm">Notes: <br /> <span className="opacity-50">Eg: Please double check before packing.</span></p>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {cart.items.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-lg text-foreground/60 mb-6">Your bag is empty</p>
-              <Link
-                href="/shop"
-                className="inline-block px-8 py-3 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary/90 transition-colors"
-              >
-                Continue Shopping
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              {/* Cart Items */}
-              <div className="lg:col-span-2 space-y-4">
-                {cart.items.map((item) => {
-                  const product = products[item.productId]
-                  if (!product) return null
+        {/* Summary Sidebar */}
+        <div className="w-full lg:w-[400px]">
+          <div className="bg-[#FDF6E9]/50 p-8 border border-gray-100 sticky top-32">
+            <h3 className="font-serif text-2xl mb-6 text-gray-800">SHOPPING INFO</h3>
 
-                  return (
-                    <div
-                      key={`${item.productId}-${item.size}-${item.color}`}
-                      className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-6 border border-border rounded-sm"
-                    >
-                      {/* Image */}
-                      <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-sm aspect-square flex items-center justify-center">
-                        <span className="text-foreground/20 text-sm">Product Image</span>
-                      </div>
-
-                      {/* Details */}
-                      <div className="sm:col-span-2 space-y-2">
-                        <h3 className="font-medium text-foreground">
-                          {product.name}
-                        </h3>
-                        <p className="text-sm text-foreground/60">
-                          Size: <span className="font-medium">{item.size}</span>
-                        </p>
-                        <p className="text-sm text-foreground/60">
-                          Color: <span className="font-medium">{item.color}</span>
-                        </p>
-                        <div className="flex items-center gap-3 pt-2">
-                          <button
-                            onClick={() => updateQuantity(item.productId, item.size, item.color, item.quantity - 1)}
-                            className="px-2 py-1 border border-border rounded-sm hover:bg-secondary transition-colors text-sm"
-                          >
-                            −
-                          </button>
-                          <span className="text-sm font-medium">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.productId, item.size, item.color, item.quantity + 1)}
-                            className="px-2 py-1 border border-border rounded-sm hover:bg-secondary transition-colors text-sm"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Price & Actions */}
-                      <div className="flex flex-col items-end justify-between">
-                        <p className="text-lg font-semibold text-foreground">
-                          ${(product.price * item.quantity).toFixed(2)}
-                        </p>
-                        <button
-                          onClick={() => removeFromCart(item.productId, item.size, item.color)}
-                          className="p-2 text-destructive hover:bg-secondary rounded-sm transition-colors"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Order Summary */}
-              <div className="space-y-6">
-                <div className="border border-border rounded-sm p-6 space-y-4">
-                  <h2 className="font-serif text-2xl font-bold text-primary">
-                    Order Summary
-                  </h2>
-
-                  <div className="space-y-3 border-t border-border pt-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-foreground/70">Subtotal</span>
-                      <span className="font-medium">${cart.subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-foreground/70">Shipping</span>
-                      <span className="font-medium">
-                        {cart.shipping === 0 ? (
-                          <span className="text-green-600">Free</span>
-                        ) : (
-                          `$${cart.shipping.toFixed(2)}`
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-foreground/70">Tax</span>
-                      <span className="font-medium">${cart.tax.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-border pt-4 flex justify-between">
-                    <span className="font-semibold text-foreground">Total</span>
-                    <span className="text-2xl font-bold text-primary">
-                      ${cart.total.toFixed(2)}
-                    </span>
-                  </div>
-
-                  <Link
-                    href="/checkout"
-                    className="w-full flex items-center justify-center gap-2 px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-sm hover:bg-primary/90 transition-colors mt-6"
-                  >
-                    Proceed to Checkout
-                    <ArrowRight size={18} />
-                  </Link>
-                </div>
-
-                {/* Free Shipping Info */}
-                {cart.subtotal < 500 && (
-                  <div className="bg-secondary border border-border rounded-sm p-4">
-                    <p className="text-sm text-foreground/70">
-                      Free shipping on orders over <span className="font-semibold text-foreground">$500</span>
-                    </p>
-                    <p className="text-sm text-foreground/70 mt-2">
-                      Add <span className="font-semibold text-primary">${(500 - cart.subtotal).toFixed(2)}</span> more to qualify
-                    </p>
-                  </div>
-                )}
+            <div className="relative mb-6">
+              <div className="bg-[#E5D3B3]/20 p-3 text-sm text-center border border-[#E5D3B3] text-[#8B5E34] mb-4">
+                Hooray! You have promo code! <span className="underline cursor-pointer font-bold">Use promo code</span>
               </div>
             </div>
-          )}
+
+            <div className="space-y-4 mb-8">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>IDR {subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-xl font-bold text-gray-900 border-t pt-4 border-gray-200">
+                <span>Total</span>
+                <span>IDR {total.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <Link href="/checkout" className="block w-full bg-[#8B5E34] text-white py-4 text-center font-bold tracking-widest hover:bg-[#7A5229] transition-colors">
+              PROCEED TO CHECKOUT
+            </Link>
+          </div>
         </div>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </main>
   )
 }

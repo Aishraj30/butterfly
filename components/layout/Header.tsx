@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { User, ShoppingCart, ChevronDown, Heart } from 'lucide-react'
 import { useState } from 'react'
+<<<<<<< HEAD
 import { Menu, X, Search, ShoppingBag, User, LogOut } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -12,17 +14,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+=======
+import { CartDrawer } from './CartDrawer'
+>>>>>>> butterfly
 
 const navigation = [
-  { name: 'Shop', href: '/shop' },
-  { name: 'Collection', href: '/collection' },
-  { name: 'Lookbook', href: '/lookbook' },
-  { name: 'Magazine', href: '/blog' },
+  { name: 'Catalog', href: '/catalog', hasDropdown: true },
+  { name: 'Sale', href: '/sale' },
+  { name: 'New Arrival', href: '/new-arrival' },
   { name: 'About', href: '/about' },
-  { name: 'Contact', href: '/contact' },
 ]
 
 export function Header() {
+<<<<<<< HEAD
   const [isOpen, setIsOpen] = useState(false)
   const { user, logout } = useAuth()
 
@@ -39,30 +43,35 @@ export function Header() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           {navigation.map((item) => (
+=======
+  const [isCartOpen, setIsCartOpen] = useState(false)
+
+  return (
+    <header className="absolute top-0 left-0 w-full z-50 py-8">
+      <nav className="max-w-[1400px] mx-auto px-6 grid grid-cols-3 items-center">
+        {/* Left Navigation */}
+        <div className="flex items-center gap-8">
+          {navigation.slice(0, 2).map((item) => (
+>>>>>>> butterfly
             <Link
               key={item.name}
               href={item.href}
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              className="group flex items-center gap-1 text-[13px] font-bold uppercase tracking-[0.2em] text-white/90 hover:text-white transition-colors"
             >
               {item.name}
+              {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
             </Link>
           ))}
         </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-4">
-          <button className="p-2 text-foreground hover:text-primary transition-colors">
-            <Search size={20} />
-          </button>
-          <Link
-            href="/cart"
-            className="relative p-2 text-foreground hover:text-primary transition-colors"
-          >
-            <ShoppingBag size={20} />
-            <span className="absolute top-0 right-0 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-              0
+        {/* Center Logo */}
+        <div className="flex justify-center">
+          <Link href="/" className="flex-shrink-0">
+            <span className="font-serif text-4xl font-bold tracking-[0.3em] text-white italic">
+              BUTTERFLY
             </span>
           </Link>
+<<<<<<< HEAD
 
           {/* Auth Section */}
           {user ? (
@@ -118,18 +127,18 @@ export function Header() {
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
+=======
+>>>>>>> butterfly
         </div>
-      </nav>
 
-      {/* Mobile Navigation */}
-      {isOpen && (
-        <div className="md:hidden border-t border-border bg-background">
-          <div className="px-4 py-4 space-y-4">
-            {navigation.map((item) => (
+        {/* Right Navigation & Actions */}
+        <div className="flex items-center justify-end gap-8">
+          <div className="hidden lg:flex items-center gap-8">
+            {navigation.slice(2).map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="block text-sm font-medium text-foreground hover:text-primary transition-colors"
+                className="text-[13px] font-bold uppercase tracking-[0.2em] text-white/90 hover:text-white transition-colors"
               >
                 {item.name}
               </Link>
@@ -170,8 +179,26 @@ export function Header() {
               )}
             </div>
           </div>
+
+          <div className="flex items-center gap-6 text-white/90 ml-4">
+            <Link href="/wishlist" className="hover:text-white transition-colors">
+              <Heart size={20} strokeWidth={1.5} />
+            </Link>
+            <Link href="/account" className="hover:text-white transition-colors">
+              <User size={20} strokeWidth={1.5} />
+            </Link>
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="flex items-center hover:text-white transition-colors cursor-pointer relative"
+              aria-label="Open Cart"
+            >
+              <ShoppingCart size={20} strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
-      )}
+      </nav>
+
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   )
 }

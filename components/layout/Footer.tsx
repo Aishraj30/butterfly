@@ -1,26 +1,27 @@
 import Link from 'next/link'
-import { Mail, Instagram, Facebook, Twitter } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="bg-primary text-primary-foreground mt-20 border-t border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+    <footer className="bg-[#E5D3B3] text-white pt-20 pb-10">
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-white/20 pb-16">
           {/* Brand */}
-          <div className="space-y-4">
-            <h2 className="font-serif text-2xl font-bold">Butterfly</h2>
-            <p className="text-sm text-primary-foreground/80">
-              Luxury fashion redefined. Where elegance meets innovation.
-            </p>
+          <div className="space-y-6">
+            <h2 className="font-serif text-4xl font-medium tracking-wide text-white">MODEVA</h2>
+            <div className="space-y-1 text-sm text-white/80">
+              <p>Address: 123 Fashion Street, Paris</p>
+              <p>Phone: +1 234 567 890</p>
+              <p>Email: info@modeva.com</p>
+            </div>
           </div>
 
-          {/* Shop */}
+          {/* Menu */}
           <div>
-            <h3 className="font-semibold text-sm mb-4">Shop</h3>
+            <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Menu</h3>
             <ul className="space-y-3">
-              {['New Arrivals', 'Best Sellers', 'Collections', 'Sale'].map((item) => (
+              {['Home', 'Shop', 'About', 'Contact'].map((item) => (
                 <li key={item}>
-                  <Link href="#" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                  <Link href="#" className="text-sm text-white/80 hover:text-white transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -28,13 +29,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
+          {/* Help */}
           <div>
-            <h3 className="font-semibold text-sm mb-4">Company</h3>
+            <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Help</h3>
             <ul className="space-y-3">
-              {['About Us', 'Blog', 'Careers', 'Press'].map((item) => (
+              {['Shipping', 'Returns', 'Sizing', 'FAQ'].map((item) => (
                 <li key={item}>
-                  <Link href="#" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                  <Link href="#" className="text-sm text-white/80 hover:text-white transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -42,13 +43,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Socials */}
           <div>
-            <h3 className="font-semibold text-sm mb-4">Support</h3>
+            <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Social</h3>
             <ul className="space-y-3">
-              {['Contact Us', 'Shipping Info', 'Returns', 'Sizing Guide'].map((item) => (
+              {['Instagram', 'Facebook', 'Twitter', 'Pinterest'].map((item) => (
                 <li key={item}>
-                  <Link href="#" className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                  <Link href="#" className="text-sm text-white/80 hover:text-white transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -57,57 +58,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Newsletter Signup */}
-        <div className="border-t border-primary-foreground/20 pt-8 mb-8">
-          <div className="max-w-md">
-            <h3 className="font-semibold text-sm mb-3">Subscribe to Our Newsletter</h3>
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-3 py-2 bg-primary-foreground text-primary text-sm rounded-sm placeholder:text-primary/50 focus:outline-none focus:ring-1 focus:ring-primary-foreground"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-background text-primary font-medium text-sm rounded-sm hover:bg-primary-foreground/10 transition-colors"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Bottom */}
-        <div className="border-t border-primary-foreground/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-primary-foreground/60">
-            © 2024 Butterfly Couture. All rights reserved.
-          </p>
-          
-          {/* Social Links */}
-          <div className="flex gap-4">
-            <Link href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
-              <Instagram size={16} />
-            </Link>
-            <Link href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
-              <Facebook size={16} />
-            </Link>
-            <Link href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
-              <Twitter size={16} />
-            </Link>
-            <Link href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
-              <Mail size={16} />
-            </Link>
-          </div>
-
-          {/* Policies */}
-          <div className="flex gap-4 text-xs">
-            <Link href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
-              Terms of Service
-            </Link>
-          </div>
+        <div className="pt-8 text-center text-sm text-white/60">
+          © 2024 MODEVA. All Rights Reserved.
         </div>
       </div>
     </footer>
