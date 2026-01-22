@@ -2,12 +2,34 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+const getProfileCacheKey = (email: string) => `user_profile:${email.toLowerCase()}`;
+
+const mergeCachedProfile = (apiUser: any) => {
+  try {
+    const email = typeof apiUser?.email === "string" ? apiUser.email : "";
+    if (!email) return apiUser;
+
+    const cached = localStorage.getItem(getProfileCacheKey(email));
+    if (!cached) return apiUser;
+
+    const parsed = JSON.parse(cached) as Partial<User>;
+    return {
+      ...apiUser,
+      name: parsed.name ?? apiUser.name,
+      avatar: parsed.avatar ?? apiUser.avatar,
+    };
+  } catch {
+    return apiUser;
+  }
+};
+
 interface User {
   id: string;
   name: string;
   email: string;
   role: string;
   createdAt: string;
+  avatar?: string;
 }
 
 interface AuthContextType {
@@ -15,6 +37,7 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
+  updateUser: (updates: Partial<User>) => void;
   logout: () => void;
   isLoading: boolean;
   error: string | null;
@@ -78,10 +101,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(data.error || "Login failed");
       }
 
-      setUser(data.user);
+      const mergedUser = mergeCachedProfile(data.user);
+      setUser(mergedUser);
       setToken(data.token);
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("user", JSON.stringify(mergedUser));
+      if (mergedUser?.email) {
+        localStorage.setItem(getProfileCacheKey(mergedUser.email), JSON.stringify({
+          name: mergedUser.name,
+          avatar: mergedUser.avatar,
+        }));
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
       setError(errorMessage);
@@ -89,6 +119,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const updateUser = (updates: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const nextUser = { ...prev, ...updates };
+      localStorage.setItem("user", JSON.stringify(nextUser));
+      if (nextUser.email) {
+        localStorage.setItem(getProfileCacheKey(nextUser.email), JSON.stringify({
+          name: nextUser.name,
+          avatar: nextUser.avatar,
+        }));
+      }
+      return nextUser;
+    });
   };
 
   const signup = async (name: string, email: string, password: string) => {
@@ -110,10 +155,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(data.error || "Signup failed");
       }
 
-      setUser(data.user);
+      const mergedUser = mergeCachedProfile(data.user);
+      setUser(mergedUser);
       setToken(data.token);
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("user", JSON.stringify(mergedUser));
+      if (mergedUser?.email) {
+        localStorage.setItem(getProfileCacheKey(mergedUser.email), JSON.stringify({
+          name: mergedUser.name,
+          avatar: mergedUser.avatar,
+        }));
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Signup failed";
       setError(errorMessage);
@@ -135,6 +187,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     token,
     login,
     signup,
+    updateUser,
     logout,
     isLoading,
     error,

@@ -39,15 +39,22 @@ export function Header() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
 
+  const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
 
   useEffect(() => {
+    if (isAuthPage) return
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [isAuthPage])
+
+  if (isAuthPage) {
+    return null
+  }
 
   // Header style based on page and scroll
   const headerBg = isScrolled || !isHome ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'

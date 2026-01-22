@@ -1,6 +1,16 @@
+"use client"
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export function Footer() {
+  const pathname = usePathname()
+  const isAuthPage = pathname === '/login' || pathname === '/signup'
+
+  if (isAuthPage) {
+    return null
+  }
+
   return (
     <footer className="bg-[#E5D3B3] text-white pt-20 pb-10">
       <div className="max-w-[1400px] mx-auto px-6">
