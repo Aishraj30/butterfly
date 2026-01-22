@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllProducts, searchProducts } from '@/lib/db'
+import { getAllProducts, searchProducts } from '@/lib/products'
 
 // AI-like responses for the chatbot
 const chatResponses: { [key: string]: string[] } = {

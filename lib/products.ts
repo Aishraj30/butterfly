@@ -1,5 +1,6 @@
 // Mock product database - in production, this would come from an actual database
-export const products = [
+// Mock product database - mutable for admin functionality
+export let products: Product[] = [
   {
     id: 1,
     name: 'Silk Butterfly Gown',
@@ -23,6 +24,8 @@ export const products = [
     reviews: 89,
     image: 'bg-gradient-to-br from-pink-100 to-rose-100',
     inStock: true,
+    onSale: true,
+    salePrice: 750,
   },
   {
     id: 3,
@@ -59,6 +62,8 @@ export const products = [
     reviews: 67,
     image: 'bg-gradient-to-br from-yellow-100 to-amber-100',
     inStock: true,
+    onSale: true,
+    salePrice: 350,
   },
   {
     id: 6,
@@ -85,6 +90,8 @@ export interface Product {
   reviews: number
   image: string
   inStock: boolean
+  onSale?: boolean
+  salePrice?: number
 }
 
 export interface FilterOptions {
@@ -157,8 +164,13 @@ export function filterAndSortProducts(
   return filtered
 }
 
-export function getProductById(id: number): Product | undefined {
-  return products.find((p) => p.id === id)
+export function getProductById(id: number | string): Product | undefined {
+  const numId = typeof id === 'string' ? parseInt(id, 10) : id
+  return products.find((p) => p.id === numId)
+}
+
+export function getProductsByCategory(category: string): Product[] {
+  return products.filter((p) => p.category === category)
 }
 
 export function getRelatedProducts(productId: number, limit = 3): Product[] {
@@ -172,4 +184,44 @@ export function getRelatedProducts(productId: number, limit = 3): Product[] {
         (p.category === product.category || p.color === product.color)
     )
     .slice(0, limit)
+}
+
+export function getAllProducts(): Product[] {
+  return products
+}
+
+export function searchProducts(query: string): Product[] {
+  return filterAndSortProducts(products, { search: query })
+}
+
+export function getSaleProducts(): Product[] {
+  return products.filter((p) => p.onSale)
+}
+
+// Admin CRUD Operations
+export function addProduct(product: Omit<Product, 'id' | 'rating' | 'reviews'>): Product {
+  const newProduct: Product = {
+    ...product,
+    id: Math.max(...products.map(p => p.id), 0) + 1,
+    rating: 0,
+    reviews: 0,
+  }
+  products.push(newProduct)
+  return newProduct
+}
+
+export function updateProduct(id: number, updates: Partial<Product>): Product | undefined {
+  const index = products.findIndex(p => p.id === id)
+  if (index === -1) return undefined
+
+  products[index] = { ...products[index], ...updates }
+  return products[index]
+}
+
+export function deleteProduct(id: number): boolean {
+  const index = products.findIndex(p => p.id === id)
+  if (index === -1) return false
+
+  products.splice(index, 1)
+  return true
 }

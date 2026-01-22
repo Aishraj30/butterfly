@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllProducts, getProductsByCategory, searchProducts } from '@/lib/db'
+import { getAllProducts, getProductsByCategory, searchProducts, addProduct } from '@/lib/products'
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const product = addProduct(body)
+    return NextResponse.json({ success: true, data: product })
+  } catch (error) {
+    console.error('[API] Create product error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to create product' },
+      { status: 500 }
+    )
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {

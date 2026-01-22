@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { getAllProducts, getProductsByCategory } from '@/lib/db'
+import { getAllProducts, getProductsByCategory } from '@/lib/products'
 import { Sliders, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
@@ -57,11 +57,10 @@ export default function ShopPage() {
                     <li key={cat}>
                       <button
                         onClick={() => setSelectedCategory(cat)}
-                        className={`text-sm transition-colors ${
-                          selectedCategory === cat
+                        className={`text-sm transition-colors ${selectedCategory === cat
                             ? 'font-semibold text-foreground'
                             : 'text-foreground/70 hover:text-foreground'
-                        }`}
+                          }`}
                       >
                         {cat}
                       </button>

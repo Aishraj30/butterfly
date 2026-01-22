@@ -119,8 +119,29 @@ export function createOrder(orderData: any): any {
   return order;
 }
 
+export function getOrdersByEmail(email: string): any[] {
+  return mockOrders.filter((o) => o.customer?.email === email);
+}
+
+export function getAllOrders(): any[] {
+  return mockOrders;
+}
+
+export function updateOrderStatus(id: string, status: string): any {
+  const order = mockOrders.find(o => o.id === id);
+  if (order) {
+    order.status = status;
+    return order;
+  }
+  return null;
+}
+
 export function createContactSubmission(data: any): any {
   const submission = { ...data, id: `SUB-${Date.now()}`, createdAt: new Date() };
   mockSubmissions.push(submission);
   return submission;
+}
+
+export function getContactSubmissions(): any[] {
+  return mockSubmissions;
 }

@@ -1,55 +1,49 @@
+'use client'
+
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import Link from 'next/link'
 import { TrendingUp, Package, ShoppingCart, Users, ArrowUpRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
-const stats = [
-  {
-    label: 'Total Revenue',
-    value: '$45,231.89',
-    change: '+20.1%',
-    icon: TrendingUp,
-    color: 'text-green-600',
-  },
-  {
-    label: 'Total Orders',
-    value: '1,234',
-    change: '+12.5%',
-    icon: ShoppingCart,
-    color: 'text-blue-600',
-  },
-  {
-    label: 'Products',
-    value: '248',
-    change: '+5.2%',
-    icon: Package,
-    color: 'text-purple-600',
-  },
-  {
-    label: 'Customers',
-    value: '892',
-    change: '+8.3%',
-    icon: Users,
-    color: 'text-orange-600',
-  },
-]
-
-const recentOrders = [
-  { id: 'ORD-001', customer: 'Sarah Johnson', amount: '$1,250', status: 'Delivered' },
-  { id: 'ORD-002', customer: 'Michael Chen', amount: '$980', status: 'Processing' },
-  { id: 'ORD-003', customer: 'Emma Wilson', amount: '$2,100', status: 'Pending' },
-  { id: 'ORD-004', customer: 'James Brown', amount: '$750', status: 'Delivered' },
-  { id: 'ORD-005', customer: 'Lisa Anderson', amount: '$1,500', status: 'Shipped' },
-]
-
-const topProducts = [
-  { name: 'Silk Butterfly Gown', sales: 245, revenue: '$306,250' },
-  { name: 'Crystal Embellished Dress', sales: 189, revenue: '$185,220' },
-  { name: 'Ethereal Drape Jacket', sales: 167, revenue: '$125,250' },
-  { name: 'Luxe Structured Blazer', sales: 142, revenue: '$126,380' },
-  { name: 'Premium Wool Coat', sales: 98, revenue: '$142,100' },
-]
+const Loading = () => <div className="p-8 text-center text-foreground/60">Loading dashboard...</div>
 
 export default function AdminDashboard() {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/admin/stats')
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) setData(res.data)
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <Loading />
+  if (!data) return <div className="p-8 text-center">Failed to load data</div>
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'revenue': return TrendingUp
+      case 'orders': return ShoppingCart
+      case 'products': return Package
+      case 'customers': return Users
+      default: return TrendingUp
+    }
+  }
+
+  const getColor = (type: string) => {
+    switch (type) {
+      case 'revenue': return 'text-green-600'
+      case 'orders': return 'text-blue-600'
+      case 'products': return 'text-purple-600'
+      case 'customers': return 'text-orange-600'
+      default: return 'text-gray-600'
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
@@ -78,8 +72,8 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:ml-0">
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat) => {
-              const Icon = stat.icon
+            {data.stats.map((stat: any) => {
+              const Icon = getIcon(stat.type)
               return (
                 <div
                   key={stat.label}
@@ -89,7 +83,7 @@ export default function AdminDashboard() {
                     <span className="text-foreground/60 text-sm font-medium">
                       {stat.label}
                     </span>
-                    <div className={`p-2 bg-secondary rounded-sm ${stat.color}`}>
+                    <div className={`p-2 bg-secondary rounded-sm ${getColor(stat.type)}`}>
                       <Icon size={20} />
                     </div>
                   </div>
@@ -212,7 +206,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-2">
-                {recentOrders.map((order) => (
+                {data.recentOrders.map((order: any) => (
                   <div
                     key={order.id}
                     className="flex items-center justify-between p-3 bg-secondary rounded-sm hover:bg-secondary/80 transition-colors"
@@ -229,15 +223,14 @@ export default function AdminDashboard() {
                       <p className="font-semibold text-foreground text-sm">
                         {order.amount}
                       </p>
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                        order.status === 'Delivered'
-                          ? 'bg-green-100 text-green-800'
-                          : order.status === 'Processing'
-                            ? 'bg-blue-100 text-blue-800'
-                            : order.status === 'Shipped'
-                              ? 'bg-purple-100 text-purple-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${order.status === 'Delivered'
+                        ? 'bg-green-100 text-green-800'
+                        : order.status === 'Processing'
+                          ? 'bg-blue-100 text-blue-800'
+                          : order.status === 'Shipped'
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
                         {order.status}
                       </span>
                     </div>
@@ -258,7 +251,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-3">
-                {topProducts.map((product, idx) => (
+                {data.topProducts.map((product: any, idx: number) => (
                   <div
                     key={idx}
                     className="flex items-center justify-between p-3 bg-secondary rounded-sm"

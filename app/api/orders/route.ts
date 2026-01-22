@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createOrder, getOrdersByEmail, createContactSubmission } from '@/lib/db'
+import { createOrder, getOrdersByEmail, getAllOrders, createContactSubmission } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,15 +48,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const email = request.nextUrl.searchParams.get('email')
-
-    if (!email) {
-      return NextResponse.json(
-        { success: false, error: 'Email parameter required' },
-        { status: 400 }
-      )
-    }
-
-    const orders = getOrdersByEmail(email)
+    const orders = email ? getOrdersByEmail(email) : getAllOrders()
 
     return NextResponse.json({
       success: true,
