@@ -84,6 +84,7 @@ export interface Product {
   name: string
   price: number
   category: string
+  brand?: string
   color: string
   size: string[]
   rating: number
@@ -205,6 +206,7 @@ export function addProduct(product: Omit<Product, 'id' | 'rating' | 'reviews'>):
     id: Math.max(...products.map(p => p.id), 0) + 1,
     rating: 0,
     reviews: 0,
+    brand: product.brand || 'Butterfly Couture', // Default brand
   }
   products.push(newProduct)
   return newProduct

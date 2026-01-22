@@ -12,12 +12,16 @@ import {
   BarChart3,
   Menu,
   X,
+  Tags,
+  Award,
 } from 'lucide-react'
 import { useState } from 'react'
 
 const menuItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Products', href: '/admin/products', icon: Package },
+  { label: 'Categories', href: '/admin/categories', icon: Tags },
+  { label: 'Brands', href: '/admin/brands', icon: Award },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { label: 'Customers', href: '/admin/customers', icon: Users },
   { label: 'Pages', href: '/admin/pages', icon: FileText },

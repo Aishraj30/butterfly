@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Product } from '@/lib/products'
+import { Category } from '@/lib/categories'
+import { Brand } from '@/lib/brands'
 
 interface ProductFormProps {
     initialData?: Product
@@ -12,17 +14,37 @@ interface ProductFormProps {
 export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [categories, setCategories] = useState<Category[]>([])
+    const [brands, setBrands] = useState<Brand[]>([])
     const [formData, setFormData] = useState<Partial<Product>>(
         initialData || {
             name: '',
             price: 0,
             category: '',
+            brand: '',
             color: '',
             inStock: true,
             image: 'bg-gradient-to-br from-gray-100 to-gray-200', // Default placeholder
             size: ['S', 'M', 'L'], // Default sizes
         }
     )
+
+    useEffect(() => {
+        // Fetch categories and brands
+        Promise.all([
+            fetch('/api/categories').then(res => res.json()),
+            fetch('/api/brands').then(res => res.json())
+        ]).then(([categoriesData, brandsData]) => {
+            if (categoriesData.success) {
+                setCategories(categoriesData.data)
+            }
+            if (brandsData.success) {
+                setBrands(brandsData.data)
+            }
+        }).catch(error => {
+            console.error('Error fetching categories/brands:', error)
+        })
+    }, [])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target
@@ -108,12 +130,28 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                     >
                         <option value="">Select Category</option>
-                        <option value="Evening Wear">Evening Wear</option>
-                        <option value="Cocktail">Cocktail</option>
-                        <option value="Jacket">Jacket</option>
-                        <option value="Blazer">Blazer</option>
-                        <option value="Blouse">Blouse</option>
-                        <option value="Coat">Coat</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.name}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Brand</label>
+                    <select
+                        name="brand"
+                        value={formData.brand || ''}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                    >
+                        <option value="">Select Brand</option>
+                        {brands.map((brand) => (
+                            <option key={brand.id} value={brand.name}>
+                                {brand.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
@@ -130,6 +168,22 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-medium text-foreground">Sizes (comma-separated)</label>
+                    <input
+                        type="text"
+                        name="sizes"
+                        value={Array.isArray(formData.size) ? formData.size.join(', ') : formData.size || ''}
+                        onChange={(e) => {
+                            const sizes = e.target.value.split(',').map(s => s.trim()).filter(s => s)
+                            setFormData(prev => ({ ...prev, size: sizes }))
+                        }}
+                        placeholder="e.g. XS, S, M, L, XL"
+                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                    />
+                    <p className="text-xs text-foreground/60">Enter sizes separated by commas (e.g., XS, S, M, L, XL)</p>
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
                     <label className="text-sm font-medium text-foreground">Image Class (Tailwind Gradient)</label>
                     <input
                         type="text"
@@ -142,7 +196,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     <p className="text-xs text-foreground/60">Enter a Tailwind CSS background gradient class.</p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 md:col-span-2">
                     <input
                         type="checkbox"
                         name="inStock"
@@ -153,6 +207,36 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     />
                     <label htmlFor="inStock" className="text-sm font-medium text-foreground cursor-pointer">In Stock</label>
                 </div>
+
+                <div className="flex items-center gap-2 md:col-span-2">
+                    <input
+                        type="checkbox"
+                        name="onSale"
+                        id="onSale"
+                        checked={formData.onSale || false}
+                        onChange={handleChange}
+                        className="rounded border-border text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="onSale" className="text-sm font-medium text-foreground cursor-pointer">On Sale</label>
+                </div>
+
+                {formData.onSale && (
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground">Sale Price ($)</label>
+                        <input
+                            type="number"
+                            name="salePrice"
+                            min="0"
+                            step="0.01"
+                            value={formData.salePrice || ''}
+                            onChange={(e) => {
+                                const value = e.target.value ? parseFloat(e.target.value) : undefined
+                                setFormData(prev => ({ ...prev, salePrice: value }))
+                            }}
+                            className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="flex justify-end gap-4 pt-4 border-t border-border">

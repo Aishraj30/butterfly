@@ -136,10 +136,22 @@ export default function AdminDashboard() {
                 <h2 className="font-semibold text-foreground">Quick Actions</h2>
                 <div className="space-y-2">
                   <Link
-                    href="/admin/products"
+                    href="/admin/products/new"
                     className="block px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-sm hover:bg-primary/90 transition-colors text-center"
                   >
                     Add Product
+                  </Link>
+                  <Link
+                    href="/admin/categories"
+                    className="block px-4 py-2 border border-primary text-primary text-sm font-medium rounded-sm hover:bg-primary/5 transition-colors text-center"
+                  >
+                    Create Category
+                  </Link>
+                  <Link
+                    href="/admin/brands"
+                    className="block px-4 py-2 border border-primary text-primary text-sm font-medium rounded-sm hover:bg-primary/5 transition-colors text-center"
+                  >
+                    Create Brand
                   </Link>
                   <Link
                     href="/admin/pages"
