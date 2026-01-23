@@ -10,6 +10,7 @@ import { ThemeProvider } from 'next-themes'
 import './globals.css'
 import { Header } from "@/components/layout/Header"
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter"
+import { LoadingProvider } from "@/components/LoadingProvider"
 
 const geist = Geist({ subsets: ["latin"], variable: '--font-sans' })
 const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-serif' })
@@ -53,12 +54,14 @@ export default function RootLayout({
       <body className={`font-sans antialiased bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            <SmoothScroll />
-            <Header />
-            {children}
-            <ConditionalFooter />
-            <ChatBot />
-            <Analytics />
+            <LoadingProvider>
+              <SmoothScroll />
+              <Header />
+              {children}
+              <ConditionalFooter />
+              <ChatBot />
+              <Analytics />
+            </LoadingProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
