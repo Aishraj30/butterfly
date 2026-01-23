@@ -24,10 +24,13 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             brand: '',
             color: '',
             inStock: true,
-            image: 'bg-gradient-to-br from-gray-100 to-gray-200', // Default placeholder
+            image: '', // Will store image URL
+            imageUrl: '', // Additional field for uploaded images
             size: ['S', 'M', 'L'], // Default sizes
         }
     )
+    const [uploadingImage, setUploadingImage] = useState(false)
+    const [imagePreview, setImagePreview] = useState('')
 
     useEffect(() => {
         // Fetch categories and brands
@@ -56,6 +59,41 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }))
         } else {
             setFormData(prev => ({ ...prev, [name]: value }))
+        }
+    }
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploadingImage(true)
+        
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            
+            const data = await response.json()
+            
+            if (data.success) {
+                setFormData(prev => ({ 
+                    ...prev, 
+                    image: data.url,
+                    imageUrl: data.url 
+                }))
+                setImagePreview(data.url)
+            } else {
+                alert(data.error || 'Failed to upload image')
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error)
+            alert('Failed to upload image')
+        } finally {
+            setUploadingImage(false)
         }
     }
 
@@ -184,16 +222,60 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-medium text-foreground">Image Class (Tailwind Gradient)</label>
-                    <input
-                        type="text"
-                        name="image"
-                        value={formData.image}
-                        onChange={handleChange}
-                        placeholder="e.g. bg-gradient-to-br from-blue-100 to-purple-100"
-                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                    />
-                    <p className="text-xs text-foreground/60">Enter a Tailwind CSS background gradient class.</p>
+                    <label className="text-sm font-medium text-foreground">Product Image</label>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                disabled={uploadingImage}
+                                className="hidden"
+                                id="image-upload"
+                            />
+                            <label
+                                htmlFor="image-upload"
+                                className="px-4 py-2 border border-border text-foreground hover:bg-secondary rounded-sm transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                                {uploadingImage ? 'Uploading...' : 'Choose Image'}
+                            </label>
+                            {(imagePreview || formData.imageUrl) && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setFormData(prev => ({ ...prev, image: '', imageUrl: '' }))
+                                        setImagePreview('')
+                                    }}
+                                    className="px-4 py-2 border border-red-500 text-red-500 hover:bg-red-50 rounded-sm transition-colors"
+                                >
+                                    Remove Image
+                                </button>
+                            )}
+                        </div>
+                        
+                        {(imagePreview || formData.imageUrl) && (
+                            <div className="mt-4">
+                                <img 
+                                    src={imagePreview || formData.imageUrl} 
+                                    alt="Product preview" 
+                                    className="w-32 h-32 object-cover rounded-sm border border-border"
+                                />
+                            </div>
+                        )}
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">Or use CSS Gradient (fallback)</label>
+                            <input
+                                type="text"
+                                name="image"
+                                value={formData.image}
+                                onChange={handleChange}
+                                placeholder="e.g. bg-gradient-to-br from-blue-100 to-purple-100"
+                                className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                            />
+                            <p className="text-xs text-foreground/60">Enter a Tailwind CSS background gradient class as fallback.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2 md:col-span-2">

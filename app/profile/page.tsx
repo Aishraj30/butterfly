@@ -93,7 +93,7 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="min-h-screen pt-20 pb-10 sm:pt-24 sm:pb-12"
+      className="min-h-screen pt-32 pb-10 sm:pt-36 sm:pb-12"
       style={{ backgroundColor: "#FDF7F1" }}
     >
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">

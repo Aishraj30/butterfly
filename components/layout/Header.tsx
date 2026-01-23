@@ -41,6 +41,7 @@ export function Header() {
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
+  const isAdmin = pathname.startsWith('/admin')
 
   useEffect(() => {
     if (isAuthPage) return
@@ -52,7 +53,7 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isAuthPage])
 
-  if (isAuthPage) {
+  if (isAuthPage || isAdmin) {
     return null
   }
 

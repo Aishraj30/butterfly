@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next'
 import SmoothScroll from '@/components/SmoothScroll'
 import { ChatBot } from '@/components/chat/ChatBot'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ThemeProvider } from 'next-themes'
 
 import './globals.css'
 import { Header } from "@/components/layout/Header"
@@ -48,19 +49,18 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${geist.variable} ${playfair.variable}`} suppressHydrationWarning>
       <body className={`font-sans antialiased bg-background text-foreground`}>
-
-
-
-        <AuthProvider>
-          <SmoothScroll />
-          <Header />
-          {children}
-          <ConditionalFooter />
-          <ChatBot />
-          <Analytics />
-        </AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AuthProvider>
+            <SmoothScroll />
+            <Header />
+            {children}
+            <ConditionalFooter />
+            <ChatBot />
+            <Analytics />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

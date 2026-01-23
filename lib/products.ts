@@ -90,6 +90,7 @@ export interface Product {
   rating: number
   reviews: number
   image: string
+  imageUrl?: string
   inStock: boolean
   onSale?: boolean
   salePrice?: number
