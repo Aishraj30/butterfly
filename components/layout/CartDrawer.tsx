@@ -3,8 +3,8 @@
 import { X, ShoppingBag } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
+// import gsap from 'gsap'
+// import { useGSAP } from '@gsap/react'
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -28,40 +28,40 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         }
     }, [isOpen])
 
-    useGSAP(() => {
-        if (isOpen) {
-            // Open animation
-            gsap.to(backdropRef.current, {
-                opacity: 1,
-                pointerEvents: 'auto',
-                duration: 0.5,
-                ease: 'power3.out'
-            })
-            gsap.to(drawerRef.current, {
-                x: 0,
-                duration: 0.6,
-                ease: 'expo.out'
-            })
-            // Staggered entry for content
-            gsap.fromTo(contentRef.current,
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.5, delay: 0.2, ease: 'power2.out' }
-            )
-        } else {
-            // Close animation
-            gsap.to(backdropRef.current, {
-                opacity: 0,
-                pointerEvents: 'none',
-                duration: 0.4,
-                ease: 'power2.inOut'
-            })
-            gsap.to(drawerRef.current, {
-                x: '100%',
-                duration: 0.5,
-                ease: 'power3.inOut'
-            })
-        }
-    }, [isOpen])
+    // useGSAP(() => {
+    //     if (isOpen) {
+    //         // Open animation
+    //         gsap.to(backdropRef.current, {
+    //             opacity: 1,
+    //             pointerEvents: 'auto',
+    //             duration: 0.5,
+    //             ease: 'power3.out'
+    //         })
+    //         gsap.to(drawerRef.current, {
+    //             x: 0,
+    //             duration: 0.6,
+    //             ease: 'expo.out'
+    //         })
+    //         // Staggered entry for content
+    //         gsap.fromTo(contentRef.current,
+    //             { y: 20, opacity: 0 },
+    //             { y: 0, opacity: 1, duration: 0.5, delay: 0.2, ease: 'power2.out' }
+    //         )
+    //     } else {
+    //         // Close animation
+    //         gsap.to(backdropRef.current, {
+    //             opacity: 0,
+    //             pointerEvents: 'none',
+    //             duration: 0.4,
+    //             ease: 'power2.inOut'
+    //         })
+    //         gsap.to(drawerRef.current, {
+    //             x: '100%',
+    //             duration: 0.5,
+    //             ease: 'power3.inOut'
+    //         })
+    //     }
+    // }, [isOpen])
 
     return (
         <>
@@ -69,13 +69,17 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <div
                 ref={backdropRef}
                 onClick={onClose}
-                className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none cursor-pointer"
+                className={`fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm cursor-pointer transition-opacity duration-300 ${
+                    isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                }`}
             />
 
             {/* Drawer Panel */}
             <div
                 ref={drawerRef}
-                className="fixed top-0 right-0 z-[101] h-screen w-full max-w-[480px] bg-white shadow-2xl translate-x-full"
+                className={`fixed top-0 right-0 z-[101] h-screen w-full max-w-[480px] bg-white shadow-2xl transition-transform duration-500 ${
+                    isOpen ? 'translate-x-0' : 'translate-x-full'
+                }`}
             >
                 <div className="flex h-full flex-col">
 
@@ -86,9 +90,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         </h2>
                         <button
                             onClick={onClose}
-                            className="group rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer"
+                            className="group rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer bg-gray-100"
                         >
-                            <X size={24} className="transition-transform duration-300 group-hover:rotate-90" />
+                            <X size={24} className="transition-transform duration-300 group-hover:rotate-90 text-black" />
                         </button>
                     </div>
 

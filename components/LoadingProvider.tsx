@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { ButterflyLoader } from '@/components/ui/ButterflyLoader'
+// import { ButterflyLoader } from '@/components/ui/ButterflyLoader'
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
@@ -55,7 +55,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <ButterflyLoader isLoading={isLoading} />
+      {/* <ButterflyLoader isLoading={isLoading} /> */}
       {children}
     </>
   )

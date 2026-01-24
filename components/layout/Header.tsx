@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import {
   User,
@@ -35,43 +35,33 @@ const navigation = [
 export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
   const { user, logout } = useAuth()
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
+  const isCatalog = pathname === '/catalog'
   const isAdmin = pathname.startsWith('/admin')
-
-  useEffect(() => {
-    if (isAuthPage) return
-
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [isAuthPage])
 
   if (isAuthPage || isAdmin) {
     return null
   }
 
-  // Header style based on page and scroll
-  const headerBg = isScrolled || !isHome ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
-  const textColor = isScrolled || !isHome ? 'text-black' : 'text-white'
-  const logoColor = isScrolled || !isHome ? 'text-black' : 'text-white'
+  // Header style - transparent on home, white on other pages
+  const headerBg = !isHome || isCatalog ? 'bg-white shadow-sm' : 'bg-transparent'
+  const textColor = !isHome || isCatalog ? 'text-black' : 'text-white'
+  const logoColor = !isHome || isCatalog ? 'text-black' : 'text-white'
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${headerBg} ${isScrolled || !isHome ? 'py-4' : 'py-8'}`}>
-      <nav className="max-w-[1400px] mx-auto px-6 grid grid-cols-3 items-center">
+    <header className={`relative w-full z-50 transition-all duration-300 ${headerBg} py-8`}>
+      <nav className="max-w-[1400px] mx-auto px-2 py-1 grid grid-cols-3 items-center">
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
           {navigation.slice(0, 2).map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className={`group flex items-center gap-1 text-[13px] font-bold uppercase tracking-[0.2em] transition-colors ${textColor} hover:opacity-70`}
+              className={`flex items-center gap-1 text-[13px] font-bold uppercase tracking-[0.2em] transition-colors ${textColor} hover:opacity-70`}
             >
               {item.name}
               {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
@@ -92,7 +82,7 @@ export function Header() {
         {/* Center Logo */}
         <div className="flex justify-center">
           <Link href="/" className="flex-shrink-0">
-            <span className={`font-serif text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.9em] italic whitespace-nowrap transition-colors ${logoColor}`}>
+            <span className={`font-sans text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.2em]  whitespace-nowrap transition-colors ${logoColor}`}>
               BUTTERFLY
             </span>
           </Link>

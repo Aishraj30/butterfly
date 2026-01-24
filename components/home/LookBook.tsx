@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export function LookBook() {
     return (
-        <section className="py-20 px-6 max-w-[1400px] mx-auto bg-background">
+        <section className="py-12 px-4 max-w-[1400px] mx-auto bg-background">
             <div className="text-center mb-12">
                 <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#8B5E34] uppercase tracking-wide">
                     LOOK BOOK HIGHLIGHTS

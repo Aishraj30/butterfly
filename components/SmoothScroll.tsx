@@ -3,10 +3,13 @@ import { useEffect } from 'react';
 
 export default function SmoothScroll() {
     useEffect(() => {
-        (async () => {
-            const LocomotiveScroll = (await import('locomotive-scroll')).default
-            const locomotiveScroll = new LocomotiveScroll();
-        })()
+        // Enable native smooth scrolling for the entire page
+        document.documentElement.style.scrollBehavior = 'smooth';
+        
+        return () => {
+            // Cleanup: reset scroll behavior when component unmounts
+            document.documentElement.style.scrollBehavior = 'auto';
+        };
     }, [])
 
     return null

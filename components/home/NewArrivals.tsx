@@ -40,7 +40,7 @@ const products = [
 
 export function NewArrivals() {
     return (
-        <section className="py-20 px-6 max-w-[1400px] mx-auto bg-[#E5D3B3]/20"> {/* Light beige bg matching design */}
+        <section className="py-12 px-4 max-w-[1400px] mx-auto bg-[#E5D3B3]/20"> {/* Light beige bg matching design */}
             <div className="mb-12">
                 <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#4A4A4A] uppercase tracking-wide">
                     NEW ARRIVALS

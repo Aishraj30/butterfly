@@ -2,10 +2,10 @@ import React from "react"
 import type { Metadata, Viewport } from 'next'
 import { Geist, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import SmoothScroll from '@/components/SmoothScroll'
 import { ChatBot } from '@/components/chat/ChatBot'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from 'next-themes'
+import SmoothScroll from '@/components/SmoothScroll'
 
 import './globals.css'
 import { Header } from "@/components/layout/Header"
