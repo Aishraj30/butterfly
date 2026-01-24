@@ -1,10 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { Filter, Grid, List, Heart } from 'lucide-react';
 import Image from 'next/image';
 import { FilterDrawer } from '@/components/layout/FilterDrawer';
 import { CatalogBanner } from '@/components/catalog/CatalogBanner';
 import { ProductImageCarousel } from '@/components/catalog/ProductImageCarousel';
+
+interface Product {
+  id: number;
+  name: string;
+  price: string;
+  images: string[];
+}
 
 const products = [
     { 
@@ -98,10 +106,21 @@ const products = [
 ];
 
 export default function CatalogPage() {
-    const [selectedGender, setSelectedGender] = useState('male');
-    const [selectedSize, setSelectedSize] = useState('xs');
-    const [layout, setLayout] = useState('grid');
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSize, setSelectedSize] = useState('all');
+  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [wishlist, setWishlist] = useState<number[]>([]);
+
+  const toggleWishlist = (productId: number) => {
+    setWishlist(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const isInWishlist = (productId: number) => wishlist.includes(productId);
 
     return (
         <main className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
@@ -198,16 +217,31 @@ export default function CatalogPage() {
                                 images={product.images}
                                 alt={product.name}
                             />
-                            <h3 className={`text-sm font-medium leading-tight uppercase text-black text-left ${
-                                layout === 'list' ? '' : 'mt-4'
+                            <div className={`flex justify-between items-start ${
+                                layout === 'list' ? 'flex-1' : ''
                             }`}>
-                                {product.name}
-                            </h3>
-                            <p className={`text-sm font-medium text-black text-left ${
-                                layout === 'list' ? '' : ''
-                            }`}>
-                                {product.price}
-                            </p>
+                                <div>
+                                    <h3 className={`text-sm font-medium leading-tight uppercase text-black text-left ${
+                                        layout === 'list' ? '' : 'mt-4'
+                                    }`}>
+                                        {product.name}
+                                    </h3>
+                                    <p className={`text-sm font-medium text-black text-left ${
+                                        layout === 'list' ? '' : ''
+                                    }`}>
+                                        {product.price}
+                                    </p>
+                                </div>
+                                <button 
+                                    onClick={() => toggleWishlist(product.id)}
+                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                >
+                                    <Heart 
+                                        size={16} 
+                                        className={isInWishlist(product.id) ? "text-red-500 fill-red-500" : "text-gray-400 hover:text-red-500"} 
+                                    />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

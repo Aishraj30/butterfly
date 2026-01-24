@@ -4,13 +4,12 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-// Mock data for sale products
-const saleProducts = [
+// Mock data for new arrivals
+const newArrivals = [
     { 
         id: 1, 
         name: 'PREMIUM COTTON BLAZER', 
         price: '$2,900',
-        originalPrice: '$4,500',
         image: 'https://images.unsplash.com/photo-1529139574466-a302c2d56dc6?w=800&q=80',
         category: 'blazers'
     },
@@ -18,7 +17,6 @@ const saleProducts = [
         id: 2, 
         name: 'CLASSIC DENIM JACKET', 
         price: '$1,800',
-        originalPrice: '$2,800',
         image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
         category: 'jackets'
     },
@@ -26,7 +24,6 @@ const saleProducts = [
         id: 3, 
         name: 'WOOL OVERCOAT', 
         price: '$4,200',
-        originalPrice: '$6,500',
         image: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=800&q=80',
         category: 'coats'
     },
@@ -34,7 +31,6 @@ const saleProducts = [
         id: 4, 
         name: 'SPORTY WINDBREAKER', 
         price: '$950',
-        originalPrice: '$1,500',
         image: 'https://images.unsplash.com/photo-1563630423918-b58f07336ac9?w=800&q=80',
         category: 'jackets'
     },
@@ -42,7 +38,6 @@ const saleProducts = [
         id: 5, 
         name: 'RASTAH PEACOCK BOMBER', 
         price: '$4,700',
-        originalPrice: '$7,200',
         image: 'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=800&q=80',
         category: 'jackets'
     },
@@ -50,7 +45,6 @@ const saleProducts = [
         id: 6, 
         name: 'AK COLLAR TRENCH', 
         price: '$3,200',
-        originalPrice: '$4,900',
         image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80',
         category: 'coats'
     },
@@ -58,7 +52,6 @@ const saleProducts = [
         id: 7, 
         name: 'OVERSIZED BLUE OVERCOAT', 
         price: '$5,100',
-        originalPrice: '$7,800',
         image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&q=80',
         category: 'coats'
     },
@@ -66,13 +59,12 @@ const saleProducts = [
         id: 8, 
         name: 'RASTAH 1995 LEATHER', 
         price: '$6,800',
-        originalPrice: '$10,500',
         image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80',
         category: 'jackets'
     },
 ]
 
-export default function SalePage() {
+export default function NewArrivalsPage() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -92,7 +84,7 @@ export default function SalePage() {
                             Discover
                         </h2>
                         <h3 className="text-2xl md:text-3xl font-sans font-bold text-black uppercase tracking-wider">
-                            SALE COLLECTION
+                            NEW ARRIVALS
                         </h3>
                     </div>
                 </div>
@@ -103,12 +95,12 @@ export default function SalePage() {
                     <div className="flex items-center justify-center py-20">
                         <div className="animate-pulse flex flex-col items-center">
                             <div className="h-4 w-32 bg-gray-200 rounded mb-4"></div>
-                            <p className="text-gray-500">Loading sale items...</p>
+                            <p className="text-gray-500">Loading new arrivals...</p>
                         </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {saleProducts.map((product) => (
+                        {newArrivals.map((product) => (
                             <Link
                                 key={product.id}
                                 href={`/product/${product.id}`}
@@ -122,9 +114,9 @@ export default function SalePage() {
                                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                                     />
                                     
-                                    {/* Sale Badge */}
-                                    <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                                        Sale
+                                    {/* New Badge */}
+                                    <div className="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                                        New
                                     </div>
 
                                     {/* Add to cart button */}
@@ -141,17 +133,9 @@ export default function SalePage() {
                                     <h3 className="font-medium text-sm text-black text-left uppercase">
                                         {product.name}
                                     </h3>
-                                    <div className="flex items-baseline gap-3">
-                                        <p className="text-red-600 font-semibold text-sm">
-                                            {product.price}
-                                        </p>
-                                        <p className="text-xs text-gray-400 line-through decoration-gray-400">
-                                            {product.originalPrice}
-                                        </p>
-                                        <span className="text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded">
-                                            {Math.round(((parseInt(product.originalPrice.replace('$', '')) - parseInt(product.price.replace('$', ''))) / parseInt(product.originalPrice.replace('$', ''))) * 100)}% OFF
-                                        </span>
-                                    </div>
+                                    <p className="font-medium text-sm text-black text-left">
+                                        {product.price}
+                                    </p>
                                     <p className="text-xs text-gray-500">
                                         {product.category}
                                     </p>

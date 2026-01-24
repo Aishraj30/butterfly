@@ -10,6 +10,11 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [selectedColor, setSelectedColor] = useState('black');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+
+  const toggleWishlist = () => {
+    setIsInWishlist(!isInWishlist);
+  };
 
   // Mock data - would normally fetch based on params.id
   const product = {
@@ -66,15 +71,26 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
             {/* Right: Info */}
             <div className="space-y-8 -mt-10">
-              <div>
-                <p className="text-gray-500 text-xs tracking-widest mb-2">MAN T-SHIRT</p>
-                <h1 className="font-serif text-4xl text-[#4A4A4A] mb-4">{product.name}</h1>
-                <div className="flex items-center gap-4">
-                  <span className="text-gray-400 line-through text-base">{product.originalPrice}</span>
-                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">-50%</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-500 text-xs tracking-widest mb-2">MAN T-SHIRT</p>
+                  <h1 className="font-serif text-4xl text-[#4A4A4A] mb-4">{product.name}</h1>
                 </div>
-                <p className="text-2xl font-bold text-[#8B5E34] mt-2">{product.price}</p>
+                <button 
+                    onClick={toggleWishlist}
+                    className="p-3 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <Heart 
+                    size={20} 
+                    className={isInWishlist ? "text-red-500 fill-red-500" : "text-gray-400 hover:text-red-500"} 
+                  />
+                </button>
               </div>
+              <div className="flex items-center gap-4">
+                <span className="text-gray-400 line-through text-base">{product.originalPrice}</span>
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">-50%</span>
+              </div>
+              <p className="text-2xl font-bold text-[#8B5E34] mt-2">{product.price}</p>
 
               <div className="prose prose-sm text-gray-500 text-sm">
                 <p>{product.description}</p>

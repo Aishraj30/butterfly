@@ -111,10 +111,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             </div>
                             <button
                                 onClick={onClose}
-                                className="group relative overflow-hidden border border-black px-12 py-4 text-sm font-bold uppercase tracking-widest transition-colors hover:text-white cursor-pointer"
+                                className="group relative overflow-hidden bg-black px-12 py-4 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-gray-800 cursor-pointer"
                             >
                                 <span className="relative z-10">Continue Shopping</span>
-                                <div className="absolute inset-0 z-0 translate-y-full bg-black transition-transform duration-300 group-hover:translate-y-0" />
                             </button>
                         </div>
                     </div>
