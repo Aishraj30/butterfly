@@ -39,7 +39,7 @@ export function useCart() {
   }
 
   const addToCart = useCallback(
-    async (productId: string, quantity: number, size: string, color: string) => {
+    async (productId: string, quantity: number, size: string, color: string, name?: string, price?: number, image?: string) => {
       try {
         const response = await fetch('/api/cart', {
           method: 'POST',
@@ -53,6 +53,9 @@ export function useCart() {
               quantity,
               size,
               color,
+              name: name || 'Product',
+              price: String(price || 0),
+              image: image || '',
             },
           }),
         })

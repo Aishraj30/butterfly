@@ -100,7 +100,13 @@ export function clearCart(sessionId: string): void {
 
 export function calculateCartTotal(items: CartItem[]): number {
   return items.reduce((total, item) => {
-    const price = parseInt(item.price.replace(/[^0-9]/g, "")) || 0;
+    // Parse price - it might be a string or number
+    let price = 0;
+    if (typeof item.price === 'string') {
+      price = parseInt(item.price.replace(/[^0-9]/g, "")) || 0;
+    } else {
+      price = item.price || 0;
+    }
     return total + price * item.quantity;
   }, 0);
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import {
   User,
@@ -25,6 +25,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { CartDrawer } from './CartDrawer'
 
+interface Collection {
+  id: number
+  name: string
+  description?: string
+  categories?: string[]
+  productCount?: number
+}
+
 const navigation = [
   { name: 'Catalog', href: '/catalog', hasDropdown: true },
   { name: 'Sale', href: '/sale' },
@@ -35,8 +43,22 @@ const navigation = [
 export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isCatalogHovered, setIsCatalogHovered] = useState(false)
+  const [collections, setCollections] = useState<Collection[]>([])
   const pathname = usePathname()
   const { user, logout } = useAuth()
+
+  useEffect(() => {
+    // Fetch collections
+    fetch('/api/collections')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setCollections(data.data)
+        }
+      })
+      .catch(error => console.error('Failed to fetch collections:', error))
+  }, [])
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
@@ -58,14 +80,44 @@ export function Header() {
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
           {navigation.slice(0, 2).map((item) => (
-            <Link
+            <div
               key={item.name}
-              href={item.href}
-              className={`flex items-center gap-1 text-[13px] font-bold uppercase tracking-[0.2em] transition-colors ${textColor} hover:opacity-70`}
+              className="relative group"
+              onMouseEnter={() => item.hasDropdown && setIsCatalogHovered(true)}
+              onMouseLeave={() => item.hasDropdown && setIsCatalogHovered(false)}
             >
-              {item.name}
-              {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
-            </Link>
+              <Link
+                href={item.href}
+                className={`flex items-center gap-1 text-[13px] font-bold uppercase tracking-[0.2em] transition-colors ${textColor} hover:opacity-70`}
+              >
+                {item.name}
+                {item.hasDropdown && <ChevronDown size={12} className={`mt-[2px] opacity-70 transition-transform ${isCatalogHovered ? 'rotate-180' : ''}`} />}
+              </Link>
+
+              {/* Catalog Collections Dropdown */}
+              {item.hasDropdown && isCatalogHovered && collections.length > 0 && (
+                <div className="absolute left-0 top-full pt-2 opacity-100 visible transition-opacity">
+                  <div className="bg-white shadow-lg border border-gray-200 rounded-sm py-2 min-w-[200px]">
+                    {collections.map((collection) => (
+                      <Link
+                        key={collection.id}
+                        href={`/catalog?collection=${collection.name}`}
+                        className="block px-4 py-3 text-sm font-medium text-black hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span>{collection.name}</span>
+                          {collection.productCount && (
+                            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                              {collection.productCount}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
@@ -180,14 +232,29 @@ export function Header() {
           </button>
 
           {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-2xl font-serif text-black tracking-widest uppercase border-b border-black/10 pb-4"
-            >
-              {item.name}
-            </Link>
+            <div key={item.name}>
+              <Link
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-2xl font-serif text-black tracking-widest uppercase border-b border-black/10 pb-4 block"
+              >
+                {item.name}
+              </Link>
+              {item.hasDropdown && collections.length > 0 && (
+                <div className="pl-6 pt-4 space-y-2">
+                  {collections.map((collection) => (
+                    <Link
+                      key={collection.id}
+                      href={`/catalog?collection=${collection.name}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block text-sm text-black/60 py-2 hover:text-black transition-colors"
+                    >
+                      {collection.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
 
           <div className="pt-8 space-y-4">

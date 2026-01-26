@@ -1,15 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getProductById, updateProduct, deleteProduct } from '@/lib/products'
+import { connectDB } from '@/lib/db'
+import mongoose from 'mongoose'
+
+// Define a simple Product schema for MongoDB
+const productSchema = new mongoose.Schema({
+  id: Number,
+  name: String,
+  price: Number,
+  category: String,
+  brand: String,
+  color: String,
+  gender: String,
+  size: [String],
+  rating: Number,
+  reviews: Number,
+  image: String,
+  imageUrl: String,
+  inStock: Boolean,
+  onSale: Boolean,
+  salePrice: Number,
+  isNew: Boolean,
+  createdAt: { type: Date, default: Date.now }
+})
+
+const Product = mongoose.models.Product || mongoose.model('Product', productSchema)
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    // Handle both Promise and non-Promise params (for different Next.js versions)
+    const resolvedParams = params instanceof Promise ? await params : params
+    const { id } = resolvedParams
+    
     const body = await request.json()
-    const product = updateProduct(parseInt(id), body)
-
+    
+    await connectDB()
+    const product = await Product.findOneAndUpdate(
+      { id: parseInt(id) },
+      body,
+      { new: true }
+    )
+    
     if (!product) {
       return NextResponse.json(
         { success: false, error: 'Product not found' },
@@ -29,13 +62,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
-    const success = deleteProduct(parseInt(id))
-
-    if (!success) {
+    // Handle both Promise and non-Promise params (for different Next.js versions)
+    const resolvedParams = params instanceof Promise ? await params : params
+    const { id } = resolvedParams
+    
+    await connectDB()
+    const result = await Product.findOneAndDelete({ id: parseInt(id) })
+    
+    if (!result) {
       return NextResponse.json(
         { success: false, error: 'Product not found' },
         { status: 404 }
@@ -54,11 +91,19 @@ export async function DELETE(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
-    const product = getProductById(id)
+    // Handle both Promise and non-Promise params (for different Next.js versions)
+    const resolvedParams = params instanceof Promise ? await params : params
+    const { id } = resolvedParams
+    
+    console.log('[API] Fetching product with id:', id)
+    
+    await connectDB()
+    const product = await Product.findOne({ id: parseInt(id) }).lean()
+    
+    console.log('[API] Found product:', product)
 
     if (!product) {
       return NextResponse.json(

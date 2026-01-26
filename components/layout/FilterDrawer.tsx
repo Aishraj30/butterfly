@@ -7,18 +7,28 @@ import { ChevronDown } from 'lucide-react'
 interface FilterDrawerProps {
     isOpen: boolean
     onClose: () => void
+    onApplyFilters: (filters: FilterState) => void
 }
 
-export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
+export interface FilterState {
+    genders: string[]
+    sizes: string[]
+    priceRange: { min: number | null; max: number | null }
+    colors: string[]
+    sortBy: 'name' | 'price-low' | 'price-high' | 'rating'
+}
+
+export function FilterDrawer({ isOpen, onClose, onApplyFilters }: FilterDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
     const backdropRef = useRef<HTMLDivElement>(null)
     const contentRef = useRef<HTMLDivElement>(null)
     
-    const [expandedSections, setExpandedSections] = useState<string[]>(['category', 'size', 'price', 'color'])
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+    const [expandedSections, setExpandedSections] = useState<string[]>(['gender', 'size', 'price', 'color', 'sort'])
+    const [selectedGenders, setSelectedGenders] = useState<string[]>([])
     const [selectedSizes, setSelectedSizes] = useState<string[]>([])
     const [priceRange, setPriceRange] = useState({ min: '', max: '' })
     const [selectedColors, setSelectedColors] = useState<string[]>([])
+    const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'rating'>('name')
 
     // Prevent body scroll when filter is open
     useEffect(() => {
@@ -40,11 +50,11 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
         )
     }
 
-    const toggleCategory = (category: string) => {
-        setSelectedCategories(prev => 
-            prev.includes(category) 
-                ? prev.filter(c => c !== category)
-                : [...prev, category]
+    const toggleGender = (gender: string) => {
+        setSelectedGenders(prev => 
+            prev.includes(gender) 
+                ? prev.filter(g => g !== gender)
+                : [...prev, gender]
         )
     }
 
@@ -65,14 +75,24 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
     }
 
     const clearAllFilters = () => {
-        setSelectedCategories([])
+        setSelectedGenders([])
         setSelectedSizes([])
         setSelectedColors([])
         setPriceRange({ min: '', max: '' })
+        setSortBy('name')
     }
 
     const applyFilters = () => {
-        // Handle filter application logic here
+        onApplyFilters({
+            genders: selectedGenders,
+            sizes: selectedSizes,
+            priceRange: {
+                min: priceRange.min ? parseInt(priceRange.min) : null,
+                max: priceRange.max ? parseInt(priceRange.max) : null
+            },
+            colors: selectedColors,
+            sortBy
+        })
         onClose()
     }
 
@@ -113,31 +133,31 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                     <div ref={contentRef} className="flex-1 overflow-y-auto">
                         <div className="p-8 space-y-6">
                             
-                            {/* Category Filter */}
+                            {/* Gender Filter */}
                             <div className="border-b pb-6">
                                 <button
-                                    onClick={() => toggleSection('category')}
+                                    onClick={() => toggleSection('gender')}
                                     className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
                                 >
-                                    <h3 className="font-bold text-sm uppercase tracking-wider">Category</h3>
+                                    <h3 className="font-bold text-sm uppercase tracking-wider">Gender</h3>
                                     <ChevronDown 
                                         size={16} 
                                         className={`transition-transform duration-200 ${
-                                            expandedSections.includes('category') ? 'rotate-180' : ''
+                                            expandedSections.includes('gender') ? 'rotate-180' : ''
                                         }`}
                                     />
                                 </button>
-                                {expandedSections.includes('category') && (
+                                {expandedSections.includes('gender') && (
                                     <div className="space-y-3">
-                                        {['Woman', 'Man', 'Unisex'].map((category) => (
-                                            <label key={category} className="flex items-center gap-3 cursor-pointer">
+                                        {['Male', 'Female', 'Unisex'].map((gender) => (
+                                            <label key={gender} className="flex items-center gap-3 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedCategories.includes(category)}
-                                                    onChange={() => toggleCategory(category)}
+                                                    checked={selectedGenders.includes(gender)}
+                                                    onChange={() => toggleGender(gender)}
                                                     className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
                                                 />
-                                                <span className="text-sm text-gray-700">{category}</span>
+                                                <span className="text-sm text-gray-700">{gender}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -183,7 +203,7 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                                     onClick={() => toggleSection('price')}
                                     className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
                                 >
-                                    <h3 className="font-bold text-sm uppercase tracking-wider">Price</h3>
+                                    <h3 className="font-bold text-sm uppercase tracking-wider">Price (₹)</h3>
                                     <ChevronDown 
                                         size={16} 
                                         className={`transition-transform duration-200 ${
@@ -215,7 +235,7 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                             </div>
 
                             {/* Color Filter */}
-                            <div className="pb-6">
+                            <div className="border-b pb-6">
                                 <button
                                     onClick={() => toggleSection('color')}
                                     className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
@@ -230,7 +250,7 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                                 </button>
                                 {expandedSections.includes('color') && (
                                     <div className="grid grid-cols-6 gap-3">
-                                        {['Black', 'White', 'Gray', 'Brown', 'Blue', 'Red'].map((color) => (
+                                        {['Black', 'White', 'Gray', 'Brown', 'Blue', 'Red', 'Navy', 'Cream', 'Gold', 'Camel'].map((color) => (
                                             <button
                                                 key={color}
                                                 onClick={() => toggleColor(color)}
@@ -248,13 +268,55 @@ export function FilterDrawer({ isOpen, onClose }: FilterDrawerProps) {
                                                                         color.toLowerCase() === 'gray' ? '#6b7280' :
                                                                         color.toLowerCase() === 'brown' ? '#92400e' :
                                                                         color.toLowerCase() === 'blue' ? '#2563eb' :
-                                                                        color.toLowerCase() === 'red' ? '#dc2626' : '#000000'
+                                                                        color.toLowerCase() === 'red' ? '#dc2626' :
+                                                                        color.toLowerCase() === 'navy' ? '#001f3f' :
+                                                                        color.toLowerCase() === 'cream' ? '#fffdd0' :
+                                                                        color.toLowerCase() === 'gold' ? '#ffd700' :
+                                                                        color.toLowerCase() === 'camel' ? '#c19a6b' : '#000000'
                                                     }}
                                                 />
                                                 {color === 'White' && (
                                                     <div className="absolute inset-0 rounded-full border border-gray-300" />
                                                 )}
                                             </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Sort */}
+                            <div className="pb-6">
+                                <button
+                                    onClick={() => toggleSection('sort')}
+                                    className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
+                                >
+                                    <h3 className="font-bold text-sm uppercase tracking-wider">Sort By</h3>
+                                    <ChevronDown 
+                                        size={16} 
+                                        className={`transition-transform duration-200 ${
+                                            expandedSections.includes('sort') ? 'rotate-180' : ''
+                                        }`}
+                                    />
+                                </button>
+                                {expandedSections.includes('sort') && (
+                                    <div className="space-y-3">
+                                        {[
+                                            { value: 'name', label: 'Name (A-Z)' },
+                                            { value: 'price-low', label: 'Price: Low to High' },
+                                            { value: 'price-high', label: 'Price: High to Low' },
+                                            { value: 'rating', label: 'Rating (Highest)' }
+                                        ].map(option => (
+                                            <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="sort"
+                                                    value={option.value}
+                                                    checked={sortBy === option.value}
+                                                    onChange={(e) => setSortBy(e.target.value as any)}
+                                                    className="w-4 h-4 text-black border-gray-300 focus:ring-black"
+                                                />
+                                                <span className="text-sm text-gray-700">{option.label}</span>
+                                            </label>
                                         ))}
                                     </div>
                                 )}

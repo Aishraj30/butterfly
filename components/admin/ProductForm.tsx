@@ -6,6 +6,13 @@ import { Product } from '@/lib/products'
 import { Category } from '@/lib/categories'
 import { Brand } from '@/lib/brands'
 
+interface Collection {
+    id: number
+    name: string
+    description?: string
+    categories?: string[]
+}
+
 interface ProductFormProps {
     initialData?: Product
     isEdit?: boolean
@@ -14,13 +21,14 @@ interface ProductFormProps {
 export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-    const [categories, setCategories] = useState<Category[]>([])
+    const [collections, setCollections] = useState<Collection[]>([])
     const [brands, setBrands] = useState<Brand[]>([])
     const [formData, setFormData] = useState<Partial<Product>>(
         initialData || {
             name: '',
             price: 0,
             category: '',
+            gender: 'Unisex',
             brand: '',
             color: '',
             inStock: true,
@@ -33,19 +41,19 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const [imagePreview, setImagePreview] = useState('')
 
     useEffect(() => {
-        // Fetch categories and brands
+        // Fetch collections and brands
         Promise.all([
-            fetch('/api/categories').then(res => res.json()),
+            fetch('/api/collections').then(res => res.json()),
             fetch('/api/brands').then(res => res.json())
-        ]).then(([categoriesData, brandsData]) => {
-            if (categoriesData.success) {
-                setCategories(categoriesData.data)
+        ]).then(([collectionsData, brandsData]) => {
+            if (collectionsData.success) {
+                setCollections(collectionsData.data)
             }
             if (brandsData.success) {
                 setBrands(brandsData.data)
             }
         }).catch(error => {
-            console.error('Error fetching categories/brands:', error)
+            console.error('Error fetching collections/brands:', error)
         })
     }, [])
 
@@ -130,7 +138,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl bg-background p-6 rounded-sm border border-border">
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl bg-background p-6 rounded-sm border border-border">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Product Name</label>
@@ -145,13 +153,13 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Price ($)</label>
+                    <label className="text-sm font-medium text-foreground">Price (₹)</label>
                     <input
                         type="number"
                         name="price"
                         required
                         min="0"
-                        step="0.01"
+                        step="1"
                         value={formData.price}
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
@@ -159,7 +167,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Category</label>
+                    <label className="text-sm font-medium text-foreground">Collection</label>
                     <select
                         name="category"
                         required
@@ -167,12 +175,26 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                     >
-                        <option value="">Select Category</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.name}>
-                                {category.name}
+                        <option value="">Select Collection</option>
+                        {collections.map((collection) => (
+                            <option key={collection.id} value={collection.name}>
+                                {collection.name}
                             </option>
                         ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Gender</label>
+                    <select
+                        name="gender"
+                        value={formData.gender || 'Unisex'}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                    >
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Unisex">Unisex</option>
                     </select>
                 </div>
 
@@ -206,19 +228,30 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-medium text-foreground">Sizes (comma-separated)</label>
-                    <input
-                        type="text"
-                        name="sizes"
-                        value={Array.isArray(formData.size) ? formData.size.join(', ') : formData.size || ''}
-                        onChange={(e) => {
-                            const sizes = e.target.value.split(',').map(s => s.trim()).filter(s => s)
-                            setFormData(prev => ({ ...prev, size: sizes }))
-                        }}
-                        placeholder="e.g. XS, S, M, L, XL"
-                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                    />
-                    <p className="text-xs text-foreground/60">Enter sizes separated by commas (e.g., XS, S, M, L, XL)</p>
+                    <label className="text-sm font-medium text-foreground">Sizes</label>
+                    <div className="flex flex-wrap gap-2">
+                        {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                            <button
+                                key={size}
+                                type="button"
+                                onClick={() => {
+                                    const currentSizes = Array.isArray(formData.size) ? formData.size : []
+                                    const newSizes = currentSizes.includes(size)
+                                        ? currentSizes.filter(s => s !== size)
+                                        : [...currentSizes, size]
+                                    setFormData(prev => ({ ...prev, size: newSizes }))
+                                }}
+                                className={`px-4 py-2 rounded-sm font-medium transition-all border-2 ${
+                                    (Array.isArray(formData.size) ? formData.size : []).includes(size)
+                                        ? 'bg-primary text-primary-foreground border-primary'
+                                        : 'border-border text-foreground hover:border-primary bg-background'
+                                }`}
+                            >
+                                {size}
+                            </button>
+                        ))}
+                    </div>
+                    <p className="text-xs text-foreground/60">Click to select available sizes</p>
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
@@ -302,14 +335,26 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     <label htmlFor="onSale" className="text-sm font-medium text-foreground cursor-pointer">On Sale</label>
                 </div>
 
+                <div className="flex items-center gap-2 md:col-span-2">
+                    <input
+                        type="checkbox"
+                        name="isNew"
+                        id="isNew"
+                        checked={formData.isNew || false}
+                        onChange={handleChange}
+                        className="rounded border-border text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="isNew" className="text-sm font-medium text-foreground cursor-pointer">New Arrivals</label>
+                </div>
+
                 {formData.onSale && (
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">Sale Price ($)</label>
+                        <label className="text-sm font-medium text-foreground">Sale Price (₹)</label>
                         <input
                             type="number"
                             name="salePrice"
                             min="0"
-                            step="0.01"
+                            step="1"
                             value={formData.salePrice || ''}
                             onChange={(e) => {
                                 const value = e.target.value ? parseFloat(e.target.value) : undefined

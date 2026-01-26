@@ -11,7 +11,10 @@ export let products: Product[] = [
     rating: 4.8,
     reviews: 124,
     image: 'bg-gradient-to-br from-purple-100 to-pink-100',
+    imageUrl: 'https://images.unsplash.com/photo-1566150905458-1bf049841a8f?w=600&q=80',
     inStock: true,
+    gender: 'Female',
+    brand: 'Butterfly Couture',
   },
   {
     id: 2,
@@ -23,9 +26,12 @@ export let products: Product[] = [
     rating: 4.6,
     reviews: 89,
     image: 'bg-gradient-to-br from-pink-100 to-rose-100',
+    imageUrl: 'https://images.unsplash.com/photo-1595777707802-c8b99eef7b10?w=600&q=80',
     inStock: true,
     onSale: true,
     salePrice: 750,
+    gender: 'Female',
+    brand: 'Butterfly Couture',
   },
   {
     id: 3,
@@ -37,7 +43,10 @@ export let products: Product[] = [
     rating: 4.9,
     reviews: 156,
     image: 'bg-gradient-to-br from-amber-50 to-orange-100',
+    imageUrl: 'https://images.unsplash.com/photo-1520572163474-6864f9cf17ab?w=600&q=80',
     inStock: true,
+    gender: 'Female',
+    brand: 'Butterfly Couture',
   },
   {
     id: 4,
@@ -49,7 +58,10 @@ export let products: Product[] = [
     rating: 4.7,
     reviews: 103,
     image: 'bg-gradient-to-br from-slate-100 to-gray-100',
+    imageUrl: 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=600&q=80',
     inStock: true,
+    gender: 'Female',
+    brand: 'Butterfly Couture',
   },
   {
     id: 5,
@@ -61,9 +73,12 @@ export let products: Product[] = [
     rating: 4.5,
     reviews: 67,
     image: 'bg-gradient-to-br from-yellow-100 to-amber-100',
+    imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695c952952?w=600&q=80',
     inStock: true,
     onSale: true,
     salePrice: 350,
+    gender: 'Female',
+    brand: 'Butterfly Couture',
   },
   {
     id: 6,
@@ -75,7 +90,10 @@ export let products: Product[] = [
     rating: 4.9,
     reviews: 142,
     image: 'bg-gradient-to-br from-orange-50 to-yellow-100',
+    imageUrl: 'https://images.unsplash.com/photo-1539533057440-7814a62d53d1?w=600&q=80',
     inStock: true,
+    gender: 'Female',
+    brand: 'Butterfly Couture',
   },
 ]
 
@@ -86,6 +104,7 @@ export interface Product {
   category: string
   brand?: string
   color: string
+  gender?: 'Male' | 'Female' | 'Unisex'
   size: string[]
   rating: number
   reviews: number
@@ -94,6 +113,7 @@ export interface Product {
   inStock: boolean
   onSale?: boolean
   salePrice?: number
+  isNew?: boolean
 }
 
 export interface FilterOptions {
