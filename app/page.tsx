@@ -1,5 +1,8 @@
 import { HeroBanner } from '@/components/ui/HeroBanner'
 import { ProductCarousel } from '@/components/ui/ProductCarousel'
+import connectDB from '@/lib/db'
+import Collection from '@/models/Collection'
+import Product from '@/models/Product'
 
 // Sample data for multiple sections
 const heroBanners = [
@@ -36,123 +39,68 @@ const heroBanners = [
     backgroundImage: "/banners/b1.JPG"
   }
 ]
+// Fallback data in case DB is empty
+const fallbackHero = {
+  title: "BUTTERFLY COUTURE",
+  subtitle: "Exquisite Fashion for the Modern Individual",
+  buttonText: "Shop Collection",
+  buttonLink: "/catalog",
+  backgroundImage: "/hero.JPG"
+}
 
-const carouselData = [
-  {
-    id: 1,
-    title: "Featured Products",
-    products: [
-      { id: '1', name: 'Classic Hoodie', price: '$89.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '2', name: 'Premium Sweatshirt', price: '$79.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '3', name: 'Streetwear Jacket', price: '$129.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '4', name: 'Urban Pullover', price: '$69.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '5', name: 'Casual Sweater', price: '$59.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '6', name: 'Designer Hoodie', price: '$99.99', image: '/uploads/product-1769084011566.jpeg' }
-    ]
-  },
-  {
-    id: 2,
-    title: "New Arrivals",
-    products: [
-      { id: '7', name: 'Summer Dress', price: '$119.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '8', name: 'Beach Shirt', price: '$49.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '9', name: 'Linen Pants', price: '$89.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '10', name: 'Sandals', price: '$39.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '11', name: 'Sun Hat', price: '$29.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '12', name: 'Beach Bag', price: '$79.99', image: '/uploads/product-1769084011566.jpeg' }
-    ]
-  },
-  {
-    id: 3,
-    title: "Summer Essentials",
-    products: [
-      { id: '13', name: 'Tank Top', price: '$29.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '14', name: 'Shorts', price: '$49.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '15', name: 'Cap', price: '$19.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '16', name: 'Sunglasses', price: '$89.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '17', name: 'Flip Flops', price: '$24.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '18', name: 'Water Bottle', price: '$15.99', image: '/uploads/product-1769084011566.jpeg' }
-    ]
-  },
-  {
-    id: 4,
-    title: "Luxury Collection",
-    products: [
-      { id: '19', name: 'Silk Shirt', price: '$199.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '20', name: 'Cashmere Sweater', price: '$299.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '21', name: 'Leather Jacket', price: '$599.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '22', name: 'Designer Watch', price: '$399.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '23', name: 'Premium Shoes', price: '$249.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '24', name: 'Luxury Bag', price: '$449.99', image: '/uploads/product-1769084011566.jpeg' }
-    ]
-  },
-  {
-    id: 5,
-    title: "Urban Streetwear",
-    products: [
-      { id: '25', name: 'Graphic Tee', price: '$39.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '26', name: 'Cargo Pants', price: '$79.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '27', name: 'Sneakers', price: '$119.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '28', name: 'Backpack', price: '$69.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '29', name: 'Baseball Cap', price: '$29.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '30', name: 'Phone Case', price: '$19.99', image: '/uploads/product-1769084011566.jpeg' }
-    ]
-  },
-  {
-    id: 6,
-    title: "Classic Essentials",
-    products: [
-      { id: '31', name: 'White Shirt', price: '$59.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '32', name: 'Blue Jeans', price: '$89.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '33', name: 'Black Belt', price: '$39.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '34', name: 'Leather Wallet', price: '$49.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '35', name: 'Classic Watch', price: '$149.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '36', name: 'Dress Shoes', price: '$179.99', image: '/uploads/product-1769084011566.jpeg' }
-    ]
-  },
-  {
-    id: 7,
-    title: "Accessories",
-    products: [
-      { id: '37', name: 'Scarf', price: '$34.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '38', name: 'Gloves', price: '$24.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '39', name: 'Tie', price: '$29.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '40', name: 'Cufflinks', price: '$44.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '41', name: 'Pocket Square', price: '$19.99', image: '/uploads/product-1769084011566.jpeg' },
-      { id: '42', name: 'Tie Clip', price: '$14.99', image: '/uploads/product-1769084011566.jpeg' }
-    ]
-  }
-]
+export default async function Home() {
+  await connectDB()
 
-export default function Home() {
+  // Ensure Product model is registered for populate
+  console.log("📦 Initializing models:", Product.modelName, Collection.modelName)
+  const collections = await Collection.find({ isActive: true })
+    .populate('products')
+    .sort({ createdAt: -1 })
+    .limit(7)
+
   return (
     <main className="min-h-screen">
-      {/* Create alternating layout: Hero -> Carousel x4 times */}
-      {Array.from({ length: 4 }, (_, index) => {
-        const heroIndex = index
-        const carouselIndex = index
-        
-        return (
-          <div key={index}>
-            {/* Hero Banner */}
-            <HeroBanner 
-              title={heroBanners[heroIndex].title}
-              subtitle={heroBanners[heroIndex].subtitle}
-              buttonText={heroBanners[heroIndex].buttonText}
-              buttonLink={heroBanners[heroIndex].buttonLink}
-              backgroundImage={heroBanners[heroIndex].backgroundImage}
-              showScrollIndicator={index < 3} // Hide scroll indicator on last hero
-              isFirst={index === 0} // Only first hero gets extreme top positioning
+      {collections.length > 0 ? (
+        collections.map((col: any, index: number) => (
+          <div key={col._id.toString()}>
+            {/* Hero Banner for the collection */}
+            <HeroBanner
+              title={col.name.toUpperCase()}
+              subtitle={col.description || "Discover our latest premium collection"}
+              buttonText="Explore Collection"
+              buttonLink={`/collections/${col.slug}`}
+              backgroundImage={col.bannerImage || "/pic1.jpg"}
+              showScrollIndicator={index < collections.length - 1}
+              isFirst={index === 0}
             />
-            
-            {/* Product Carousel */}
-            <ProductCarousel 
-              title={carouselData[carouselIndex].title}
-              products={carouselData[carouselIndex].products}
-            />
+
+            {/* Product Carousel for the collection */}
+            {col.products && col.products.length > 0 && (
+              <ProductCarousel
+                title={`${col.name} Highlights`}
+                products={col.products.map((p: any) => ({
+                  id: p._id.toString(),
+                  name: p.name,
+                  price: `₹${p.price.toLocaleString()}`,
+                  image: p.images?.[0] || "/uploads/product-1769084011566.jpeg"
+                }))}
+              />
+            )}
           </div>
-        )
-      })}
+        ))
+      ) : (
+        /* Fallback if no collections in DB */
+        <div>
+          <HeroBanner
+            {...fallbackHero}
+            showScrollIndicator={true}
+            isFirst={true}
+          />
+          <div className="py-20 text-center text-gray-400">
+            <p>No collections found. Visit the admin dashboard to create one.</p>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

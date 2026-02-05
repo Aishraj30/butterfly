@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
+import { uploadToS3 } from '@/lib/s3'
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
-    
+
     if (!file) {
       return NextResponse.json(
         { success: false, error: 'No file provided' },
@@ -36,28 +35,22 @@ export async function POST(request: NextRequest) {
 
     // Create unique filename
     const timestamp = Date.now()
-    const extension = file.name.split('.').pop()
-    const filename = `product-${timestamp}.${extension}`
-    
-    // Save to public/uploads directory
-    const uploadsDir = join(process.cwd(), 'public', 'uploads')
-    const filepath = join(uploadsDir, filename)
-    
-    await writeFile(filepath, buffer)
+    const originalName = file.name.replace(/\s+/g, '-')
+    const filename = `${timestamp}-${originalName}`
 
-    // Return the URL for the uploaded image
-    const url = `/uploads/${filename}`
-    
+    // Upload to S3 instead of local storage
+    const url = await uploadToS3(buffer, filename, file.type)
+
     return NextResponse.json({
       success: true,
       url,
       filename
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('[API] Upload error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to upload file' },
+      { success: false, error: error.message || 'Failed to upload file' },
       { status: 500 }
     )
   }

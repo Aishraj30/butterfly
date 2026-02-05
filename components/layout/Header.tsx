@@ -116,6 +116,14 @@ export function Header() {
               {item.name}
               {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
             </Link>
+                } : undefined}
+                className={`text-sm font-semibold transition-all flex items-center gap-1 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'
+                  } hover:text-white`}
+              >
+                {item.name}
+                {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
+              </Link>
+            </div>
           ))}
         </div>
 
@@ -132,7 +140,7 @@ export function Header() {
         {/* Center Logo */}
         <div className="flex justify-center items-center">
           <Link href="/" className="flex-shrink-0">
-            <span className={`font-sans text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.2em]  whitespace-nowrap transition-colors ${logoColor}`}>
+            <span className={`font-sans text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-[0.2em] whitespace-nowrap transition-all ${logoColor} ${!isHome || isCatalog ? '' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]'}`}>
               BUTTERFLY
             </span>
           </Link>
@@ -155,6 +163,9 @@ export function Header() {
                 className={`text-sm font-medium transition-colors hover:${isHome && !isCatalog ? 'text-white' : 'text-black'} ${
                   pathname === item.href ? textColor : (isHome && !isCatalog ? 'text-white/90' : 'text-gray-900')
                 }`}
+                href={item.href}
+                className={`text-sm font-semibold transition-all hover:opacity-100 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'
+                  } hover:text-white`}
               >
                 {item.name}
               </Link>

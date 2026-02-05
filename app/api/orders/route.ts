@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createOrder, getOrdersByEmail, getAllOrders, createContactSubmission } from '@/lib/db'
+import { connectDB } from '@/lib/db'
+import Order from '@/models/Order'
+import Contact from '@/models/Contact'
 
 export async function POST(request: NextRequest) {
   try {
+    await connectDB()
     const body = await request.json()
-    const { items, subtotal, shipping, tax, total, customer, shipping: shippingAddress, billing: billingAddress } = body
+    const { items, total, customer, shipping: shippingAddress, billing: billingAddress } = body
 
     // Validate required fields
     if (!items?.length || !customer?.email || !shippingAddress?.address || !billingAddress?.address) {
@@ -14,7 +17,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const order = createOrder({
+    const order = await Order.create({
       items,
       total: Math.round(total * 100) / 100,
       customer,
@@ -23,12 +26,12 @@ export async function POST(request: NextRequest) {
       status: 'pending',
     })
 
-    // Create order confirmation email notification
-    await createContactSubmission({
+    // Create order confirmation email notification (saving to database as contact submission)
+    await Contact.create({
       name: customer.name,
       email: customer.email,
-      subject: `Order Confirmation: ${order.id}`,
-      message: `Your order has been received. Order ID: ${order.id}. Total: $${order.total.toFixed(2)}`,
+      subject: `Order Confirmation: ${order.orderId}`,
+      message: `Your order has been received. Order ID: ${order.orderId}. Total: ₹${order.total.toLocaleString()}`,
     })
 
     return NextResponse.json({
@@ -36,10 +39,10 @@ export async function POST(request: NextRequest) {
       data: order,
       message: 'Order created successfully. Please check your email for confirmation.',
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[API] Orders POST error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to create order' },
+      { success: false, error: error.message || 'Failed to create order' },
       { status: 500 }
     )
   }
@@ -47,18 +50,19 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    await connectDB()
     const email = request.nextUrl.searchParams.get('email')
-    const orders = email ? getOrdersByEmail(email) : getAllOrders()
+    const orders = email ? await Order.find({ 'customer.email': email }).sort({ createdAt: -1 }) : await Order.find({}).sort({ createdAt: -1 })
 
     return NextResponse.json({
       success: true,
       data: orders,
       count: orders.length,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[API] Orders GET error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch orders' },
+      { success: false, error: error.message || 'Failed to fetch orders' },
       { status: 500 }
     )
   }

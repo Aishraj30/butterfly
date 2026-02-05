@@ -66,6 +66,8 @@ export class AuthController {
         name: user.name,
         email: user.email,
         role: user.role,
+        avatar: user.avatar,
+        phoneNumber: user.phoneNumber,
         createdAt: user.createdAt,
       };
 
@@ -144,6 +146,8 @@ export class AuthController {
         name: user.name,
         email: user.email,
         role: user.role,
+        avatar: user.avatar,
+        phoneNumber: user.phoneNumber,
         createdAt: user.createdAt,
       };
 

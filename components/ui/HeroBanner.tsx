@@ -66,30 +66,35 @@ export function HeroBanner({
       className={`relative w-full overflow-hidden ${isFirst ? 'h-[110vh] -mt-32 pt-32' : 'h-screen'}`}
     >
       {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src={backgroundImage}
-          alt="Fashion Background"
-          fill
-          priority
-          unoptimized
-          className="object-cover w-full h-full opacity-90"
-          style={{ objectPosition: 'center center' }}
-        />
-        {/* Gradient Overlay */}
+      <div className="absolute inset-0 z-0 bg-gray-50">
+        {backgroundImage && (
+          <>
+            <Image
+              src={backgroundImage}
+              alt="Fashion Background"
+              fill
+              priority
+              unoptimized
+              className="object-cover w-full h-full"
+              style={{ objectPosition: 'center center' }}
+            />
+            {/* Darker overlay to ensure text visibility */}
+            <div className="absolute inset-0 bg-black/30" />
+          </>
+        )}
         <div className={`absolute inset-0 ${overlayColor}`} />
       </div>
 
       {/* Content */}
-      <div ref={textRef} className="relative z-10 flex h-full flex-col items-center justify-center">
-        <h1 className={`mb-4 text-center font-sans text-5xl font-bold md:text-6xl lg:text-7xl ${textColor}`}>
+      <div ref={textRef} className="relative z-10 flex h-full flex-col items-center justify-center p-4">
+        <h1 className={`mb-4 text-center font-sans text-5xl font-bold md:text-6xl lg:text-7xl ${backgroundImage ? 'text-white' : 'text-[#003300]'}`}>
           {title}
         </h1>
-        <p className={`mb-8 text-center text-lg md:text-xl ${textColor} opacity-90`}>
+        <p className={`mb-8 text-center text-lg md:text-xl ${backgroundImage ? 'text-white/90' : 'text-gray-600'}`}>
           {subtitle}
         </p>
         {buttonText && buttonLink && (
-          <Button asChild className="rounded-md px-8 py-6 text-lg bg-white text-black hover:bg-gray-100">
+          <Button asChild className={`rounded-md px-8 py-6 text-lg ${backgroundImage ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#003300] text-white hover:bg-[#004400]'}`}>
             <Link href={buttonLink}>{buttonText}</Link>
           </Button>
         )}
@@ -97,7 +102,7 @@ export function HeroBanner({
 
       {/* Scroll Indicator */}
       {showScrollIndicator && (
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-white/80 z-10">
+        <div className={`absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 z-10 ${backgroundImage ? 'text-white/80' : 'text-[#003300]/80'}`}>
           <span className="text-[10px] tracking-[0.2em] font-medium uppercase">Scroll Down</span>
           <ChevronDown className="animate-bounce" size={20} strokeWidth={1} />
         </div>
