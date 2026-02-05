@@ -42,7 +42,7 @@ export function FeaturedProducts() {
     <section className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">
             Featured Collection
           </h2>
@@ -52,7 +52,7 @@ export function FeaturedProducts() {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {products.map((product) => (
             <Link
               key={product.id}
@@ -60,7 +60,7 @@ export function FeaturedProducts() {
               className="group cursor-pointer"
             >
               <div
-                className="relative overflow-hidden bg-secondary rounded-sm aspect-square mb-4 transition-all duration-300"
+                className="relative overflow-hidden bg-secondary rounded-sm aspect-[3/4] mb-4 transition-all duration-300"
                 onMouseEnter={() => setHoveredId(product.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >

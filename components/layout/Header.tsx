@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { CartDrawer } from './CartDrawer'
 import { CatalogDrawer } from './CatalogDrawer'
+import { FeaturedDrawer } from './FeaturedDrawer'
 
 interface Collection {
   id: number
@@ -36,7 +37,7 @@ interface Collection {
 
 const navigation = [
   { name: 'Catalog', href: '/catalog', hasDropdown: true },
-  { name: 'Sale', href: '/sale' },
+  { name: 'Featured', href: '/featured', hasDropdown: true },
   { name: 'New Arrival', href: '/new-arrival' },
   { name: 'About', href: '/about' },
 ]
@@ -46,7 +47,10 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCatalogHovered, setIsCatalogHovered] = useState(false)
   const [isCatalogDrawerOpen, setIsCatalogDrawerOpen] = useState(false)
+  const [isFeaturedDrawerOpen, setIsFeaturedDrawerOpen] = useState(false)
   const [collections, setCollections] = useState<Collection[]>([])
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const pathname = usePathname()
   const { user, logout } = useAuth()
 
@@ -62,6 +66,18 @@ export function Header() {
       .catch(error => console.error('Failed to fetch collections:', error))
   }, [])
 
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      window.location.href = `/catalog/search?q=${encodeURIComponent(searchQuery.trim())}`;
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
   const isCatalog = pathname === '/catalog'
@@ -72,9 +88,9 @@ export function Header() {
   }
 
   // Header style - transparent on home, white on other pages
-  const headerBg = !isHome || isCatalog ? 'bg-white shadow-sm' : 'bg-transparent'
-  const textColor = !isHome || isCatalog ? 'text-black' : 'text-white'
-  const logoColor = !isHome || isCatalog ? 'text-black' : 'text-white'
+  const headerBg = isHome && !isCatalog ? 'bg-transparent' : 'bg-white shadow-sm'
+  const textColor = isHome && !isCatalog ? 'text-white' : 'text-black'
+  const logoColor = isHome && !isCatalog ? 'text-white' : 'text-black'
 
   return (
     <header className={`relative w-full z-50 transition-all duration-300 ${headerBg} py-8`}>
@@ -82,27 +98,24 @@ export function Header() {
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
           {navigation.slice(0, 2).map((item) => (
-            <div
+            <Link
               key={item.name}
-              className="relative group"
-              onMouseEnter={() => item.hasDropdown && setIsCatalogDrawerOpen(true)}
-              onMouseLeave={() => item.hasDropdown && setIsCatalogDrawerOpen(false)}
-            >
-              <Link
-                key={item.name}
-                href={item.hasDropdown ? '#' : item.href}
-                onClick={item.hasDropdown ? (e) => {
-                  e.preventDefault()
+              href={item.hasDropdown ? '#' : item.href}
+              onClick={item.hasDropdown ? (e) => {
+                e.preventDefault()
+                if (item.name === 'Catalog') {
                   setIsCatalogDrawerOpen(true)
-                } : undefined}
-                className={`text-sm font-medium transition-colors flex items-center gap-1 ${
-                  pathname === item.href ? 'text-white' : 'text-gray-300'
-                }`}
-              >
-                {item.name}
-                {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
-              </Link>
-            </div>
+                } else if (item.name === 'Featured') {
+                  setIsFeaturedDrawerOpen(true)
+                }
+              } : undefined}
+              className={`text-sm font-medium transition-colors flex items-center gap-1 ${
+                pathname === item.href ? textColor : (isHome && !isCatalog ? 'text-white/90' : 'text-gray-900')
+              }`}
+            >
+              {item.name}
+              {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
+            </Link>
           ))}
         </div>
 
@@ -117,7 +130,7 @@ export function Header() {
         </div>
 
         {/* Center Logo */}
-        <div className="flex justify-center">
+        <div className="flex justify-center items-center">
           <Link href="/" className="flex-shrink-0">
             <span className={`font-sans text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.2em]  whitespace-nowrap transition-colors ${logoColor}`}>
               BUTTERFLY
@@ -132,9 +145,15 @@ export function Header() {
             {navigation.slice(2).map((item) => (
               <Link
                 key={item.name}
-                href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-white ${
-                  pathname === item.href ? 'text-white' : 'text-gray-300'
+                href={item.hasDropdown ? '#' : item.href}
+                onClick={item.hasDropdown ? (e) => {
+                  e.preventDefault()
+                  if (item.name === 'Featured') {
+                    setIsFeaturedDrawerOpen(true)
+                  }
+                } : undefined}
+                className={`text-sm font-medium transition-colors hover:${isHome && !isCatalog ? 'text-white' : 'text-black'} ${
+                  pathname === item.href ? textColor : (isHome && !isCatalog ? 'text-white/90' : 'text-gray-900')
                 }`}
               >
                 {item.name}
@@ -144,10 +163,40 @@ export function Header() {
 
           {/* Action Icons */}
           <div className={`flex items-center gap-3 md:gap-6 transition-colors ${textColor}`}>
-            <button className="hover:opacity-70 transition-opacity hidden sm:block">
-              <Search size={20} strokeWidth={1.5} />
-            </button>
-            <Link href="/wishlist" className="hover:opacity-70 transition-opacity hidden sm:block">
+            {/* Search Bar */}
+            <div className="relative flex items-center">
+              {isSearchOpen ? (
+                <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50">
+                  <div className="relative w-full px-4 pt-4">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="SEARCH"
+                        className="w-full py-4 px-4 border-b-2 border-gray-400 focus:outline-none text-lg text-black bg-transparent"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => setIsSearchOpen(false)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              
+              <button 
+                onClick={() => setIsSearchOpen(true)}
+                className="hover:opacity-70 transition-opacity flex items-center"
+              >
+                <Search size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+            <Link href="/wishlist" className="hover:opacity-70 transition-opacity hidden sm:flex items-center">
               <Heart size={20} strokeWidth={1.5} />
             </Link>
 
@@ -273,6 +322,7 @@ export function Header() {
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
       <CatalogDrawer isOpen={isCatalogDrawerOpen} onClose={() => setIsCatalogDrawerOpen(false)} />
+      <FeaturedDrawer isOpen={isFeaturedDrawerOpen} onClose={() => setIsFeaturedDrawerOpen(false)} />
     </header>
   )
 }

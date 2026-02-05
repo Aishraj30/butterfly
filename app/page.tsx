@@ -6,10 +6,10 @@ const heroBanners = [
   {
     id: 1,
     title: "BUTTERFLY",
-    subtitle: "Discover the latest trends in fashion",
+    subtitle: "Discover latest trends in fashion",
     buttonText: "Shop Now",
     buttonLink: "/catalog",
-    backgroundImage: "/hero.JPG"
+    backgroundImage: "/banners/b1.JPG"
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ const heroBanners = [
     subtitle: "Elevate your style with our premium pieces",
     buttonText: "Explore",
     buttonLink: "/new-arrival",
-    backgroundImage: "/pic1.jpg"
+    backgroundImage: "/banners/b2.JPG"
   },
   {
     id: 3,
@@ -25,7 +25,7 @@ const heroBanners = [
     subtitle: "Light fabrics for warm days ahead",
     buttonText: "View Collection",
     buttonLink: "/catalog",
-    backgroundImage: "/pic2.jpg"
+    backgroundImage: "/banners/b3.jpg"
   },
   {
     id: 4,
@@ -33,31 +33,7 @@ const heroBanners = [
     subtitle: "Premium materials meet timeless design",
     buttonText: "Discover",
     buttonLink: "/catalog",
-    backgroundImage: "/male-photo.jpeg"
-  },
-  {
-    id: 5,
-    title: "URBAN STYLE",
-    subtitle: "Streetwear that makes a statement",
-    buttonText: "Shop Now",
-    buttonLink: "/catalog",
-    backgroundImage: "/hero.JPG"
-  },
-  {
-    id: 6,
-    title: "CLASSIC ELEGANCE",
-    subtitle: "Timeless pieces for modern wardrobes",
-    buttonText: "Explore",
-    buttonLink: "/catalog",
-    backgroundImage: "/pic1.jpg"
-  },
-  {
-    id: 7,
-    title: "FINAL TOUCH",
-    subtitle: "Complete your look with our accessories",
-    buttonText: "Shop Accessories",
-    buttonLink: "/catalog",
-    backgroundImage: "/pic2.jpg"
+    backgroundImage: "/banners/b1.JPG"
   }
 ]
 

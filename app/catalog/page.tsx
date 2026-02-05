@@ -1,6 +1,6 @@
 'use client';
-
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { CatalogBanner } from '@/components/catalog/CatalogBanner';
 import Link from 'next/link';
 
@@ -9,6 +9,7 @@ interface Product {
     name: string;
     price: number;
     category: string;
+    subcategory?: string;
     color: string;
     gender?: string;
     size: string[];
@@ -31,13 +32,23 @@ interface Collection {
 
 export default function CatalogPage() {
     const [collections, setCollections] = useState<Collection[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const searchParams = useSearchParams();
+    const collectionParam = searchParams.get('collection');
+
+    // Find the collection that matches the URL parameter
+    const currentCollection = collections.find(c => 
+        c.name.toLowerCase() === collectionParam?.toLowerCase()
+    );
 
     useEffect(() => {
         fetchCollections();
-    }, []);
+        // Also fetch category data when collection changes
+        if (currentCollection) {
+            fetchCategoryData(currentCollection.name);
+        }
+    }, [collectionParam]);
 
     const fetchCollections = async () => {
         try {
@@ -55,16 +66,26 @@ export default function CatalogPage() {
         }
     };
 
-    const handleSearch = async () => {
-        if (searchQuery.trim()) {
-            // Navigate to search results page
-            window.location.href = `/catalog/search?q=${encodeURIComponent(searchQuery.trim())}`;
-        }
-    };
-
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleSearch();
+    const fetchCategoryData = async (collectionName: string) => {
+        try {
+            setIsLoading(true);
+            
+            // Fetch products for this collection
+            const productsRes = await fetch('/api/products');
+            const productsData = await productsRes.json();
+            
+            if (productsData.success) {
+                // Show ALL products from this collection/category
+                const categoryProducts = productsData.data.filter((p: Product) => 
+                    p.category.toLowerCase() === collectionName.toLowerCase()
+                );
+                
+                setProducts(categoryProducts);
+            }
+        } catch (error) {
+            console.error('Failed to fetch category data:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -86,29 +107,6 @@ export default function CatalogPage() {
             <CatalogBanner />
 
             <div className="max-w-[1400px] mx-auto px-5 py-8">
-                {/* Search Bar */}
-                <div className="mb-8 flex justify-center">
-                    <div className="relative w-full max-w-md">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            onFocus={() => setIsSearchOpen(true)}
-                            placeholder="Search products..."
-                            className="w-full px-4 py-3 pr-12 border border-[#8D7B68] rounded-sm focus:outline-none focus:ring-2 focus:ring-[#8D7B68] bg-white text-black"
-                        />
-                        <button
-                            onClick={handleSearch}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-[#8D7B68] hover:bg-[#8D7B68] hover:text-white transition-colors rounded-sm"
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="11" cy="11" r="8" />
-                                <path d="m21 21-5.197-5.197-2.121-2.121-2.121-2.121 0-3.66 2.121-2.121 2.121 2.121 3.66 0 2.121 2.121 2.121 5.197" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
                 {/* Categories Section */}
                 {isLoading ? (
                     <div className="flex justify-center items-center py-12">
