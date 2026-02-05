@@ -22,11 +22,28 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
+      enum: ["user", "admin"],
       default: "user",
+    },
+
+    avatar: {
+      type: String,
+      default: "",
+    },
+
+    phoneNumber: {
+      type: String,
+      default: "",
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }
 );
+
 
 // hash password before save
 userSchema.pre("save", async function () {
