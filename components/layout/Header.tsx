@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { CartDrawer } from './CartDrawer'
+import { CatalogDrawer } from './CatalogDrawer'
 
 interface Collection {
   id: number
@@ -44,6 +45,7 @@ export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCatalogHovered, setIsCatalogHovered] = useState(false)
+  const [isCatalogDrawerOpen, setIsCatalogDrawerOpen] = useState(false)
   const [collections, setCollections] = useState<Collection[]>([])
   const pathname = usePathname()
   const { user, logout } = useAuth()
@@ -83,40 +85,23 @@ export function Header() {
             <div
               key={item.name}
               className="relative group"
-              onMouseEnter={() => item.hasDropdown && setIsCatalogHovered(true)}
-              onMouseLeave={() => item.hasDropdown && setIsCatalogHovered(false)}
+              onMouseEnter={() => item.hasDropdown && setIsCatalogDrawerOpen(true)}
+              onMouseLeave={() => item.hasDropdown && setIsCatalogDrawerOpen(false)}
             >
               <Link
-                href={item.href}
-                className={`flex items-center gap-1 text-[13px] font-bold uppercase tracking-[0.2em] transition-colors ${textColor} hover:opacity-70`}
+                key={item.name}
+                href={item.hasDropdown ? '#' : item.href}
+                onClick={item.hasDropdown ? (e) => {
+                  e.preventDefault()
+                  setIsCatalogDrawerOpen(true)
+                } : undefined}
+                className={`text-sm font-medium transition-colors flex items-center gap-1 ${
+                  pathname === item.href ? 'text-white' : 'text-gray-300'
+                }`}
               >
                 {item.name}
-                {item.hasDropdown && <ChevronDown size={12} className={`mt-[2px] opacity-70 transition-transform ${isCatalogHovered ? 'rotate-180' : ''}`} />}
+                {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
               </Link>
-
-              {/* Catalog Collections Dropdown */}
-              {item.hasDropdown && isCatalogHovered && collections.length > 0 && (
-                <div className="absolute left-0 top-full pt-2 opacity-100 visible transition-opacity">
-                  <div className="bg-white shadow-lg border border-gray-200 rounded-sm py-2 min-w-[200px]">
-                    {collections.map((collection) => (
-                      <Link
-                        key={collection.id}
-                        href={`/catalog?collection=${collection.name}`}
-                        className="block px-4 py-3 text-sm font-medium text-black hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-                      >
-                        <div className="flex justify-between items-center">
-                          <span>{collection.name}</span>
-                          {collection.productCount && (
-                            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
-                              {collection.productCount}
-                            </span>
-                          )}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -142,18 +127,20 @@ export function Header() {
 
         {/* Right Navigation & Actions */}
         <div className="flex items-center justify-end gap-4 md:gap-8">
-          {/* Desktop Links (Right half) */}
-          <div className="hidden lg:flex items-center gap-8">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
             {navigation.slice(2).map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`text-[13px] font-bold uppercase tracking-[0.2em] transition-colors ${textColor} hover:opacity-70`}
+                className={`text-sm font-medium transition-colors hover:text-white ${
+                  pathname === item.href ? 'text-white' : 'text-gray-300'
+                }`}
               >
                 {item.name}
               </Link>
             ))}
-          </div>
+          </nav>
 
           {/* Action Icons */}
           <div className={`flex items-center gap-3 md:gap-6 transition-colors ${textColor}`}>
@@ -285,6 +272,7 @@ export function Header() {
       )}
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CatalogDrawer isOpen={isCatalogDrawerOpen} onClose={() => setIsCatalogDrawerOpen(false)} />
     </header>
   )
 }

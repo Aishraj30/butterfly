@@ -1,6 +1,6 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
-import { Geist, Playfair_Display } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ChatBot } from '@/components/chat/ChatBot'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -12,8 +12,7 @@ import { Header } from "@/components/layout/Header"
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter"
 import { LoadingProvider } from "@/components/LoadingProvider"
 
-const geist = Geist({ subsets: ["latin"], variable: '--font-sans' })
-const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-serif' })
+const inter = Inter({ subsets: ["latin"], variable: '--font-sans' })
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -50,9 +49,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${playfair.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className={`font-sans antialiased bg-background text-foreground`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AuthProvider>
             <LoadingProvider>
               <SmoothScroll />

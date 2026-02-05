@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "models/User.js", "app/api/auth/login/route.js", "lib/db.js", "lib/jwt.js"  ],
   "exclude": [
     "node_modules"
   ]

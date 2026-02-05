@@ -12,16 +12,16 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-[#E5D3B3] text-white pt-20 pb-10">
+    <footer className="bg-black text-white pt-20 pb-10">
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-white/20 pb-16">
           {/* Brand */}
           <div className="space-y-6">
-            <h2 className="font-serif text-4xl font-medium tracking-wide text-white">MODEVA</h2>
+            <h2 className="text-4xl font-medium tracking-wide text-white">BUTTERFLY</h2>
             <div className="space-y-1 text-sm text-white/80">
               <p>Address: 123 Fashion Street, Paris</p>
               <p>Phone: +1 234 567 890</p>
-              <p>Email: info@modeva.com</p>
+              <p>Email: info@butterflycouture.com</p>
             </div>
           </div>
 
@@ -69,7 +69,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 text-center text-sm text-white/60">
-          © 2024 MODEVA. All Rights Reserved.
+          © 2024 Butterfly Couture. All Rights Reserved.
         </div>
       </div>
     </footer>

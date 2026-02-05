@@ -89,7 +89,7 @@ export function HeroBanner({
           {subtitle}
         </p>
         {buttonText && buttonLink && (
-          <Button asChild className="rounded-full px-8 py-3 text-lg bg-white text-black hover:bg-gray-100">
+          <Button asChild className="rounded-md px-8 py-6 text-lg bg-white text-black hover:bg-gray-100">
             <Link href={buttonLink}>{buttonText}</Link>
           </Button>
         )}

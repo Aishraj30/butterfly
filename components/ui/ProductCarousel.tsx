@@ -41,7 +41,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
   }
 
   return (
-    <section className="w-full py-16 md:py-24 text-black min-h-screen" style={{ backgroundColor: '#F7E7CE' }}>
+    <section className="w-full py-16 md:py-24 text-black min-h-screen bg-white">
       <div className="w-full px-4 md:px-8 lg:px-12">
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">{title}</h2>
