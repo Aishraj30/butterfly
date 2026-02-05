@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
-import User from "@/models/User";
-import { generateToken } from "@/lib/jwt";
+import connectDB from "../lib/db.js";
+import User from "../models/User.js";
+import { generateToken } from "../lib/jwt.js";
 import { z } from "zod";
-import { authHooks } from "@/hooks/authHooks";
+import { authHooks } from "../hooks/authHooks.js";
+
 
 /* =========================
    Validation Schemas
