@@ -84,6 +84,7 @@ export default async function Home() {
                   price: `₹${p.price.toLocaleString()}`,
                   image: p.images?.[0] || "/uploads/product-1769084011566.jpeg"
                 }))}
+                shopAllLink={`/catalog?collection=${encodeURIComponent(col.name)}`}
               />
             )}
           </div>

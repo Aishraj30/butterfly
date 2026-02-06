@@ -58,7 +58,7 @@ export function Header() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setCollections(data.data)
+          setCollections(data.collections || [])
         }
       })
       .catch(error => console.error('Failed to fetch collections:', error))
@@ -184,8 +184,8 @@ export function Header() {
                   </div>
                 </div>
               ) : null}
-              
-              <button 
+
+              <button
                 onClick={() => setIsSearchOpen(true)}
                 className="hover:opacity-70 transition-opacity flex items-center"
               >
