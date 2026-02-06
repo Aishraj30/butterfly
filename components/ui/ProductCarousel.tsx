@@ -90,12 +90,12 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
                 <Link href={`/product/${product.id}`} className="block">
                   <div className="relative overflow-hidden rounded-lg bg-gray-900 cursor-pointer">
                     {/* Product Image */}
-                    <div className="relative aspect-[4/5] overflow-hidden">
+                    <div className="relative aspect-[3/4] overflow-hidden">
                       <Image
                         src={product.image}
                         alt={product.name}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="object-cover object-top transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>
                   </div>

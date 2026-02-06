@@ -73,6 +73,22 @@ const productSchema = new mongoose.Schema(
       default: true,
     },
 
+    stock: {
+      type: Number,
+      default: 0,
+    },
+
+    description: { type: String },
+    fabricComposition: { type: String }, // "100% Polyester/Cosmic Sequin"
+    fit: { type: String }, // "Fitted"
+    closure: { type: String }, // "Back Zipper"
+    sleeveType: { type: String }, // "Sleeveless"
+    washCare: { type: String }, // "Dry Clean Only..."
+    countryOfManufacture: { type: String }, // "India"
+    modelSize: { type: String }, // "XS"
+    modelHeight: { type: String }, // "5'9"
+    shippingTime: { type: String }, // "Within 10-12 Weeks..."
+
     isActive: {
       type: Boolean,
       default: true,
@@ -81,5 +97,9 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Product ||
-  mongoose.model("Product", productSchema);
+// Prevent Mongoose OverwriteModelError but allow schema updates in development
+if (process.env.NODE_ENV === "development") {
+  delete mongoose.models.Product;
+}
+
+export default mongoose.models.Product || mongoose.model("Product", productSchema);

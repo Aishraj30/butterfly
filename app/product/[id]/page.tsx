@@ -19,11 +19,28 @@ interface Product {
     reviews: number;
     image?: string;
     imageUrl?: string;
+    images?: string[];
     inStock: boolean;
     onSale?: boolean;
     salePrice?: number;
     isNew?: boolean;
     brand?: string;
+    sizes?: string[]; // Add sizes array
+    colors?: string[]; // Add colors array
+    reviewsCount?: number;
+    subCategory?: string;
+
+    // Detailed fields
+    description?: string;
+    fabricComposition?: string;
+    fit?: string;
+    closure?: string;
+    sleeveType?: string;
+    washCare?: string;
+    countryOfManufacture?: string;
+    modelSize?: string;
+    modelHeight?: string;
+    shippingTime?: string;
 }
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -31,7 +48,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const { id } = use(params);
     const { addToCart } = useCart();
     const { user } = useAuth();
-    
+
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
@@ -53,17 +70,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             console.log('[Client] Fetching product with id:', id);
             const response = await fetch(`/api/products/${id}`);
             const data = await response.json();
-            
+
             console.log('[Client] Response:', data);
-            
-            if (data.success && data.data) {
-                setProduct(data.data);
+
+            if (data.success && data.product) {
+                setProduct(data.product);
                 // Set default size
-                if (data.data.size && data.data.size.length > 0) {
-                    setSelectedSize(data.data.size[0]);
+                const availableSizes = data.product.sizes || data.product.size || [];
+                if (availableSizes && availableSizes.length > 0) {
+                    setSelectedSize(availableSizes[0]);
                 }
             } else {
-                console.error('API Error:', data.error);
+                console.error('API Error:', data.message || data.error);
             }
         } catch (error) {
             console.error('Failed to fetch product:', error);
@@ -85,11 +103,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             setCartError('Please select a size');
             return;
         }
-        
+
         try {
             setAddingToCart(true);
             setCartError(null);
-            
+
             await addToCart(
                 String(product.id),
                 quantity,
@@ -97,9 +115,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 product.color,
                 product.name,
                 product.price,
-                product.imageUrl || product.image
+                product.images?.[0] || product.imageUrl || product.image
             );
-            
+
             // Show success message
             alert(`${product.name} added to cart!`);
             setAddingToCart(false);
@@ -140,9 +158,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         );
     }
 
-    const discountPercent = product.onSale && product.salePrice 
+    const discountPercent = product.onSale && product.salePrice
         ? Math.round(((product.price - product.salePrice) / product.price) * 100)
         : 0;
+
+    const displayImage = product.images?.[0] || product.imageUrl || product.image;
+
+    // Helper for display
+    const displayColors = product.colors && product.colors.length > 0
+        ? product.colors.join(', ')
+        : product.color || 'N/A';
+
+    const reviewCount = product.reviewsCount !== undefined ? product.reviewsCount : (product.reviews || 0);
 
     return (
         <main className="pt-10 pb-20 w-full bg-white min-h-screen">
@@ -160,12 +187,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
                     {/* Left: Image */}
                     <div className="space-y-4">
-                        <div className="relative aspect-square bg-gray-100 overflow-hidden rounded-lg">
-                            <div
-                                className={`w-full h-full ${
-                                    product.imageUrl || 'bg-gradient-to-br from-purple-100 to-pink-100'
-                                } flex items-center justify-center`}
-                            >
+                        <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden rounded-lg">
+                            <div className="w-full h-full relative flex items-center justify-center bg-gray-50">
+                                {displayImage ? (
+                                    <img
+                                        src={displayImage}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover object-top"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
+                                )}
+
                                 {/* Badge */}
                                 {(product.isNew || product.onSale) && (
                                     <div className="absolute top-4 left-4 z-10">
@@ -181,9 +214,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         )}
                                     </div>
                                 )}
-                                
+
                                 {/* Rating Badge */}
-                                <div className="absolute top-4 right-4 bg-yellow-400 text-xs font-bold px-3 py-1 flex items-center gap-1 rounded-sm">
+                                <div className="absolute top-4 right-4 bg-yellow-400 text-xs font-bold px-3 py-1 flex items-center gap-1 rounded-sm shadow-sm z-10">
                                     <Star size={12} fill="currentColor" /> {product.rating}
                                 </div>
                             </div>
@@ -207,14 +240,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 <h1 className="font-serif text-4xl text-black mb-4">{product.name}</h1>
                             </div>
                             <div className="relative">
-                                <button 
+                                <button
                                     onClick={toggleWishlist}
                                     className="p-3 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
                                     title={!user ? "Login to add to wishlist" : "Add to wishlist"}
                                 >
-                                    <Heart 
-                                        size={20} 
-                                        className={isInWishlist ? "text-red-500 fill-red-500" : "text-gray-400 hover:text-red-500"} 
+                                    <Heart
+                                        size={20}
+                                        className={isInWishlist ? "text-red-500 fill-red-500" : "text-gray-400 hover:text-red-500"}
                                     />
                                 </button>
                                 {!user && (
@@ -236,7 +269,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                     </>
                                 )}
                             </div>
-                            
+
                             {/* Stock Status */}
                             <div className="flex items-center gap-2">
                                 <span className={`text-sm font-medium ${product.inStock ? 'text-green-600' : 'text-red-600'}`}>
@@ -260,19 +293,48 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 </div>
                             </div>
                             <span className="text-sm text-gray-600">
-                                ({product.reviews} reviews)
+                                ({product.reviewsCount !== undefined ? product.reviewsCount : (product.reviews || 0)} reviews)
                             </span>
                         </div>
 
-                        {/* Product Details */}
-                        <div className="space-y-4 text-sm text-gray-600">
-                            <div>
-                                <h3 className="font-semibold text-black mb-2">Product Details</h3>
-                                <ul className="space-y-1 text-sm">
-                                    <li><strong>Category:</strong> {product.category}</li>
-                                    <li><strong>Color:</strong> {product.color}</li>
-                                    <li><strong>Gender:</strong> {product.gender || 'Unisex'}</li>
+                        {/* Description & Model Info */}
+                        <div className="space-y-4 text-gray-600">
+                            {product.description && (
+                                <p className="text-sm leading-relaxed">{product.description}</p>
+                            )}
+
+                            {(product.modelSize || product.modelHeight) && (
+                                <ul className="text-sm list-disc pl-4 space-y-1">
+                                    {product.modelSize && <li>Model wears a size: {product.modelSize}</li>}
+                                    {product.modelHeight && <li>Model Height: {product.modelHeight}</li>}
                                 </ul>
+                            )}
+                        </div>
+
+                        {/* Shipping Info */}
+                        {product.shippingTime && (
+                            <div className="text-sm border-t border-b border-gray-100 py-3">
+                                <strong>Shipping Time: </strong> {product.shippingTime}
+                            </div>
+                        )}
+
+
+                        {/* Product Specifications Layout */}
+                        <div className="space-y-4">
+                            <h3 className="font-semibold text-black border-b border-black inline-block pb-1 mb-2">Product Specifications</h3>
+
+                            <div className="text-sm space-y-2 text-gray-700">
+                                <p><strong>Color:</strong> {displayColors}</p>
+                                {product.fabricComposition && <p><strong>Fabric Composition:</strong> {product.fabricComposition}</p>}
+                                {product.fit && <p><strong>Fit:</strong> {product.fit}</p>}
+                                {product.closure && <p><strong>Closure:</strong> {product.closure}</p>}
+                                {product.sleeveType && <p><strong>Sleeve Type:</strong> {product.sleeveType}</p>}
+                                {product.washCare && <p><strong>Wash Care:</strong> {product.washCare}</p>}
+                                {product.countryOfManufacture && <p><strong>Country of Manufacture:</strong> {product.countryOfManufacture}</p>}
+
+                                <p className="mt-4 text-xs text-gray-500 italic">
+                                    <strong>Disclaimer:</strong> The garment details including but not limited to specifications have been portrayed as accurately as possible. Each garment is carefully handcrafted by artisans, and hence the beauty and nature of the garment is that it is one of its kind.
+                                </p>
                             </div>
                         </div>
 
@@ -280,15 +342,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         <div>
                             <h3 className="font-semibold text-black mb-3">Available Sizes</h3>
                             <div className="flex flex-wrap gap-2">
-                                {product.size.map((size) => (
+                                {(product.sizes || product.size || []).map((size) => (
                                     <button
                                         key={size}
                                         onClick={() => setSelectedSize(size)}
-                                        className={`w-12 h-12 flex items-center justify-center border-2 text-sm font-medium transition-colors ${
-                                            selectedSize === size
-                                                ? 'bg-black text-white border-black'
-                                                : 'border-gray-300 text-black hover:border-black'
-                                        }`}
+                                        className={`min-w-[3rem] h-12 px-2 flex items-center justify-center border-2 text-sm font-medium transition-colors ${selectedSize === size
+                                            ? 'bg-black text-white border-black'
+                                            : 'border-gray-300 text-black hover:border-black'
+                                            }`}
                                     >
                                         {size}
                                     </button>
@@ -307,7 +368,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 <h3 className="font-semibold text-black mb-3">Quantity</h3>
                                 <div className="flex gap-4">
                                     <div className="flex items-center border-2 border-gray-300 rounded w-32 justify-between px-4 py-3">
-                                        <button 
+                                        <button
                                             onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                             className="p-1 hover:text-black transition-colors"
                                             disabled={addingToCart}
@@ -315,7 +376,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                             <Minus size={16} />
                                         </button>
                                         <span className="font-semibold">{quantity}</span>
-                                        <button 
+                                        <button
                                             onClick={() => setQuantity(quantity + 1)}
                                             className="p-1 hover:text-black transition-colors"
                                             disabled={addingToCart}
@@ -324,12 +385,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         </button>
                                     </div>
 
-                                    <button 
+                                    <button
                                         onClick={handleAddToCart}
                                         disabled={!product.inStock || addingToCart}
                                         className="flex-1 bg-black text-white font-bold uppercase flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed rounded"
                                     >
-                                        {addingToCart ? 'Adding...' : 'ADD TO CART'} 
+                                        {addingToCart ? 'Adding...' : 'ADD TO CART'}
                                         {!addingToCart && <ShoppingCart size={20} />}
                                     </button>
                                 </div>
@@ -361,7 +422,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         )}
 
                         {/* Back to Catalog */}
-                        <Link 
+                        <Link
                             href="/catalog"
                             className="inline-block text-center w-full py-3 border-2 border-black text-black hover:bg-gray-100 transition-colors rounded font-medium"
                         >

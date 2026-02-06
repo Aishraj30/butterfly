@@ -74,8 +74,8 @@ export function HeroBanner({
               fill
               priority
               unoptimized
-              className="object-cover w-full h-full"
-              style={{ objectPosition: 'center center' }}
+              className="object-cover object-top w-full h-full"
+              style={{ objectPosition: 'top center' }}
             />
             {/* Darker overlay to ensure text visibility */}
             <div className="absolute inset-0 bg-black/30" />
