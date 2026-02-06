@@ -23,11 +23,11 @@ export function Footer() {
   ]
 
   return (
-    <footer className="bg-black text-white pt-24 pb-12 border-t border-white/5 font-sans">
+    <footer className="bg-black text-white pt-16 pb-8 border-t border-white/5 font-sans">
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         
         {/* Top Section: Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
           
           {/* Left Column: Brand Statement */}
           <div className="lg:col-span-5 flex flex-col justify-between">
@@ -98,7 +98,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Section: Copyright & Payments */}
-        <div className="flex flex-col-reverse md:flex-row justify-between items-start md:items-end gap-8 pt-8 border-t border-white/10">
+        <div className="flex flex-col-reverse md:flex-row justify-between items-start md:items-end gap-8 pt-6 border-t border-white/10">
           
           <div className="space-y-4 text-xs text-gray-500">
             <p className="uppercase tracking-wider text-white mb-2">USD / EN</p>
