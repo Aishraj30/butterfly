@@ -42,10 +42,9 @@ export function HeroBanner({
     const ctx = gsap.context(() => {
       gsap.fromTo(
         textRef.current,
-        { y: 0, autoAlpha: 1 },
+        { y: 0 },
         {
           y: 500,
-          autoAlpha: 0,
           ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,

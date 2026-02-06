@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const submission = createContactSubmission({
+    const submission = await createContactSubmission({
       name,
       email,
       subject,
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
   try {
     // In a real app, this would require authentication
     // For demo purposes, we'll return all submissions
-    const submissions = getContactSubmissions()
+    const submissions = await getContactSubmissions()
 
     return NextResponse.json({
       success: true,

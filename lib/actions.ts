@@ -9,7 +9,7 @@ export async function submitContactForm(formData: {
   message: string
 }) {
   try {
-    const submission = createContactSubmission({
+    const submission = await createContactSubmission({
       name: formData.name,
       email: formData.email,
       subject: formData.subject,
@@ -64,22 +64,22 @@ export async function submitCheckoutForm(formData: {
     // Prepare billing address
     const billingAddress = formData.sameAsShipping
       ? {
-          address: formData.shippingAddress,
-          city: formData.shippingCity,
-          state: formData.shippingState,
-          zipCode: formData.shippingZip,
-          country: formData.shippingCountry,
-        }
+        address: formData.shippingAddress,
+        city: formData.shippingCity,
+        state: formData.shippingState,
+        zipCode: formData.shippingZip,
+        country: formData.shippingCountry,
+      }
       : {
-          address: formData.billingAddress,
-          city: formData.billingCity,
-          state: formData.billingState,
-          zipCode: formData.billingZip,
-          country: formData.billingCountry,
-        }
+        address: formData.billingAddress,
+        city: formData.billingCity,
+        state: formData.billingState,
+        zipCode: formData.billingZip,
+        country: formData.billingCountry,
+      }
 
     // Create order
-    const order = createOrder({
+    const order = await createOrder({
       items: formData.cartItems,
       total: formData.total,
       customer: {
@@ -125,7 +125,7 @@ export async function subscribeToNewsletter(email: string) {
 
     // In a real app, this would save to a newsletter database
     // For now, we'll create a contact submission
-    createContactSubmission({
+    await createContactSubmission({
       name: 'Newsletter Subscriber',
       email,
       subject: 'Newsletter Signup',

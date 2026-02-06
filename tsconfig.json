@@ -33,8 +33,16 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
-, "models/User.js", "app/api/auth/login/route.js", "lib/db.js", "lib/jwt.js", "app/api/products/route.js", "app/api/products/[id]/route.js", "app/api/collections/[id]/route.js", "app/api/collections/route.js"  ],
+    ".next/dev/types/**/*.ts",
+    "models/User.js",
+    "app/api/auth/login/route.js",
+    "lib/db.js",
+    "lib/jwt.js",
+    "app/api/products/route.js",
+    "app/api/products/[id]/route.js",
+    "app/api/collections/[id]/route.js",
+    "app/api/collections/route.js"
+  ],
   "exclude": [
     "node_modules"
   ]

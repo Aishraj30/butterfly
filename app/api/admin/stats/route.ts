@@ -4,7 +4,7 @@ import { products } from '@/lib/products'
 
 export async function GET() {
     try {
-        const orders = getAllOrders()
+        const orders = await getAllOrders()
         const totalOrders = orders.length
 
         // Calculate total revenue
