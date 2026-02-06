@@ -187,7 +187,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
                     {/* Left: Image */}
                     <div className="space-y-4">
-                        <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden rounded-lg">
+                        <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden rounded-lg max-w-[480px] max-h-[600px]">
                             <div className="w-full h-full relative flex items-center justify-center bg-gray-50">
                                 {displayImage ? (
                                     <img
@@ -311,33 +311,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             )}
                         </div>
 
-                        {/* Shipping Info */}
-                        {product.shippingTime && (
-                            <div className="text-sm border-t border-b border-gray-100 py-3">
-                                <strong>Shipping Time: </strong> {product.shippingTime}
-                            </div>
-                        )}
+                        
 
-
-                        {/* Product Specifications Layout */}
-                        <div className="space-y-4">
-                            <h3 className="font-semibold text-black border-b border-black inline-block pb-1 mb-2">Product Specifications</h3>
-
-                            <div className="text-sm space-y-2 text-gray-700">
-                                <p><strong>Color:</strong> {displayColors}</p>
-                                {product.fabricComposition && <p><strong>Fabric Composition:</strong> {product.fabricComposition}</p>}
-                                {product.fit && <p><strong>Fit:</strong> {product.fit}</p>}
-                                {product.closure && <p><strong>Closure:</strong> {product.closure}</p>}
-                                {product.sleeveType && <p><strong>Sleeve Type:</strong> {product.sleeveType}</p>}
-                                {product.washCare && <p><strong>Wash Care:</strong> {product.washCare}</p>}
-                                {product.countryOfManufacture && <p><strong>Country of Manufacture:</strong> {product.countryOfManufacture}</p>}
-
-                                <p className="mt-4 text-xs text-gray-500 italic">
-                                    <strong>Disclaimer:</strong> The garment details including but not limited to specifications have been portrayed as accurately as possible. Each garment is carefully handcrafted by artisans, and hence the beauty and nature of the garment is that it is one of its kind.
-                                </p>
-                            </div>
-                        </div>
-
+                        
                         {/* Size Selector */}
                         <div>
                             <h3 className="font-semibold text-black mb-3">Available Sizes</h3>
@@ -421,14 +397,43 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             </div>
                         )}
 
-                        {/* Back to Catalog */}
-                        <Link
-                            href="/catalog"
-                            className="inline-block text-center w-full py-3 border-2 border-black text-black hover:bg-gray-100 transition-colors rounded font-medium"
-                        >
-                            Continue Shopping
-                        </Link>
-                    </div>
+                        {/* Shipping Info */}
+                        {product.shippingTime && (
+                            <div className="text-sm border-t border-b border-gray-100 py-3 mt-6">
+                                <strong>Shipping Time: </strong> {product.shippingTime}
+                            </div>
+                        )}
+
+                        {/* Product Specifications Layout */}
+                        <div className="space-y-4 mt-6">
+                            <h3 className="font-semibold text-black border-b border-black inline-block pb-1 mb-2">Product Specifications</h3>
+
+                            <div className="text-sm space-y-2 text-gray-700">
+                                <p><strong>Color:</strong> {displayColors}</p>
+                                <p><strong>Fabric Composition:</strong> {product.fabricComposition || 'N/A'}</p>
+                                <p><strong>Fit:</strong> {product.fit || 'N/A'}</p>
+                                <p><strong>Closure:</strong> {product.closure || 'N/A'}</p>
+                                <p><strong>Sleeve Type:</strong> {product.sleeveType || 'N/A'}</p>
+                                <p><strong>Wash Care:</strong> {product.washCare || 'N/A'}</p>
+                                <p><strong>Country of Manufacture:</strong> {product.countryOfManufacture || 'N/A'}</p>
+
+                                <p className="mt-4 text-xs text-gray-500 italic">
+                                    <strong>Disclaimer:</strong> The garment details including but not limited to specifications have been portrayed as accurately as possible. Each garment is carefully handcrafted by artisans, and hence the beauty and nature of the garment is that it is one of its kind.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Description & Model Info */}
+                        <div className="space-y-4 text-gray-600 mt-6">
+                            <p className="text-sm leading-relaxed">{product.description || 'No description available for this product.'}</p>
+
+                            <ul className="text-sm list-disc pl-4 space-y-1">
+                                <li>Model wears a size: {product.modelSize || 'N/A'}</li>
+                                <li>Model Height: {product.modelHeight || 'N/A'}</li>
+                            </ul>
+                        </div>
+
+                                            </div>
                 </div>
             </div>
         </main>

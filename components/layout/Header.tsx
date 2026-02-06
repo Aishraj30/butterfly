@@ -91,8 +91,8 @@ export function Header() {
   const logoColor = isHome && !isCatalog ? 'text-white' : 'text-black'
 
   return (
-    <header className={`relative w-full z-50 transition-all duration-300 ${headerBg} py-8`}>
-      <nav className="max-w-[1400px] mx-auto px-2 py-1 grid grid-cols-3 items-center">
+    <header className={`relative w-full z-50 transition-all duration-300 ${headerBg} py-6`}>
+      <nav className="max-w-[1400px] mx-auto px-2 py-0.5 grid grid-cols-3 items-center">
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
           {navigation.slice(0, 2).map((item) => (

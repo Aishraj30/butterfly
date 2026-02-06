@@ -42,13 +42,13 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
   }
 
   return (
-    <section className="w-full pt-4 md:pt-2 pb-4 md:pb-2 text-black bg-white">
-      <div className="w-full">
+    <section className="w-full pt-4 md:pt-2 pb-1 md:pb-1 text-black bg-white min-h-[95vh]">
+      <div className="w-full h-full">
         {/* Carousel Container */}
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden h-full">
           <div
             ref={carouselRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pl-0.5 md:pl-1 lg:pl-1.5"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pl-0.5 md:pl-1 lg:pl-1.5"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -56,11 +56,11 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
             }}
           >
             {products.map((product) => (
-              <div key={product.id} className="flex-none w-64 md:w-80 lg:w-96 xl:w-[28rem] group">
-                <Link href={`/product/${product.id}`} className="block">
-                  <div className="relative overflow-hidden rounded-lg bg-gray-900 cursor-pointer">
+              <div key={product.id} className="flex-none w-[calc(25%-16px)] sm:w-[calc(25%-24px)] md:w-[calc(25%-32px)] lg:w-[calc(25%-36px)] group h-full">
+                <Link href={`/product/${product.id}`} className="block h-full">
+                  <div className="relative overflow-hidden rounded-lg bg-gray-900 cursor-pointer h-full">
                     {/* Product Image */}
-                    <div className="relative aspect-[2/3] overflow-hidden">
+                    <div className="relative h-[92vh] overflow-hidden">
                       <Image
                         src={product.image}
                         alt={product.name}
@@ -69,9 +69,9 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
                       />
 
                       {/* Product Info Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                        <h3 className="font-normal text-white text-sm md:text-base mb-1">{product.name}</h3>
-                        <p className="font-normal text-white text-base md:text-lg">{product.price}</p>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent p-4">
+                        <h3 className="font-normal text-white/90 text-xs md:text-sm mb-1 tracking-wide">{product.name}</h3>
+                        <p className="font-normal text-white/90 text-sm md:text-base tracking-wide">{product.price}</p>
                       </div>
                     </div>
                   </div>
