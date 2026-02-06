@@ -48,7 +48,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
         <div className="relative overflow-hidden h-full">
           <div
             ref={carouselRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pl-0.5 md:pl-1 lg:pl-1.5"
+            className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pl-0.5 md:pl-1 lg:pl-1.5"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -56,7 +56,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
             }}
           >
             {products.map((product) => (
-              <div key={product.id} className="flex-none w-[calc(25%-16px)] sm:w-[calc(25%-24px)] md:w-[calc(25%-32px)] lg:w-[calc(25%-36px)] group h-full">
+              <div key={product.id} className="flex-none w-[calc(25%-12px)] sm:w-[calc(25%-18px)] md:w-[calc(25%-24px)] lg:w-[calc(25%-27px)] group h-full">
                 <Link href={`/product/${product.id}`} className="block h-full">
                   <div className="relative overflow-hidden rounded-lg bg-gray-900 cursor-pointer h-full">
                     {/* Product Image */}
