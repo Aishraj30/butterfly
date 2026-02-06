@@ -112,7 +112,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                             <div className="border-t my-4"></div>
 
                             {/* Collections with Dropdowns */}
-                            {collections.map((collection) => (
+                            {collections && collections.length > 0 ? collections.map((collection) => (
                                 <div key={collection.id} className="border-b border-gray-100 last:border-b-0">
                                     <button
                                         onClick={() => toggleExpanded(collection.id)}
@@ -152,7 +152,11 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <div className="text-center py-8 text-gray-500">
+                                    <p>No collections available</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* All Products Link */}

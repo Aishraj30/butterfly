@@ -38,8 +38,6 @@ interface Collection {
 const navigation = [
   { name: 'Catalog', href: '/catalog', hasDropdown: true },
   { name: 'Featured', href: '/featured', hasDropdown: true },
-  { name: 'New Arrival', href: '/new-arrival' },
-  { name: 'About', href: '/about' },
 ]
 
 export function Header() {
@@ -109,21 +107,12 @@ export function Header() {
                   setIsFeaturedDrawerOpen(true)
                 }
               } : undefined}
-              className={`text-sm font-medium transition-colors flex items-center gap-1 ${
-                pathname === item.href ? textColor : (isHome && !isCatalog ? 'text-white/90' : 'text-gray-900')
-              }`}
+              className={`text-sm font-semibold transition-all flex items-center gap-1 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'
+                } hover:text-white`}
             >
               {item.name}
               {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
             </Link>
-                } : undefined}
-                className={`text-sm font-semibold transition-all flex items-center gap-1 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'
-                  } hover:text-white`}
-              >
-                {item.name}
-                {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
-              </Link>
-            </div>
           ))}
         </div>
 
@@ -160,10 +149,6 @@ export function Header() {
                     setIsFeaturedDrawerOpen(true)
                   }
                 } : undefined}
-                className={`text-sm font-medium transition-colors hover:${isHome && !isCatalog ? 'text-white' : 'text-black'} ${
-                  pathname === item.href ? textColor : (isHome && !isCatalog ? 'text-white/90' : 'text-gray-900')
-                }`}
-                href={item.href}
                 className={`text-sm font-semibold transition-all hover:opacity-100 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'
                   } hover:text-white`}
               >
@@ -207,9 +192,11 @@ export function Header() {
                 <Search size={20} strokeWidth={1.5} />
               </button>
             </div>
-            <Link href="/wishlist" className="hover:opacity-70 transition-opacity hidden sm:flex items-center">
-              <Heart size={20} strokeWidth={1.5} />
-            </Link>
+            {user && (
+              <Link href="/wishlist" className="hover:opacity-70 transition-opacity hidden sm:flex items-center">
+                <Heart size={20} strokeWidth={1.5} />
+              </Link>
+            )}
 
             {/* Auth/Account */}
             <DropdownMenu>
