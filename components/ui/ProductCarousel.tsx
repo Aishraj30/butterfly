@@ -42,43 +42,13 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
   }
 
   return (
-    <section className="w-full py-8 md:py-12 text-black min-h-screen bg-white">
-      <div className="w-full px-4 md:px-8 lg:px-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">{title}</h2>
-          <div className="flex items-center gap-4">
-            {shopAllLink && (
-              <Link
-                href={shopAllLink}
-                className="text-sm font-semibold tracking-wider hover:underline underline-offset-4 hidden md:block"
-              >
-                SHOP ALL
-              </Link>
-            )}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => scroll('left')}
-                className="p-3 rounded-full bg-white hover:bg-gray-100 transition-colors border border-gray-300 shadow-sm"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                onClick={() => scroll('right')}
-                className="p-3 rounded-full bg-white hover:bg-gray-100 transition-colors border border-gray-300 shadow-sm"
-                aria-label="Scroll right"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </div>
-          </div>
-        </div>
-
+    <section className="w-full pt-4 md:pt-2 pb-4 md:pb-2 text-black bg-white">
+      <div className="w-full">
         {/* Carousel Container */}
         <div className="relative overflow-hidden">
           <div
             ref={carouselRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+            className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pl-0.5 md:pl-1 lg:pl-1.5"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -86,24 +56,24 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
             }}
           >
             {products.map((product) => (
-              <div key={product.id} className="flex-none w-64 md:w-80 lg:w-96 group">
+              <div key={product.id} className="flex-none w-48 md:w-64 lg:w-80 group">
                 <Link href={`/product/${product.id}`} className="block">
                   <div className="relative overflow-hidden rounded-lg bg-gray-900 cursor-pointer">
                     {/* Product Image */}
-                    <div className="relative aspect-[4/5] overflow-hidden">
+                    <div className="relative aspect-[12/20] overflow-hidden">
                       <Image
                         src={product.image}
                         alt={product.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                       />
+                      
+                      {/* Product Info Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                        <h3 className="font-normal text-white text-xs md:text-sm mb-1">{product.name}</h3>
+                        <p className="font-normal text-white text-sm md:text-base">{product.price}</p>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="mt-6 text-center">
-                    <h3 className="font-semibold text-base md:text-lg mb-2">{product.name}</h3>
-                    <p className="font-bold text-lg md:text-xl">{product.price}</p>
                   </div>
                 </Link>
               </div>

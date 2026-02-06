@@ -93,19 +93,11 @@ export function HeroBanner({
           {subtitle}
         </p>
         {buttonText && buttonLink && (
-          <Button asChild className={`rounded-md px-8 py-6 text-lg ${backgroundImage ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#003300] text-white hover:bg-[#004400]'}`}>
+          <Button asChild className={`rounded-md px-8 py-6 text-lg underline ${backgroundImage ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#003300] text-white hover:bg-[#004400]'}`}>
             <Link href={buttonLink}>{buttonText}</Link>
           </Button>
         )}
       </div>
-
-      {/* Scroll Indicator */}
-      {showScrollIndicator && (
-        <div className={`absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 z-10 ${backgroundImage ? 'text-white/80' : 'text-[#003300]/80'}`}>
-          <span className="text-[10px] tracking-[0.2em] font-medium uppercase">Scroll Down</span>
-          <ChevronDown className="animate-bounce" size={20} strokeWidth={1} />
-        </div>
-      )}
     </section>
   )
 }
