@@ -58,6 +58,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [selectedSize, setSelectedSize] = useState('');
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [addingToCart, setAddingToCart] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
     const [showWishlistPrompt, setShowWishlistPrompt] = useState(false);
@@ -197,7 +198,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         ? Math.round(((product.price - product.salePrice) / product.price) * 100)
         : 0;
 
-    const displayImage = product.images?.[0] || product.imageUrl || product.image;
+    const allImages = product.images || [product.imageUrl, product.image].filter(Boolean);
+    const displayImage = allImages[selectedImageIndex] || product.images?.[0] || product.imageUrl || product.image;
 
     // Helper for display
     const displayColors = product.colors && product.colors.length > 0
@@ -221,35 +223,67 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 {/* Product Detail */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
                     {/* Left: Image */}
-                    <div className="space-y-4">
-                        <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden rounded-lg max-w-[480px] max-h-[600px]">
-                            <div className="w-full h-full relative flex items-center justify-center bg-gray-50">
-                                {displayImage ? (
-                                    <img
-                                        src={displayImage}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover object-top"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
-                                )}
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden rounded-lg max-w-[480px] max-h-[600px]">
+                                <div className="w-full h-full relative flex items-center justify-center bg-gray-50">
+                                    {displayImage ? (
+                                        <img
+                                            src={displayImage}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover object-top"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
+                                    )}
 
-                                {/* Badge */}
-                                {(product.isNew || product.onSale) && (
-                                    <div className="absolute top-4 left-4 z-10">
-                                        {product.isNew && (
-                                            <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2">
-                                                NEW
-                                            </div>
-                                        )}
-                                        {product.onSale && (
-                                            <div className="bg-red-600 text-white text-xs font-bold px-3 py-1">
-                                                SALE
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
+                                    {/* Badge */}
+                                    {(product.isNew || product.onSale) && (
+                                        <div className="absolute top-4 left-4 z-10">
+                                            {product.isNew && (
+                                                <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2">
+                                                    NEW
+                                                </div>
+                                            )}
+                                            {product.onSale && (
+                                                <div className="bg-red-600 text-white text-xs font-bold px-3 py-1">
+                                                    SALE
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+                        </div>
+                        
+                        {/* Thumbnail Gallery */}
+                        <div className="flex flex-col gap-4">
+                            {allImages.length > 1 ? (
+                                allImages.map((image, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setSelectedImageIndex(index)}
+                                        className={`w-40 h-46 border-2 rounded overflow-hidden transition-all ${
+                                            selectedImageIndex === index 
+                                                ? 'border-black opacity-100' 
+                                                : 'border-gray-300 opacity-70 hover:opacity-100 hover:border-gray-400'
+                                        }`}
+                                    >
+                                        <img
+                                            src={image}
+                                            alt={`${product.name} ${index + 1}`}
+                                            className="w-full h-full object-cover object-top"
+                                        />
+                                    </button>
+                                ))
+                            ) : (
+                                // Show grey placeholder blocks when no multiple photos
+                                <>
+                                    <div className="w-40 h-44 border-2 border-gray-300 rounded bg-gray-200"></div>
+                                    <div className="w-40 h-44 border-2 border-gray-300 rounded bg-gray-200"></div>
+                                    <div className="w-40 h-44 border-2 border-gray-300 rounded bg-gray-200"></div>
+                                </>
+                            )}
                         </div>
                     </div>
 
