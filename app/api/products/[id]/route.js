@@ -22,7 +22,18 @@ export async function GET(req, { params }) {
     );
   }
 
-  return NextResponse.json({ success: true, product });
+  // Transform MongoDB document to match frontend interface
+  const transformedProduct = {
+    ...product.toObject(),
+    id: product._id.toString(), // Convert ObjectId to string and assign to id
+    color: product.colors?.[0] || '', // Use first color for backward compatibility
+    size: product.sizes || [], // Map sizes field
+    reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
+    imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
+    image: product.imageGradient || '', // Map imageGradient to image
+  };
+
+  return NextResponse.json({ success: true, data: transformedProduct });
 }
 
 // UPDATE PRODUCT (ADMIN)
@@ -45,7 +56,25 @@ export async function PUT(req, { params }) {
     { new: true }
   );
 
-  return NextResponse.json({ success: true, product });
+  if (!product) {
+    return NextResponse.json(
+      { message: "Product not found" },
+      { status: 404 }
+    );
+  }
+
+  // Transform MongoDB document to match frontend interface
+  const transformedProduct = {
+    ...product.toObject(),
+    id: product._id.toString(), // Convert ObjectId to string and assign to id
+    color: product.colors?.[0] || '', // Use first color for backward compatibility
+    size: product.sizes || [], // Map sizes field
+    reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
+    imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
+    image: product.imageGradient || '', // Map imageGradient to image
+  };
+
+  return NextResponse.json({ success: true, data: transformedProduct });
 }
 
 // DELETE PRODUCT (ADMIN)

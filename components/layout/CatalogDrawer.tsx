@@ -9,31 +9,58 @@ interface CatalogDrawerProps {
     onClose: () => void
 }
 
-interface Collection {
-    id: number
+interface Product {
+    _id: string
     name: string
-    description?: string
-    categories?: string[]
-    productCount?: number
+    category: string
+    subCategory: string
+    gender: string
+    brand: string
+    price: number
+}
+
+interface CategoryData {
+    [category: string]: {
+        [subCategory: string]: Product[]
+    }
 }
 
 export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
     const backdropRef = useRef<HTMLDivElement>(null)
-    const [expandedItems, setExpandedItems] = useState<number[]>([])
-    const [collections, setCollections] = useState<Collection[]>([])
+    const [expandedItems, setExpandedItems] = useState<string[]>([])
+    const [products, setProducts] = useState<Product[]>([])
+    const [categories, setCategories] = useState<CategoryData>({})
 
-    // Fetch collections from backend
+    // Fetch products from backend
     useEffect(() => {
-        fetch('/api/collections')
+        fetch('/api/products')
             .then(res => res.json())
             .then(data => {
-                if (data.success) {
-                    setCollections(data.data)
+                if (data.success && data.products) {
+                    setProducts(data.products)
+                    organizeProductsByCategory(data.products)
                 }
             })
-            .catch(error => console.error('Failed to fetch collections:', error))
+            .catch(error => console.error('Failed to fetch products:', error))
     }, [])
+
+    // Organize products by category and subcategory
+    const organizeProductsByCategory = (products: Product[]) => {
+        const organized: CategoryData = {}
+        
+        products.forEach(product => {
+            if (!organized[product.category]) {
+                organized[product.category] = {}
+            }
+            if (!organized[product.category][product.subCategory]) {
+                organized[product.category][product.subCategory] = []
+            }
+            organized[product.category][product.subCategory].push(product)
+        })
+        
+        setCategories(organized)
+    }
 
     // Prevent body scroll when catalog drawer is open
     useEffect(() => {
@@ -48,11 +75,11 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
         }
     }, [isOpen])
 
-    const toggleExpanded = (id: number) => {
+    const toggleExpanded = (key: string) => {
         setExpandedItems(prev => 
-            prev.includes(id) 
-                ? prev.filter(item => item !== id)
-                : [...prev, id]
+            prev.includes(key) 
+                ? prev.filter(item => item !== key)
+                : [...prev, key]
         )
     }
 
@@ -111,52 +138,48 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
                             <div className="border-t my-4"></div>
 
-                            {/* Collections with Dropdowns */}
-                            {collections && collections.length > 0 ? collections.map((collection) => (
-                                <div key={collection.id} className="border-b border-gray-100 last:border-b-0">
+                            {/* Categories with Dropdowns */}
+                            {Object.keys(categories).length > 0 && Object.entries(categories).map(([category, subCategories]) => (
+                                <div key={category} className="border-b border-gray-100 last:border-b-0">
                                     <button
-                                        onClick={() => toggleExpanded(collection.id)}
+                                        onClick={() => toggleExpanded(category)}
                                         className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors group"
                                     >
-                                        <span className="font-medium text-black text-left">{collection.name}</span>
+                                        <span className="font-medium text-black text-left">{category}</span>
                                         <ChevronDown 
                                             size={16} 
                                             className={`text-gray-400 transition-transform duration-300 ${
-                                                expandedItems.includes(collection.id) ? 'rotate-180' : ''
+                                                expandedItems.includes(category) ? 'rotate-180' : ''
                                             }`} 
                                         />
                                     </button>
                                     
                                     {/* Dropdown Subcategories */}
                                     <div className={`overflow-hidden transition-all duration-300 ${
-                                        expandedItems.includes(collection.id) ? 'max-h-64' : 'max-h-0'
+                                        expandedItems.includes(category) ? 'max-h-96' : 'max-h-0'
                                     }`}>
                                         <div className="px-4 pb-4 space-y-2">
                                             <Link
-                                                href={`/catalog?collection=${encodeURIComponent(collection.name)}`}
+                                                href={`/catalog/${encodeURIComponent(category)}`}
                                                 onClick={onClose}
                                                 className="block py-2 px-4 text-sm font-medium text-black hover:bg-gray-50 rounded transition-colors"
                                             >
-                                                View All {collection.name}
+                                                View All {category}
                                             </Link>
-                                            {collection.categories && collection.categories.length > 0 && collection.categories.map((category) => (
+                                            {Object.keys(subCategories).map((subCategory) => (
                                                 <Link
-                                                    key={category}
-                                                    href={`/catalog/${encodeURIComponent(category)}`}
+                                                    key={subCategory}
+                                                    href={`/catalog/${encodeURIComponent(category)}/${encodeURIComponent(subCategory)}`}
                                                     onClick={onClose}
                                                     className="block py-2 px-4 text-sm text-gray-600 hover:text-black hover:bg-gray-50 rounded transition-colors pl-8"
                                                 >
-                                                    {category}
+                                                    {subCategory} ({subCategories[subCategory].length})
                                                 </Link>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
-                            )) : (
-                                <div className="text-center py-8 text-gray-500">
-                                    <p>No collections available</p>
-                                </div>
-                            )}
+                            ))}
                         </div>
 
                         {/* All Products Link */}

@@ -2,7 +2,7 @@
 // Mock product database - mutable for admin functionality
 export let products: Product[] = [
   {
-    id: 1,
+    id: '1',
     name: 'Silk Butterfly Gown',
     price: 1250,
     category: 'Evening Wear',
@@ -17,7 +17,7 @@ export let products: Product[] = [
     brand: 'Butterfly Couture',
   },
   {
-    id: 2,
+    id: '2',
     name: 'Crystal Embellished Dress',
     price: 980,
     category: 'Cocktail',
@@ -34,7 +34,7 @@ export let products: Product[] = [
     brand: 'Butterfly Couture',
   },
   {
-    id: 3,
+    id: '3',
     name: 'Ethereal Drape Jacket',
     price: 750,
     category: 'Jacket',
@@ -49,7 +49,7 @@ export let products: Product[] = [
     brand: 'Butterfly Couture',
   },
   {
-    id: 4,
+    id: '4',
     name: 'Luxe Structured Blazer',
     price: 890,
     category: 'Blazer',
@@ -64,7 +64,7 @@ export let products: Product[] = [
     brand: 'Butterfly Couture',
   },
   {
-    id: 5,
+    id: '5',
     name: 'Silk Charmeuse Blouse',
     price: 520,
     category: 'Blouse',
@@ -81,7 +81,7 @@ export let products: Product[] = [
     brand: 'Butterfly Couture',
   },
   {
-    id: 6,
+    id: '6',
     name: 'Premium Wool Coat',
     price: 1450,
     category: 'Coat',
@@ -98,22 +98,42 @@ export let products: Product[] = [
 ]
 
 export interface Product {
-  id: number
+  id: string // MongoDB ObjectId as string
   name: string
   price: number
   category: string
+  subCategory?: string
   brand?: string
   color: string
+  colors?: string[]
   gender?: 'Male' | 'Female' | 'Unisex'
   size: string[]
+  sizes?: string[]
   rating: number
   reviews: number
+  reviewsCount?: number
   image: string
+  imageGradient?: string
   imageUrl?: string
+  images?: string[]
   inStock: boolean
+  stock?: number
   onSale?: boolean
   salePrice?: number
   isNew?: boolean
+  description?: string
+  fabricComposition?: string
+  fit?: string
+  closure?: string
+  sleeveType?: string
+  washCare?: string
+  countryOfManufacture?: string
+  modelSize?: string
+  modelHeight?: string
+  shippingTime?: string
+  isActive?: boolean
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface FilterOptions {
@@ -187,22 +207,22 @@ export function filterAndSortProducts(
 }
 
 export function getProductById(id: number | string): Product | undefined {
-  const numId = typeof id === 'string' ? parseInt(id, 10) : id
-  return products.find((p) => p.id === numId)
+  const stringId = typeof id === 'string' ? id : id.toString()
+  return products.find((p) => p.id === stringId)
 }
 
 export function getProductsByCategory(category: string): Product[] {
   return products.filter((p) => p.category === category)
 }
 
-export function getRelatedProducts(productId: number, limit = 3): Product[] {
+export function getRelatedProducts(productId: number | string, limit = 3): Product[] {
   const product = getProductById(productId)
   if (!product) return []
 
   return products
     .filter(
       (p) =>
-        p.id !== productId &&
+        p.id !== productId.toString() &&
         (p.category === product.category || p.color === product.color)
     )
     .slice(0, limit)
@@ -224,7 +244,7 @@ export function getSaleProducts(): Product[] {
 export function addProduct(product: Omit<Product, 'id' | 'rating' | 'reviews'>): Product {
   const newProduct: Product = {
     ...product,
-    id: Math.max(...products.map(p => p.id), 0) + 1,
+    id: Date.now().toString(), // Use timestamp as string ID
     rating: 0,
     reviews: 0,
     brand: product.brand || 'Butterfly Couture', // Default brand
@@ -233,16 +253,18 @@ export function addProduct(product: Omit<Product, 'id' | 'rating' | 'reviews'>):
   return newProduct
 }
 
-export function updateProduct(id: number, updates: Partial<Product>): Product | undefined {
-  const index = products.findIndex(p => p.id === id)
+export function updateProduct(id: number | string, updates: Partial<Product>): Product | undefined {
+  const stringId = typeof id === 'string' ? id : id.toString()
+  const index = products.findIndex(p => p.id === stringId)
   if (index === -1) return undefined
 
   products[index] = { ...products[index], ...updates }
   return products[index]
 }
 
-export function deleteProduct(id: number): boolean {
-  const index = products.findIndex(p => p.id === id)
+export function deleteProduct(id: number | string): boolean {
+  const stringId = typeof id === 'string' ? id : id.toString()
+  const index = products.findIndex(p => p.id === stringId)
   if (index === -1) return false
 
   products.splice(index, 1)

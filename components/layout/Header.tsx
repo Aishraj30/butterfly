@@ -26,6 +26,7 @@ import {
 import { CartDrawer } from './CartDrawer'
 import { CatalogDrawer } from './CatalogDrawer'
 import { FeaturedDrawer } from './FeaturedDrawer'
+import { useCart } from '@/hooks/useCart'
 
 interface Collection {
   id: number
@@ -51,6 +52,7 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const pathname = usePathname()
   const { user, logout } = useAuth()
+  const { cart } = useCart()
 
   useEffect(() => {
     // Fetch collections
@@ -107,8 +109,7 @@ export function Header() {
                   setIsFeaturedDrawerOpen(true)
                 }
               } : undefined}
-              className={`text-sm font-semibold transition-all flex items-center gap-1 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'
-                } hover:text-white`}
+              className={`text-sm font-semibold transition-all flex items-center gap-1 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'}`}
             >
               {item.name}
               {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
@@ -149,8 +150,7 @@ export function Header() {
                     setIsFeaturedDrawerOpen(true)
                   }
                 } : undefined}
-                className={`text-sm font-semibold transition-all hover:opacity-100 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'
-                  } hover:text-white`}
+                className={`text-sm font-semibold transition-all hover:opacity-100 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'}`}
               >
                 {item.name}
               </Link>
@@ -187,13 +187,13 @@ export function Header() {
 
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="hover:opacity-70 transition-opacity flex items-center"
+                className="hover:opacity-70 transition-opacity flex items-center hover:cursor-pointer"
               >
                 <Search size={20} strokeWidth={1.5} />
               </button>
             </div>
             {user && (
-              <Link href="/wishlist" className="hover:opacity-70 transition-opacity hidden sm:flex items-center">
+              <Link href="/wishlist" className="hover:opacity-70 transition-opacity hidden sm:flex items-center hover:cursor-pointer">
                 <Heart size={20} strokeWidth={1.5} />
               </Link>
             )}
@@ -201,7 +201,7 @@ export function Header() {
             {/* Auth/Account */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="hover:opacity-70 transition-opacity flex items-center gap-1">
+                <button className="hover:opacity-70 transition-opacity flex items-center gap-1 hover:cursor-pointer">
                   <User size={20} strokeWidth={1.5} />
                 </button>
               </DropdownMenuTrigger>
@@ -250,6 +250,11 @@ export function Header() {
               aria-label="Open Cart"
             >
               <ShoppingBag size={20} strokeWidth={1.5} />
+              {cart?.items && cart.items.length > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 bg-black text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {cart.items.reduce((total, item) => total + item.quantity, 0)}
+                </span>
+              )}
             </button>
           </div>
         </div>

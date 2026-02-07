@@ -11,7 +11,20 @@ export function AnnouncementBar() {
     useEffect(() => {
         // Fetch collections to populate the announcement bar
         fetch('/api/collections')
-            .then(res => res.json())
+            .then(async (res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                const text = await res.text();
+                if (!text) {
+                    throw new Error('Empty response');
+                }
+                try {
+                    return JSON.parse(text);
+                } catch (parseError) {
+                    throw new Error(`Invalid JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+                }
+            })
             .then(data => {
                 if (data.success && data.collections && data.collections.length > 0) {
                     const collectionMessages = data.collections.map((c: any) => c.name.toUpperCase())

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ShoppingBag, Heart } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 
 const products = [
   {
@@ -37,6 +38,21 @@ const products = [
 
 export function FeaturedProducts() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+  const { user } = useAuth()
+
+  const handleWishlistClick = (e: React.MouseEvent, productId: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!user) {
+      setShowLoginPrompt(true)
+      return
+    }
+    
+    // TODO: Add actual wishlist functionality here
+    console.log('Add to wishlist:', productId)
+  }
 
   return (
     <section className="py-20 bg-background">
@@ -81,9 +97,12 @@ export function FeaturedProducts() {
                     <ShoppingBag size={18} />
                     Add to Bag
                   </button>
-                  <button className={`p-2 border border-primary text-primary rounded-sm hover:bg-primary/5 transition-all duration-300 ${
-                    hoveredId === product.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                  }`}>
+                  <button 
+                    onClick={(e) => handleWishlistClick(e, product.id)}
+                    className={`p-2 border border-primary text-primary rounded-sm hover:bg-primary/5 transition-all duration-300 ${
+                      hoveredId === product.id ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}
+                  >
                     <Heart size={18} />
                   </button>
                 </div>
@@ -117,6 +136,31 @@ export function FeaturedProducts() {
           </Link>
         </div>
       </div>
+
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-xl flex items-center justify-center z-50 h-screen">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 space-y-4 shadow-xl border border-gray-200">
+            <h3 className="text-lg font-bold text-black">Login Required</h3>
+            <p className="text-gray-600">Please login to add items to your wishlist.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLoginPrompt(false)}
+                className="flex-1 px-4 py-2 border-2 border-gray-300 text-black rounded font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <Link
+                href="/login"
+                onClick={() => setShowLoginPrompt(false)}
+                className="flex-1 px-4 py-2 bg-black text-white rounded font-medium hover:bg-gray-800 transition-colors text-center"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

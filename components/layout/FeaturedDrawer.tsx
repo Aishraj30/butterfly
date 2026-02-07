@@ -10,31 +10,40 @@ interface FeaturedDrawerProps {
 }
 
 interface Collection {
-    id: number
+    _id: string
     name: string
+    slug: string
     description?: string
-    categories?: string[]
-    type: 'editors' | 'bestsellers' | 'limited' | 'seasonal' | 'runway'
-    featured: boolean
-    productCount?: number
+    products: any[]
+    bannerImage?: string
+    isFeatured: boolean
+    isActive: boolean
+    createdAt: string
+    updatedAt: string
 }
 
 export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
     const backdropRef = useRef<HTMLDivElement>(null)
-    const [expandedItems, setExpandedItems] = useState<number[]>([])
+    const [expandedItems, setExpandedItems] = useState<string[]>([])
     const [collections, setCollections] = useState<Collection[]>([])
+    const [loading, setLoading] = useState(true)
 
     // Fetch featured collections from backend
     useEffect(() => {
-        fetch('/api/featured-collections')
+        fetch('/api/collections')
             .then(res => res.json())
             .then(data => {
-                if (data.success) {
-                    setCollections(data.data)
+                if (data.success && data.collections) {
+                    // Filter for featured collections only
+                    const featuredCollections = data.collections.filter((collection: Collection) => 
+                        collection.isFeatured && collection.isActive
+                    )
+                    setCollections(featuredCollections)
                 }
             })
             .catch(error => console.error('Failed to fetch featured collections:', error))
+            .finally(() => setLoading(false))
     }, [])
 
     // Prevent body scroll when featured drawer is open
@@ -50,7 +59,7 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
         }
     }, [isOpen])
 
-    const toggleExpanded = (id: number) => {
+    const toggleExpanded = (id: string) => {
         setExpandedItems(prev => 
             prev.includes(id) 
                 ? prev.filter(item => item !== id)
@@ -97,33 +106,33 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
                             <div className="mb-6">
                                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Featured Collections</h3>
                                 
-                                {collections.map((collection) => (
-                                    <Link 
-                                        key={collection.id}
-                                        href={`/featured/${collection.type}`} 
-                                        onClick={onClose}
-                                        className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group mb-3"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <ChevronRight size={16} className="text-gray-400 group-hover:text-black transition-colors" />
-                                            <span className="font-medium text-black">{collection.name}</span>
-                                        </div>
-                                        <ChevronRight size={16} className="text-gray-400 group-hover:text-black transition-colors" />
-                                    </Link>
-                                ))}
-                            </div>
-
-                            <div className="border-t my-4"></div>
-
-                            {/* All Featured Link */}
-                            <div className="mt-8 pt-6 border-t">
-                                <Link 
-                                    href="/featured" 
-                                    onClick={onClose}
-                                    className="block w-full bg-black text-white py-4 text-center font-bold tracking-widest hover:bg-gray-800 transition-colors"
-                                >
-                                    View All Featured
-                                </Link>
+                                {loading ? (
+                                    <div className="flex justify-center py-8">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
+                                    </div>
+                                ) : collections.length > 0 ? (
+                                    collections.map((collection) => (
+                                        <Link 
+                                            key={collection._id}
+                                            href={`/collections/${collection.slug}`} 
+                                            onClick={onClose}
+                                            className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group mb-3"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <ChevronRight size={16} className="text-gray-400 group-hover:text-black transition-colors" />
+                                                <span className="font-medium text-black">{collection.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-gray-400">{collection.products?.length || 0} items</span>
+                                                <ChevronRight size={16} className="text-gray-400 group-hover:text-black transition-colors" />
+                                            </div>
+                                        </Link>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <p>No featured collections available</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

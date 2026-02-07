@@ -39,24 +39,49 @@ export default function CategoryPage() {
             const response = await fetch('/api/products')
             const data = await response.json()
             
-            if (data.success) {
-                // Filter products that belong to this specific subcategory
-                const categoryProducts = data.data.filter((p: Product) => 
-                    p.subcategory?.toLowerCase() === categoryName.toLowerCase()
-                )
+            if (data.success && data.products && Array.isArray(data.products)) {
+                // Filter products that belong to this category or subcategory
+                const categoryProducts = data.products.filter((p: Product) => {
+                    const decodedCategoryName = decodeURIComponent(categoryName.toLowerCase())
+                    const productCategory = p.category?.toLowerCase()
+                    const productSubCategory = p.subcategory?.toLowerCase()
+                    
+                    return productCategory === decodedCategoryName || productSubCategory === decodedCategoryName
+                })
                 setProducts(categoryProducts)
+            } else {
+                console.error('Invalid data structure:', data)
+                setProducts([])
             }
         } catch (error) {
             console.error('Failed to fetch category products:', error)
+            setProducts([])
         } finally {
             setLoading(false)
         }
     }
 
+    // Function to get background image based on category
+    const getBackgroundImage = (category: string) => {
+        const categoryImages: { [key: string]: string } = {
+            'clothing': 'https://images.unsplash.com/photo-1441986300917-64674bd168d5?q=80&w=1920&auto=format&fit=crop',
+            'accessories': 'https://images.unsplash.com/photo-1524863479825-3d96d5f5a2fb?q=80&w=1920&auto=format&fit=crop',
+            'shoes': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1920&auto=format&fit=crop',
+            'bags': 'https://images.unsplash.com/photo-1553062407-98eeb64c613d?q=80&w=1920&auto=format&fit=crop',
+            'jewelry': 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1920&auto=format&fit=crop',
+            'watches': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1920&auto=format&fit=crop'
+        };
+        return categoryImages[category.toLowerCase()] || 'https://images.unsplash.com/photo-1441986300917-64674bd168d5?q=80&w=1920&auto=format&fit=crop';
+    }
+
     return (
-        <main className="min-h-screen bg-white pt-10 pb-20 w-full">
+        <main className="min-h-screen bg-white w-full">
             {/* Banner Section */}
-            <CatalogBanner />
+            <CatalogBanner 
+                title={decodeURIComponent(categoryName)}
+                subtitle="Explore our collection"
+                backgroundImage={getBackgroundImage(categoryName)}
+            />
 
             <div className="max-w-[1400px] mx-auto px-5 py-8">
                 <div className="mb-8">
@@ -95,65 +120,53 @@ export default function CategoryPage() {
                                 href={`/product/${product.id}`}
                                 className="group block"
                             >
-                                <div className="relative overflow-hidden bg-gray-100 mb-4 aspect-square">
-                                    <div
-                                        className={`w-full h-full ${
-                                            product.imageUrl || 
-                                            'bg-gradient-to-br from-pink-100 to-rose-100'
-                                        } flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}
-                                    >
-                                        {product.onSale && (
-                                            <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                                                Sale
+                                <div className="relative overflow-hidden bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 mb-4">
+                                    {/* Product Image */}
+                                    <div className="relative aspect-[4/5] overflow-hidden rounded-t-lg">
+                                        {product.image || product.imageUrl ? (
+                                            <img
+                                                src={product.image || product.imageUrl}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                                <span className="text-gray-500 text-sm">No Image</span>
                                             </div>
                                         )}
-                                        {product.isNew && (
-                                            <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                                                New
-                                            </div>
-                                        )}
+                                        
+                                        {/* Badges */}
+                                        <div className="absolute top-4 left-4 z-10 flex gap-2">
+                                            {product.onSale && (
+                                                <div className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                                    SALE
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-
-                                    {/* Add to cart button */}
-                                    <button className="absolute bottom-4 right-4 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-110 transform">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <line x1="12" y1="8" x2="12" y2="16"/>
-                                            <line x1="8" y1="12" x2="16" y2="12"/>
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <h3 className="font-medium text-sm text-black text-left uppercase">
-                                        {product.name}
-                                    </h3>
-                                    <div className="flex items-baseline gap-3">
-                                        <p className="text-black font-semibold text-sm">
-                                            ₹{product.salePrice || product.price}
-                                        </p>
-                                        {product.salePrice && (
-                                            <>
-                                                <p className="text-xs text-gray-400 line-through decoration-gray-400">
-                                                    ₹{product.price}
-                                                </p>
-                                                <span className="text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded">
-                                                    {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
-                                                </span>
-                                            </>
-                                        )}
+                                    
+                                    {/* Product Info */}
+                                    <div className="p-4 space-y-2">
+                                        <h3 className="font-medium text-black text-sm uppercase tracking-wide mb-2">
+                                            {product.name}
+                                        </h3>
+                                        
+                                        <div className="flex items-baseline gap-2">
+                                            <p className="text-black font-semibold text-lg">
+                                                ₹{product.salePrice || product.price}
+                                            </p>
+                                            {product.salePrice && (
+                                                <>
+                                                    <span className="text-gray-400 line-through text-sm">
+                                                        ₹{product.price}
+                                                    </span>
+                                                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">
+                                                        {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
+                                                    </span>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-black">
-                                            {product.rating}★
-                                        </span>
-                                        <span className="text-xs text-gray-600">
-                                            ({product.reviews} reviews)
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-gray-500">
-                                        {product.color}
-                                    </p>
                                 </div>
                             </Link>
                         ))}

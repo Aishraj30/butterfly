@@ -6,31 +6,31 @@ import { Star, Minus, Plus, ShoppingCart, Heart, ChevronLeft } from 'lucide-reac
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWishlist } from '@/hooks/useWishlist';
 
 interface Product {
-    id: number;
+    id: string; // Changed from number to string to match MongoDB ObjectId
     name: string;
     price: number;
     category: string;
+    subCategory?: string;
     color: string;
-    gender?: string;
+    colors?: string[];
+    gender?: 'Male' | 'Female' | 'Unisex';
     size: string[];
+    sizes?: string[];
     rating: number;
     reviews: number;
-    image?: string;
+    reviewsCount?: number;
+    image: string;
+    imageGradient?: string;
     imageUrl?: string;
     images?: string[];
     inStock: boolean;
+    stock?: number;
     onSale?: boolean;
     salePrice?: number;
     isNew?: boolean;
-    brand?: string;
-    sizes?: string[]; // Add sizes array
-    colors?: string[]; // Add colors array
-    reviewsCount?: number;
-    subCategory?: string;
-
-    // Detailed fields
     description?: string;
     fabricComposition?: string;
     fit?: string;
@@ -41,6 +41,10 @@ interface Product {
     modelSize?: string;
     modelHeight?: string;
     shippingTime?: string;
+    isActive?: boolean;
+    brand?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -48,12 +52,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const { id } = use(params);
     const { addToCart } = useCart();
     const { user } = useAuth();
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [selectedSize, setSelectedSize] = useState('');
-    const [isInWishlist, setIsInWishlist] = useState(false);
     const [addingToCart, setAddingToCart] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
     const [showWishlistPrompt, setShowWishlistPrompt] = useState(false);
@@ -73,10 +77,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
             console.log('[Client] Response:', data);
 
-            if (data.success && data.product) {
-                setProduct(data.product);
+            if (data.success && data.data) {
+                setProduct(data.data);
                 // Set default size
-                const availableSizes = data.product.sizes || data.product.size || [];
+                const availableSizes = data.data.sizes || data.data.size || [];
                 if (availableSizes && availableSizes.length > 0) {
                     setSelectedSize(availableSizes[0]);
                 }
@@ -90,12 +94,34 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         }
     };
 
-    const toggleWishlist = () => {
+    const toggleWishlist = async () => {
         if (!user) {
             setShowWishlistPrompt(true);
             return;
         }
-        setIsInWishlist(!isInWishlist);
+
+        if (!product) return;
+
+        try {
+            if (isInWishlist(product.id)) {
+                // Find the wishlist item and remove it
+                const response = await fetch('/api/wishlist');
+                if (response.ok) {
+                    const data = await response.json();
+                    const wishlistItem = data.data.find((item: any) => item.product._id === product.id);
+                    if (wishlistItem) {
+                        await removeFromWishlist(wishlistItem._id);
+                    }
+                }
+            } else {
+                // Add to wishlist
+                await addToWishlist(product.id);
+            }
+        } catch (error) {
+            console.error('Wishlist error:', error);
+            // Show error message to user
+            alert('Failed to update wishlist. Please try again.');
+        }
     };
 
     const handleAddToCart = async () => {
@@ -104,27 +130,36 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             return;
         }
 
+        if (!product.inStock) {
+            setCartError('Product is out of stock');
+            return;
+        }
+
         try {
             setAddingToCart(true);
             setCartError(null);
 
-            await addToCart(
+            const result = await addToCart(
                 String(product.id),
                 quantity,
                 selectedSize,
-                product.color,
+                product.color || '',
                 product.name,
-                product.price,
+                product.salePrice || product.price,
                 product.images?.[0] || product.imageUrl || product.image
             );
 
-            // Show success message
-            alert(`${product.name} added to cart!`);
-            setAddingToCart(false);
+            if (result.success) {
+                // Show success message
+                alert(`${product.name} added to cart!`);
+            } else {
+                throw new Error(result.error || 'Failed to add to cart');
+            }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to add to cart';
             setCartError(errorMessage);
             console.error('[Product] Add to cart error:', error);
+        } finally {
             setAddingToCart(false);
         }
     };
@@ -214,11 +249,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         )}
                                     </div>
                                 )}
-
-                                {/* Rating Badge */}
-                                <div className="absolute top-4 right-4 bg-yellow-400 text-xs font-bold px-3 py-1 flex items-center gap-1 rounded-sm shadow-sm z-10">
-                                    <Star size={12} fill="currentColor" /> {product.rating}
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -237,7 +267,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         {product.gender}
                                     </p>
                                 )}
-                                <h1 className="font-serif text-4xl text-black mb-4">{product.name}</h1>
+                                <h1 className="font-serif text-4xl text-black mb-1">{product.name}</h1>
                             </div>
                             <div className="relative">
                                 <button
@@ -247,7 +277,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 >
                                     <Heart
                                         size={20}
-                                        className={isInWishlist ? "text-red-500 fill-red-500" : "text-gray-400 hover:text-red-500"}
+                                        className={product && isInWishlist(product.id) ? "text-red-500 fill-red-500" : "text-gray-400 hover:text-red-500"}
                                     />
                                 </button>
                                 {!user && (
@@ -258,7 +288,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
                         {/* Price Section */}
                         <div className="space-y-2">
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
                                 <p className="text-3xl font-bold text-black">₹{product.salePrice || product.price}</p>
                                 {product.onSale && product.salePrice && (
                                     <>
@@ -287,7 +317,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         <Star
                                             key={i}
                                             size={16}
-                                            className={i < Math.round(product.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                                            className={i < Math.round(product.rating) ? "fill-gray-400 text-gray-400" : "text-gray-300"}
                                         />
                                     ))}
                                 </div>
@@ -318,7 +348,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         <div>
                             <h3 className="font-semibold text-black mb-3">Available Sizes</h3>
                             <div className="flex flex-wrap gap-2">
-                                {(product.sizes || product.size || []).map((size) => (
+                                {['s', 'm', 'l', 'xl', 'xxl', 'custom'].map((size) => (
                                     <button
                                         key={size}
                                         onClick={() => setSelectedSize(size)}
@@ -327,7 +357,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                             : 'border-gray-300 text-black hover:border-black'
                                             }`}
                                     >
-                                        {size}
+                                        {size.toUpperCase()}
                                     </button>
                                 ))}
                             </div>
@@ -375,8 +405,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
                         {/* Login Prompt Modal */}
                         {showWishlistPrompt && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                <div className="bg-white rounded-lg p-6 max-w-sm mx-4 space-y-4">
+                            <div className="fixed inset-0 bg-black/20 backdrop-blur-xl flex items-center justify-center z-50 h-screen">
+                                <div className="bg-white rounded-lg p-6 max-w-sm mx-4 space-y-4 shadow-xl border border-gray-200">
                                     <h3 className="text-lg font-bold text-black">Login Required</h3>
                                     <p className="text-gray-600">Please login to add items to your wishlist.</p>
                                     <div className="flex gap-3">
@@ -388,6 +418,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         </button>
                                         <Link
                                             href="/login"
+                                            onClick={() => setShowWishlistPrompt(false)}
                                             className="flex-1 px-4 py-2 bg-black text-white rounded font-medium hover:bg-gray-800 transition-colors text-center"
                                         >
                                             Login
@@ -417,23 +448,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 <p><strong>Wash Care:</strong> {product.washCare || 'N/A'}</p>
                                 <p><strong>Country of Manufacture:</strong> {product.countryOfManufacture || 'N/A'}</p>
 
-                                <p className="mt-4 text-xs text-gray-500 italic">
-                                    <strong>Disclaimer:</strong> The garment details including but not limited to specifications have been portrayed as accurately as possible. Each garment is carefully handcrafted by artisans, and hence the beauty and nature of the garment is that it is one of its kind.
-                                </p>
-                            </div>
+                                                            </div>
                         </div>
 
-                        {/* Description & Model Info */}
-                        <div className="space-y-4 text-gray-600 mt-6">
-                            <p className="text-sm leading-relaxed">{product.description || 'No description available for this product.'}</p>
-
-                            <ul className="text-sm list-disc pl-4 space-y-1">
-                                <li>Model wears a size: {product.modelSize || 'N/A'}</li>
-                                <li>Model Height: {product.modelHeight || 'N/A'}</li>
-                            </ul>
-                        </div>
-
-                                            </div>
+                
+                    </div>
                 </div>
             </div>
         </main>

@@ -89,7 +89,7 @@ export function HeroBanner({
         <h1 className={`mb-4 text-center font-sans text-5xl font-bold md:text-6xl lg:text-7xl ${backgroundImage ? 'text-white' : 'text-[#003300]'}`}>
           {title}
         </h1>
-        <p className={`mb-8 text-center text-lg md:text-xl ${backgroundImage ? 'text-white/90' : 'text-gray-600'}`}>
+        <p className={`mb-8 text-center text-base md:text-lg ${backgroundImage ? 'text-white' : 'text-red-800'}`}>
           {subtitle}
         </p>
         {buttonText && buttonLink && (

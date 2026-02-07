@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCart, addToCart, removeFromCart, updateCartItem, clearCart, CartItem, calculateCartTotal, getShippingCost, calculateTax } from '@/lib/db'
+import { getCart, addToCart, removeFromCart, updateCartItem, clearCart, calculateCartTotal, getShippingCost, calculateTax } from '@/lib/db.js'
+
+// Define CartItem interface locally since it's exported as an empty object from db.js
+interface CartItem {
+  productId: string
+  quantity: number
+  size: string
+  color: string
+  name?: string
+  price?: string | number
+  image?: string
+}
 import { cookies } from 'next/headers'
 
 async function getSessionId(): Promise<string> {

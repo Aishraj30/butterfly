@@ -8,6 +8,9 @@ export interface CartItem {
   quantity: number
   size: string
   color: string
+  name?: string
+  price?: number | string
+  image?: string
 }
 
 export interface CartData {
@@ -54,13 +57,16 @@ export function useCart() {
               size,
               color,
               name: name || 'Product',
-              price: String(price || 0),
+              price: price || 0, // Keep as number
               image: image || '',
             },
           }),
         })
 
-        if (!response.ok) throw new Error('Failed to add to cart')
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to add to cart')
+        }
 
         const result = await response.json()
         mutate({ success: true, data: result.data })

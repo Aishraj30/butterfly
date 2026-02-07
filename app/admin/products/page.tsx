@@ -23,11 +23,15 @@ export default function AdminProductsPage() {
     try {
       const response = await fetch('/api/products')
       const data = await response.json()
-      if (data.success) {
-        setProducts(data.data)
+      if (data.success && data.products) {
+        setProducts(data.products)
+      } else {
+        console.error('Invalid data structure:', data)
+        setProducts([])
       }
     } catch (error) {
       console.error('Failed to fetch products:', error)
+      setProducts([])
     } finally {
       setIsLoading(false)
     }
@@ -52,10 +56,10 @@ export default function AdminProductsPage() {
     }
   }
 
-  const filteredProducts = products.filter((product) =>
+  const filteredProducts = products ? products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  ) : []
 
   const toggleSelectProduct = (id: number) => {
     setSelectedProducts((prev) =>
