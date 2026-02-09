@@ -5,12 +5,26 @@ import Link from 'next/link'
 import { CatalogBanner } from '@/components/catalog/CatalogBanner'
 import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer'
 
+// --- ICONS FOR MOBILE VIEW ---
+const SingleColumnIcon = ({ active }: { active: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="16" height="16" fill={active ? "black" : "#D1D5DB"} />
+  </svg>
+)
+
+const DoubleColumnIcon = ({ active }: { active: boolean }) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="4" width="6" height="16" fill={active ? "black" : "#D1D5DB"} />
+    <rect x="13" y="4" width="6" height="16" fill={active ? "black" : "#D1D5DB"} />
+  </svg>
+)
+
 interface Product {
     _id: string;
     name: string;
     price: number;
     category: string;
-    subCategory: string; // Changed from subcategory to subCategory to match DB schema
+    subCategory: string;
     color: string;
     gender?: string;
     size: string[];
@@ -30,7 +44,12 @@ export default function SubcategoryPage() {
     const [loading, setLoading] = useState(true)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [selectedSizes, setSelectedSizes] = useState<string[]>([])
-    const [gridView, setGridView] = useState<'3' | '4'>('4')
+    
+    // --- NEW STATES FOR MOBILE ---
+    const [mobileLayout, setMobileLayout] = useState<'1' | '2'>('2') // Default to 2 columns
+    const [activeGender, setActiveGender] = useState<string | null>(null)
+    const [gridView, setGridView] = useState<'3' | '4'>('4') // Desktop grid
+
     const params = useParams()
     const categoryName = params.category as string
     const subcategoryName = params.subcategory as string
@@ -46,25 +65,17 @@ export default function SubcategoryPage() {
             const data = await response.json()
             
             if (data.success && data.products && Array.isArray(data.products)) {
-                console.log('All products:', data.products)
-                console.log('Looking for category:', categoryName, 'subcategory:', subcategoryName)
-                
-                // Filter products that belong to this specific category and subcategory
                 const subcategoryProducts = data.products.filter((p: Product) => {
                     const decodedCategoryName = decodeURIComponent(categoryName.toLowerCase())
                     const decodedSubcategoryName = decodeURIComponent(subcategoryName.toLowerCase())
                     const productCategory = p.category?.toLowerCase()
-                    const productSubCategory = p.subCategory?.toLowerCase() // Note: subCategory not subcategory
-                    
-                    console.log('Product:', p.name, 'category:', productCategory, 'subcategory:', productSubCategory)
+                    const productSubCategory = p.subCategory?.toLowerCase()
                     
                     return productCategory === decodedCategoryName && productSubCategory === decodedSubcategoryName
                 })
-                console.log('Filtered products:', subcategoryProducts)
                 setProducts(subcategoryProducts)
                 setFilteredProducts(subcategoryProducts)
             } else {
-                console.error('Invalid data structure:', data)
                 setProducts([])
             }
         } catch (error) {
@@ -81,11 +92,11 @@ export default function SubcategoryPage() {
         // Filter by gender
         if (filters.genders.length > 0) {
             filtered = filtered.filter(product => 
-                product.gender && filters.genders.includes(product.gender)
+                product.gender && filters.genders.some(g => g.toLowerCase() === product.gender?.toLowerCase())
             )
         }
 
-        // Filter by size (combine both quick sizes and drawer sizes)
+        // Filter by size
         const allSelectedSizes = [...new Set([...filters.sizes, ...selectedSizes])]
         if (allSelectedSizes.length > 0) {
             filtered = filtered.filter(product => 
@@ -133,16 +144,15 @@ export default function SubcategoryPage() {
         setFilteredProducts(filtered)
     }
 
-    // Function to handle quick size selection
+    // Handle Quick Size Select
     const handleSizeSelect = (size: string) => {
         const newSelectedSizes = selectedSizes.includes(size) 
             ? selectedSizes.filter(s => s !== size) 
             : [...selectedSizes, size]
         setSelectedSizes(newSelectedSizes)
         
-        // Apply filters immediately with new sizes
         applyFilters({
-            genders: [],
+            genders: activeGender ? [activeGender] : [],
             sizes: newSelectedSizes,
             priceRange: { min: null, max: null },
             colors: [],
@@ -150,78 +160,96 @@ export default function SubcategoryPage() {
         })
     }
 
-    // Function to handle FilterDrawer apply
+    // Handle Drawer Apply
     const handleFilterApply = (filters: FilterState) => {
-        // Update quick sizes to match drawer sizes
         setSelectedSizes(filters.sizes)
+        // Sync mobile gender toggle if modified in drawer
+        if(filters.genders.length === 1) {
+            setActiveGender(filters.genders[0])
+        } else {
+            setActiveGender(null)
+        }
         applyFilters(filters)
     }
 
-    // Function to get background image based on category and subcategory
-    const getBackgroundImage = (category: string, subcategory: string) => {
-        // Specific subcategory images - UPDATE THESE URLs TO CHANGE BANNERS
-        const subcategoryImages: { [key: string]: string } = {
-            'jackets': '/banners/banner.jpeg', // Change this URL
-            'coats': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'sweaters': 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'hoodies': 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'shirts': 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'pants': 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'jeans': 'https://images.unsplash.com/photo-1542271024958-3ea1813786aeb?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'dresses': 'https://images.unsplash.com/photo-1515372039744-b8e02a7ae8b3?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'skirts': 'https://images.unsplash.com/photo-1583496266101-7f5b9940c8d5?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'handbags': 'https://images.unsplash.com/photo-1553062407-98eeb64c613d?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'backpacks': 'https://images.unsplash.com/photo-1553062407-98eeb64c613d?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'wallets': 'https://images.unsplash.com/photo-1627123424554-42aa04b13b93?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'belts': 'https://images.unsplash.com/photo-1596755094512-f3e82e5fdb87?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'sunglasses': 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'watches': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'rings': 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'necklaces': 'https://images.unsplash.com/photo-1599643447855-5f4b8e5d197d?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'earrings': 'https://images.unsplash.com/photo-1573408301185-9cc5a027e9a1?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'bracelets': 'https://images.unsplash.com/photo-1611599544316-02b3c8b8d4b9?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'sneakers': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'boots': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'sandals': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1920&auto=format&fit=crop', // Change this URL
-            'formal-shoes': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1920&auto=format&fit=crop' // Change this URL
-        };
-
-        // Check for specific subcategory image first
-        const subcategoryKey = subcategory.toLowerCase();
-        if (subcategoryImages[subcategoryKey]) {
-            return subcategoryImages[subcategoryKey];
-        }
-
-        // Fallback to category images
-        const categoryImages: { [key: string]: string } = {
-            'clothing': 'https://images.unsplash.com/photo-1441986300917-64674bd168d5?q=80&w=1920&auto=format&fit=crop',
-            'accessories': 'https://images.unsplash.com/photo-1524863479825-3d96d5f5a2fb?q=80&w=1920&auto=format&fit=crop',
-            'shoes': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1920&auto=format&fit=crop',
-            'bags': 'https://images.unsplash.com/photo-1553062407-98eeb64c613d?q=80&w=1920&auto=format&fit=crop',
-            'jewelry': 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1920&auto=format&fit=crop',
-            'watches': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1920&auto=format&fit=crop'
-        };
+    // --- NEW: Mobile Gender Toggle Logic ---
+    const toggleMobileGender = (gender: string) => {
+        const newGender = activeGender === gender ? null : gender
+        setActiveGender(newGender)
         
-        return categoryImages[category.toLowerCase()] || 'https://images.unsplash.com/photo-1441986300917-64674bd168d5?q=80&w=1920&auto=format&fit=crop';
+        applyFilters({
+            genders: newGender ? [newGender] : [],
+            sizes: selectedSizes,
+            priceRange: { min: null, max: null },
+            colors: [],
+            sortBy: 'name'
+        })
+    }
+
+    const getBackgroundImage = (category: string, subcategory: string) => {
+        // ... (Keep existing image logic)
+        const subcategoryImages: { [key: string]: string } = {
+            'jackets': '/banners/banner.jpeg',
+            'coats': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1920&auto=format&fit=crop',
+             // ... Add other mappings if needed
+        };
+        const subcategoryKey = subcategory.toLowerCase();
+        if (subcategoryImages[subcategoryKey]) return subcategoryImages[subcategoryKey];
+        return 'https://images.unsplash.com/photo-1441986300917-64674bd168d5?q=80&w=1920&auto=format&fit=crop';
     }
 
     return (
-        <main className="min-h-screen bg-white w-full">
-            {/* Banner Section */}
+        <main className="min-h-screen bg-white w-full pb-20 md:pb-0"> 
+            {/* Added padding-bottom on mobile to prevent content being hidden behind sticky button */}
+            
             <CatalogBanner 
                 title={decodeURIComponent(subcategoryName)}
                 backgroundImage={getBackgroundImage(categoryName, subcategoryName)}
             />
 
+            {/* --- MOBILE FILTER BAR (Top Sticky) --- */}
+            <div className="sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between md:hidden shadow-sm">
+                {/* Item Count */}
+                <span className="text-xs font-medium text-black">
+                    {filteredProducts.length} Items
+                </span>
+
+                {/* Gender Toggles */}
+                <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-wide">
+                    <button 
+                        onClick={() => toggleMobileGender('Male')}
+                        className={`transition-colors ${activeGender?.toLowerCase() === 'male' ? 'text-black font-bold' : 'text-gray-300'}`}
+                    >
+                        Male
+                    </button>
+                    <button 
+                         onClick={() => toggleMobileGender('Female')}
+                        className={`transition-colors ${activeGender?.toLowerCase() === 'female' ? 'text-black font-bold' : 'text-gray-300'}`}
+                    >
+                        Female
+                    </button>
+                </div>
+
+                {/* Layout Toggles */}
+                <div className="flex items-center gap-3">
+                    <button onClick={() => setMobileLayout('1')}>
+                        <SingleColumnIcon active={mobileLayout === '1'} />
+                    </button>
+                    <button onClick={() => setMobileLayout('2')}>
+                        <DoubleColumnIcon active={mobileLayout === '2'} />
+                    </button>
+                </div>
+            </div>
+
             <div className="max-w-[1400px] mx-auto px-5 py-8 relative z-10">
-                {/* Filter Bar */}
-                <div className="flex items-center justify-between mb-6 border-b pb-4">
-                    {/* Filter & Sort Button */}
+                
+                {/* --- DESKTOP FILTER BAR (Hidden on Mobile) --- */}
+                <div className="hidden md:flex items-center justify-between mb-6 border-b pb-4">
                     <button
                         onClick={() => setIsFilterOpen(true)}
                         className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:border-black transition-colors text-sm font-medium"
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="4" y1="21" x2="4" y2="14"/>
                             <line x1="4" y1="10" x2="4" y2="3"/>
                             <line x1="12" y1="21" x2="12" y2="12"/>
@@ -234,8 +262,6 @@ export default function SubcategoryPage() {
                         </svg>
                         FILTER & SORT
                     </button>
-
-                    {/* Quick Size Filters */}
                     <div className="flex items-center gap-2">
                         {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
                             <button
@@ -251,40 +277,16 @@ export default function SubcategoryPage() {
                             </button>
                         ))}
                     </div>
-
-                    {/* Product Count and Grid View Toggle */}
                     <div className="flex items-center gap-4">
                         <span className="text-sm font-medium text-gray-700">
                             {filteredProducts.length} Items
                         </span>
-                        
                         <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => setGridView('3')}
-                                className={`p-2 rounded ${gridView === '3' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="3" y="3" width="7" height="7"/>
-                                    <rect x="14" y="3" width="7" height="7"/>
-                                    <rect x="3" y="14" width="7" height="7"/>
-                                    <rect x="14" y="14" width="7" height="7"/>
-                                </svg>
+                            <button onClick={() => setGridView('3')} className={`p-2 rounded ${gridView === '3' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
                             </button>
-                            <button
-                                onClick={() => setGridView('4')}
-                                className={`p-2 rounded ${gridView === '4' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="3" y="3" width="4" height="4"/>
-                                    <rect x="10" y="3" width="4" height="4"/>
-                                    <rect x="17" y="3" width="4" height="4"/>
-                                    <rect x="3" y="10" width="4" height="4"/>
-                                    <rect x="10" y="10" width="4" height="4"/>
-                                    <rect x="17" y="10" width="4" height="4"/>
-                                    <rect x="3" y="17" width="4" height="4"/>
-                                    <rect x="10" y="17" width="4" height="4"/>
-                                    <rect x="17" y="17" width="4" height="4"/>
-                                </svg>
+                            <button onClick={() => setGridView('4')} className={`p-2 rounded ${gridView === '4' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="10" y="17" width="4" height="4"/><rect x="17" y="17" width="4" height="4"/></svg>
                             </button>
                         </div>
                     </div>
@@ -313,11 +315,11 @@ export default function SubcategoryPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className={`grid gap-8 ${
-                        gridView === '3' 
-                            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-                            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
-                    }`}>
+                    // --- PRODUCTS GRID ---
+                    <div className={`grid gap-4 md:gap-8 
+                        ${/* Mobile Layout Logic */ mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'} 
+                        ${/* Desktop Layout Overrides */ gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'}
+                    `}>
                         {filteredProducts.map((product) => (
                             <Link
                                 key={product._id}
@@ -325,45 +327,17 @@ export default function SubcategoryPage() {
                                 className="group block"
                             >
                                 <div className="bg-gray-50 rounded-lg overflow-hidden transition-shadow duration-300">
-                                    {/* Product Image */}
                                     <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
-                                        <div
-                                            className={`w-full h-full ${
-                                                product.imageUrl || 
-                                                'bg-gradient-to-br from-pink-100 to-rose-100'
-                                            } flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}
-                                        >
-                                            {product.onSale && (
-                                                <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                                                    Sale
-                                                </div>
-                                            )}
-                                            {product.isNew && (
-                                                <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                                                    New
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Zoom Icon */}
-                                        <div className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <circle cx="11" cy="11" r="8"/>
-                                                <path d="m21 21-1.4-1.4-1.4-1.4"/>
-                                                <line x1="11" y1="8" x2="11" y2="14"/>
-                                            </svg>
+                                        <div className={`w-full h-full ${product.imageUrl || 'bg-gradient-to-br from-pink-100 to-rose-100'} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}>
+                                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover"/>}
+                                            {product.onSale && <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">Sale</div>}
+                                            {product.isNew && <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">New</div>}
                                         </div>
                                     </div>
-
-                                    {/* Product Info */}
                                     <div className="p-4">
-                                        <h3 className="font-normal text-xs text-black text-left uppercase mb-2 font-inter">
-                                            {product.name}
-                                        </h3>
+                                        <h3 className="font-normal text-xs text-black text-left uppercase mb-2 font-inter truncate">{product.name}</h3>
                                         <div className="flex items-center justify-between">
-                                            <p className="text-black font-normal text-base font-inter">
-                                                ₹{product.salePrice || product.price}
-                                            </p>
+                                            <p className="text-black font-normal text-base font-inter">₹{product.salePrice || product.price}</p>
                                             {product.salePrice && (
                                                 <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
                                                     {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
@@ -376,6 +350,16 @@ export default function SubcategoryPage() {
                         ))}
                     </div>
                 )}
+            </div>
+
+            {/* --- MOBILE FLOATING FILTER BUTTON (Bottom Sticky) --- */}
+            <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center md:hidden pointer-events-none">
+                <button
+                    onClick={() => setIsFilterOpen(true)}
+                    className="pointer-events-auto bg-white text-black px-8 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-gray-100 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors"
+                >
+                    Filter & Sort
+                </button>
             </div>
 
             {/* Filter Drawer */}

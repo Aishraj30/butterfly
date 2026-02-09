@@ -38,7 +38,7 @@ export default function NewArrivalsPage() {
             
             if (data.success) {
                 // Filter products that have isNew flag
-                const newProducts = data.data.filter((p: Product) => p.isNew === true)
+                const newProducts = data.products.filter((p: Product) => p.isNew === true)
                 setProducts(newProducts)
             }
         } catch (error) {

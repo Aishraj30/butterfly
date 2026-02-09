@@ -86,14 +86,14 @@ export function HeroBanner({
 
       {/* Content */}
       <div ref={textRef} className="relative z-10 flex h-full flex-col items-center justify-center p-4">
-        <h1 className={`mb-4 text-center font-sans text-5xl font-bold md:text-6xl lg:text-7xl ${backgroundImage ? 'text-white' : 'text-[#003300]'}`}>
+        <h1 className={`mb-4 text-center font-serif text-5xl font-bold md:text-6xl lg:text-7xl ${backgroundImage ? 'text-white' : 'text-[#003300]'}`} style={{ fontFamily: "'Birds of Paradise Personal use Regular', serif" }}>
           {title}
         </h1>
         <p className={`mb-8 text-center text-base md:text-lg ${backgroundImage ? 'text-white' : 'text-red-800'}`}>
           {subtitle}
         </p>
         {buttonText && buttonLink && (
-          <Button asChild className={`rounded-md px-8 py-6 text-lg underline ${backgroundImage ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#003300] text-white hover:bg-[#004400]'}`}>
+          <Button asChild className={`rounded-md px-6 py-3 text-sm ${backgroundImage ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#003300] text-white hover:bg-[#004400]'}`}>
             <Link href={buttonLink}>{buttonText}</Link>
           </Button>
         )}

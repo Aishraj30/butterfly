@@ -3,6 +3,26 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Prevent layout shifts when dropdowns are open */
+[data-radix-dropdown-menu-content] {
+  position: fixed !important;
+  box-sizing: border-box !important;
+  max-width: 100vw !important;
+}
+
+/* Prevent body scroll when dropdown is open */
+body[data-radix-dropdown-menu-content] {
+  overflow-x: hidden !important;
+  width: 100vw !important;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 :root {
 
   /* Butterfly Couture - Luxury Fashion Brand */

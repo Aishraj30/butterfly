@@ -115,7 +115,6 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters }: FilterDrawerPr
                 }`}
             >
                 <div className="flex h-full flex-col">
-
                     {/* Header */}
                     <div className="flex items-center justify-between border-b px-8 py-6">
                         <h2 className="text-xl font-bold uppercase tracking-[0.2em] text-black">
@@ -133,87 +132,55 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters }: FilterDrawerPr
                     <div ref={contentRef} className="flex-1 overflow-y-auto">
                         <div className="p-8 space-y-6">
                             
-                            {/* Gender Filter */}
-                            <div className="border-b pb-6">
-                                <button
-                                    onClick={() => toggleSection('gender')}
-                                    className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
-                                >
-                                    <h3 className="font-bold text-sm uppercase tracking-wider">Gender</h3>
-                                    <ChevronDown 
-                                        size={16} 
-                                        className={`transition-transform duration-200 ${
-                                            expandedSections.includes('gender') ? 'rotate-180' : ''
-                                        }`}
-                                    />
-                                </button>
-                                {expandedSections.includes('gender') && (
+                            {/* Mobile Layout - Compact */}
+                            <div className="md:hidden space-y-6">
+                                {/* First Row - Gender & Size */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Gender Filter */}
                                     <div className="space-y-3">
-                                        {['Male', 'Female', 'Unisex'].map((gender) => (
-                                            <label key={gender} className="flex items-center gap-3 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedGenders.includes(gender)}
-                                                    onChange={() => toggleGender(gender)}
-                                                    className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                                                />
-                                                <span className="text-sm text-gray-700">{gender}</span>
-                                            </label>
-                                        ))}
+                                        <h3 className="font-bold text-sm uppercase tracking-wider mb-3">Gender</h3>
+                                        <div className="space-y-2">
+                                            {['Male', 'Female', 'Unisex'].map((gender) => (
+                                                <label key={gender} className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedGenders.includes(gender)}
+                                                        onChange={() => toggleGender(gender)}
+                                                        className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
+                                                    />
+                                                    <span className="text-sm text-gray-700">{gender}</span>
+                                                </label>
+                                            ))}
+                                        </div>
                                     </div>
-                                )}
-                            </div>
 
-                            {/* Size Filter */}
-                            <div className="border-b pb-6">
-                                <button
-                                    onClick={() => toggleSection('size')}
-                                    className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
-                                >
-                                    <h3 className="font-bold text-sm uppercase tracking-wider">Size</h3>
-                                    <ChevronDown 
-                                        size={16} 
-                                        className={`transition-transform duration-200 ${
-                                            expandedSections.includes('size') ? 'rotate-180' : ''
-                                        }`}
-                                    />
-                                </button>
-                                {expandedSections.includes('size') && (
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
-                                            <button
-                                                key={size}
-                                                onClick={() => toggleSize(size)}
-                                                className={`py-2 px-3 text-xs font-medium border transition-colors ${
-                                                    selectedSizes.includes(size)
-                                                        ? 'bg-black text-white border-black'
-                                                        : 'bg-white text-black border-gray-300 hover:bg-gray-50'
-                                                }`}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Price Filter */}
-                            <div className="border-b pb-6">
-                                <button
-                                    onClick={() => toggleSection('price')}
-                                    className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
-                                >
-                                    <h3 className="font-bold text-sm uppercase tracking-wider">Price (₹)</h3>
-                                    <ChevronDown 
-                                        size={16} 
-                                        className={`transition-transform duration-200 ${
-                                            expandedSections.includes('price') ? 'rotate-180' : ''
-                                        }`}
-                                    />
-                                </button>
-                                {expandedSections.includes('price') && (
+                                    {/* Size Filter */}
                                     <div className="space-y-3">
-                                        <div className="flex items-center gap-3">
+                                        <h3 className="font-bold text-sm uppercase tracking-wider mb-3">Size</h3>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                                                <button
+                                                    key={size}
+                                                    onClick={() => toggleSize(size)}
+                                                    className={`py-2 px-2 text-xs font-medium border transition-colors ${
+                                                        selectedSizes.includes(size)
+                                                            ? 'bg-black text-white border-black'
+                                                                : 'bg-white text-black border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    {size}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Second Row - Price & Color */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Price Filter */}
+                                    <div className="space-y-3">
+                                        <h3 className="font-bold text-sm uppercase tracking-wider mb-3">Price (₹)</h3>
+                                        <div className="flex items-center gap-2">
                                             <input
                                                 type="number"
                                                 placeholder="Min"
@@ -231,75 +198,49 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters }: FilterDrawerPr
                                             />
                                         </div>
                                     </div>
-                                )}
-                            </div>
 
-                            {/* Color Filter */}
-                            <div className="border-b pb-6">
-                                <button
-                                    onClick={() => toggleSection('color')}
-                                    className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
-                                >
-                                    <h3 className="font-bold text-sm uppercase tracking-wider">Color</h3>
-                                    <ChevronDown 
-                                        size={16} 
-                                        className={`transition-transform duration-200 ${
-                                            expandedSections.includes('color') ? 'rotate-180' : ''
-                                        }`}
-                                    />
-                                </button>
-                                {expandedSections.includes('color') && (
-                                    <div className="grid grid-cols-6 gap-3">
-                                        {['Black', 'White', 'Gray', 'Brown', 'Blue', 'Red', 'Navy', 'Cream', 'Gold', 'Camel'].map((color) => (
-                                            <button
-                                                key={color}
-                                                onClick={() => toggleColor(color)}
-                                                className={`relative group cursor-pointer`}
-                                            >
-                                                <div
-                                                    className={`w-10 h-10 rounded-full border-2 transition-all ${
-                                                        selectedColors.includes(color)
-                                                            ? 'border-black ring-2 ring-offset-2 ring-black'
-                                                            : 'border-gray-300 hover:border-gray-400'
-                                                    }`}
-                                                    style={{
-                                                        backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' : 
-                                                                        color.toLowerCase() === 'black' ? '#000000' :
-                                                                        color.toLowerCase() === 'gray' ? '#6b7280' :
-                                                                        color.toLowerCase() === 'brown' ? '#92400e' :
-                                                                        color.toLowerCase() === 'blue' ? '#2563eb' :
-                                                                        color.toLowerCase() === 'red' ? '#dc2626' :
-                                                                        color.toLowerCase() === 'navy' ? '#001f3f' :
-                                                                        color.toLowerCase() === 'cream' ? '#fffdd0' :
-                                                                        color.toLowerCase() === 'gold' ? '#ffd700' :
-                                                                        color.toLowerCase() === 'camel' ? '#c19a6b' : '#000000'
-                                                    }}
-                                                />
-                                                {color === 'White' && (
-                                                    <div className="absolute inset-0 rounded-full border border-gray-300" />
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Sort */}
-                            <div className="pb-6">
-                                <button
-                                    onClick={() => toggleSection('sort')}
-                                    className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
-                                >
-                                    <h3 className="font-bold text-sm uppercase tracking-wider">Sort By</h3>
-                                    <ChevronDown 
-                                        size={16} 
-                                        className={`transition-transform duration-200 ${
-                                            expandedSections.includes('sort') ? 'rotate-180' : ''
-                                        }`}
-                                    />
-                                </button>
-                                {expandedSections.includes('sort') && (
+                                    {/* Color Filter */}
                                     <div className="space-y-3">
+                                        <h3 className="font-bold text-sm uppercase tracking-wider mb-3">Color</h3>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {['Black', 'White', 'Gray', 'Brown', 'Blue', 'Red', 'Navy', 'Cream', 'Gold'].slice(0, 8).map((color) => (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => toggleColor(color)}
+                                                    className={`relative group cursor-pointer`}
+                                                >
+                                                    <div
+                                                        className={`w-8 h-8 rounded-full border-2 transition-all ${
+                                                            selectedColors.includes(color)
+                                                                ? 'border-black ring-2 ring-offset-2 ring-black'
+                                                                : 'border-gray-300 hover:border-gray-400'
+                                                        }`}
+                                                        style={{
+                                                            backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' : 
+                                                                                color.toLowerCase() === 'black' ? '#000000' :
+                                                                                color.toLowerCase() === 'gray' ? '#6b7280' :
+                                                                                color.toLowerCase() === 'brown' ? '#92400e' :
+                                                                                color.toLowerCase() === 'blue' ? '#2563eb' :
+                                                                                color.toLowerCase() === 'red' ? '#dc2626' :
+                                                                                color.toLowerCase() === 'navy' ? '#001f3f' :
+                                                                                color.toLowerCase() === 'cream' ? '#fffdd0' :
+                                                                                color.toLowerCase() === 'gold' ? '#ffd700' :
+                                                                                color.toLowerCase() === 'camel' ? '#c19a6b' : '#000000'
+                                                        }}
+                                                    />
+                                                    {color === 'White' && (
+                                                        <div className="absolute inset-0 rounded-full border border-gray-300" />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Sort Filter - Full Width */}
+                                <div className="space-y-3">
+                                    <h3 className="font-bold text-sm uppercase tracking-wider mb-3">Sort By</h3>
+                                    <div className="space-y-2">
                                         {[
                                             { value: 'name', label: 'Name (A-Z)' },
                                             { value: 'price-low', label: 'Price: Low to High' },
@@ -319,7 +260,199 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters }: FilterDrawerPr
                                             </label>
                                         ))}
                                     </div>
-                                )}
+                                </div>
+                            </div>
+
+                            {/* Desktop Layout - Original */}
+                            <div className="hidden md:block space-y-6">
+                                {/* Gender Filter */}
+                                <div className="border-b pb-6">
+                                    <button
+                                        onClick={() => toggleSection('gender')}
+                                        className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
+                                    >
+                                        <h3 className="font-bold text-sm uppercase tracking-wider">Gender</h3>
+                                        <ChevronDown 
+                                            size={16} 
+                                            className={`transition-transform duration-200 ${
+                                                expandedSections.includes('gender') ? 'rotate-180' : ''
+                                            }`}
+                                        />
+                                    </button>
+                                    {expandedSections.includes('gender') && (
+                                        <div className="space-y-3">
+                                            {['Male', 'Female', 'Unisex'].map((gender) => (
+                                                <label key={gender} className="flex items-center gap-3 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedGenders.includes(gender)}
+                                                        onChange={() => toggleGender(gender)}
+                                                        className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
+                                                    />
+                                                    <span className="text-sm text-gray-700">{gender}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Size Filter */}
+                                <div className="border-b pb-6">
+                                    <button
+                                        onClick={() => toggleSection('size')}
+                                        className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
+                                    >
+                                        <h3 className="font-bold text-sm uppercase tracking-wider">Size</h3>
+                                        <ChevronDown 
+                                            size={16} 
+                                            className={`transition-transform duration-200 ${
+                                                expandedSections.includes('size') ? 'rotate-180' : ''
+                                            }`}
+                                        />
+                                    </button>
+                                    {expandedSections.includes('size') && (
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                                                <button
+                                                    key={size}
+                                                    onClick={() => toggleSize(size)}
+                                                    className={`py-2 px-3 text-xs font-medium border transition-colors ${
+                                                        selectedSizes.includes(size)
+                                                            ? 'bg-black text-white border-black'
+                                                                : 'bg-white text-black border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    {size}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Price Filter */}
+                                <div className="border-b pb-6">
+                                    <button
+                                        onClick={() => toggleSection('price')}
+                                        className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
+                                    >
+                                        <h3 className="font-bold text-sm uppercase tracking-wider">Price (₹)</h3>
+                                        <ChevronDown 
+                                            size={16} 
+                                            className={`transition-transform duration-200 ${
+                                                expandedSections.includes('price') ? 'rotate-180' : ''
+                                            }`}
+                                        />
+                                    </button>
+                                    {expandedSections.includes('price') && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <input
+                                                    type="number"
+                                                    placeholder="Min"
+                                                    value={priceRange.min}
+                                                    onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:border-black"
+                                                />
+                                                <span className="text-gray-500">-</span>
+                                                <input
+                                                    type="number"
+                                                    placeholder="Max"
+                                                    value={priceRange.max}
+                                                    onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                                                    className="w-full px-3 py-2 text-sm border border-gray-300 focus:outline-none focus:border-black"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Color Filter */}
+                                <div className="border-b pb-6">
+                                    <button
+                                        onClick={() => toggleSection('color')}
+                                        className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
+                                    >
+                                        <h3 className="font-bold text-sm uppercase tracking-wider">Color</h3>
+                                        <ChevronDown 
+                                            size={16} 
+                                            className={`transition-transform duration-200 ${
+                                                expandedSections.includes('color') ? 'rotate-180' : ''
+                                            }`}
+                                        />
+                                    </button>
+                                    {expandedSections.includes('color') && (
+                                        <div className="grid grid-cols-6 gap-3">
+                                            {['Black', 'White', 'Gray', 'Brown', 'Blue', 'Red', 'Navy', 'Cream', 'Gold', 'Camel'].map((color) => (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => toggleColor(color)}
+                                                    className={`relative group cursor-pointer`}
+                                                >
+                                                    <div
+                                                        className={`w-10 h-10 rounded-full border-2 transition-all ${
+                                                            selectedColors.includes(color)
+                                                                ? 'border-black ring-2 ring-offset-2 ring-black'
+                                                                : 'border-gray-300 hover:border-gray-400'
+                                                        }`}
+                                                        style={{
+                                                            backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' : 
+                                                                                color.toLowerCase() === 'black' ? '#000000' :
+                                                                                color.toLowerCase() === 'gray' ? '#6b7280' :
+                                                                                color.toLowerCase() === 'brown' ? '#92400e' :
+                                                                                color.toLowerCase() === 'blue' ? '#2563eb' :
+                                                                                color.toLowerCase() === 'red' ? '#dc2626' :
+                                                                                color.toLowerCase() === 'navy' ? '#001f3f' :
+                                                                                color.toLowerCase() === 'cream' ? '#fffdd0' :
+                                                                                color.toLowerCase() === 'gold' ? '#ffd700' :
+                                                                                color.toLowerCase() === 'camel' ? '#c19a6b' : '#000000'
+                                                        }}
+                                                    />
+                                                    {color === 'White' && (
+                                                        <div className="absolute inset-0 rounded-full border border-gray-300" />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Sort */}
+                                <div className="pb-6">
+                                    <button
+                                        onClick={() => toggleSection('sort')}
+                                        className="flex items-center justify-between w-full text-left mb-4 cursor-pointer"
+                                    >
+                                        <h3 className="font-bold text-sm uppercase tracking-wider">Sort By</h3>
+                                        <ChevronDown 
+                                            size={16} 
+                                            className={`transition-transform duration-200 ${
+                                                expandedSections.includes('sort') ? 'rotate-180' : ''
+                                            }`}
+                                        />
+                                    </button>
+                                    {expandedSections.includes('sort') && (
+                                        <div className="space-y-3">
+                                            {[
+                                                { value: 'name', label: 'Name (A-Z)' },
+                                                { value: 'price-low', label: 'Price: Low to High' },
+                                                { value: 'price-high', label: 'Price: High to Low' },
+                                                { value: 'rating', label: 'Rating (Highest)' }
+                                            ].map(option => (
+                                                <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="sort"
+                                                        value={option.value}
+                                                        checked={sortBy === option.value}
+                                                        onChange={(e) => setSortBy(e.target.value as any)}
+                                                        className="w-4 h-4 text-black border-gray-300 focus:ring-black"
+                                                    />
+                                                    <span className="text-sm text-gray-700">{option.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                         </div>

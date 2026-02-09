@@ -114,7 +114,7 @@ export default function CategoryPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {products.map((product) => (
+                        {products.map((product: Product) => (
                             <Link
                                 key={product.id}
                                 href={`/product/${product.id}`}

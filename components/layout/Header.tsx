@@ -93,7 +93,7 @@ export function Header() {
   const logoColor = isHome && !isCatalog ? 'text-white' : 'text-black'
 
   return (
-    <header className={`relative w-full z-50 transition-all duration-300 ${headerBg} py-6`}>
+    <header className={`relative w-full z-50 transition-all duration-300 ${headerBg} py-4`}>
       <nav className="max-w-[1400px] mx-auto px-2 py-0.5 grid grid-cols-3 items-center">
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
@@ -117,20 +117,29 @@ export function Header() {
           ))}
         </div>
 
-        {/* Mobile Menu Toggle (Left on Mobile) */}
-        <div className="flex md:hidden items-center">
+        {/* Mobile Navigation */}
+        <div className="flex md:hidden items-center gap-1">
+          {/* Hamburger Menu */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className={`p-2 ${textColor}`}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
+
+          {/* Search Icon */}
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className={`p-2 ${textColor} hover:opacity-70 transition-opacity`}
+          >
+            <Search size={20} strokeWidth={1.5} />
+          </button>
         </div>
 
         {/* Center Logo */}
         <div className="flex justify-center items-center">
           <Link href="/" className="flex-shrink-0">
-            <span className={`font-sans text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-[0.2em] whitespace-nowrap transition-all ${logoColor} ${!isHome || isCatalog ? '' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]'}`}>
+            <span className={`font-sans text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-[0.1em] md:tracking-[0.2em] whitespace-nowrap transition-all ${logoColor} ${!isHome || isCatalog ? '' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]'}`}>
               BUTTERFLY
             </span>
           </Link>
@@ -159,8 +168,8 @@ export function Header() {
 
           {/* Action Icons */}
           <div className={`flex items-center gap-3 md:gap-6 transition-colors ${textColor}`}>
-            {/* Search Bar */}
-            <div className="relative flex items-center">
+            {/* Search Bar - Desktop Only */}
+            <div className="relative hidden md:flex items-center">
               {isSearchOpen ? (
                 <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50">
                   <div className="relative w-full px-4 pt-4">
@@ -192,58 +201,62 @@ export function Header() {
                 <Search size={20} strokeWidth={1.5} />
               </button>
             </div>
-            {user && (
-              <Link href="/wishlist" className="hover:opacity-70 transition-opacity hidden sm:flex items-center hover:cursor-pointer">
-                <Heart size={20} strokeWidth={1.5} />
-              </Link>
-            )}
 
-            {/* Auth/Account */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="hover:opacity-70 transition-opacity flex items-center gap-1 hover:cursor-pointer">
-                  <User size={20} strokeWidth={1.5} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 mt-4">
-                {user ? (
-                  <>
-                    <div className="px-2 py-1.5 text-sm font-medium border-b mb-1">
-                      Hi, {user.name}
-                    </div>
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer w-full">Profile</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/orders" className="cursor-pointer w-full">Orders</Link>
-                    </DropdownMenuItem>
-                    {user.role === 'admin' && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/admin" className="cursor-pointer w-full text-blue-600 font-medium">Admin Dashboard</Link>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/login" className="cursor-pointer w-full">Login</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/signup" className="cursor-pointer w-full">Sign Up</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* User Icon */}
+            <div className="relative">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="hover:opacity-70 transition-opacity flex items-center gap-1 hover:cursor-pointer">
+                    <User size={20} strokeWidth={1.5} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-56" 
+                  sideOffset={4}
+                  alignOffset={0}
+                  avoidCollisions={true}
+                >
+                  {user ? (
+                    <>
+                      <div className="px-2 py-1.5 text-sm font-medium border-b mb-1">
+                        Hi, {user.name}
+                      </div>
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile" className="cursor-pointer w-full">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/orders" className="cursor-pointer w-full">Orders</Link>
+                      </DropdownMenuItem>
+                      {user.role === 'admin' && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin" className="cursor-pointer w-full text-blue-600 font-medium">Admin Dashboard</Link>
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/login" className="cursor-pointer w-full">Login</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/signup" className="cursor-pointer w-full">Sign Up</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
+            {/* Shopping Bag */}
             <button
               onClick={() => setIsCartOpen(true)}
               className="flex items-center hover:opacity-70 transition-opacity cursor-pointer relative"
