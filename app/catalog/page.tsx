@@ -1,30 +1,14 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CatalogBanner } from '@/components/catalog/CatalogBanner';
 import Link from 'next/link';
-
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-    category: string;
-    subcategory?: string;
-    color: string;
-    gender?: string;
-    size: string[];
-    rating: number;
-    reviews: number;
-    image?: string;
-    imageUrl?: string;
-    inStock: boolean;
-    onSale?: boolean;
-    salePrice?: number;
-    images?: string[];
-}
+import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer';
+import { filterAndSortProducts, FilterOptions, getAllProducts, Product } from '@/lib/products';
+import { Sliders } from 'lucide-react';
 
 interface Collection {
-    id: number;  // actually string in mongo, but let's keep it flexible or string
+    id: number;
     _id: string;
     name: string;
     description?: string;
@@ -35,28 +19,41 @@ interface Collection {
 
 export default function CatalogPage() {
     const [collections, setCollections] = useState<Collection[]>([]);
-    const [products, setProducts] = useState<Product[]>([]);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const searchParams = useSearchParams();
     const collectionParam = searchParams.get('collection');
 
-    // Find the collection that matches the URL parameter
-    const currentCollection = collections.find(c =>
-        c.name.toLowerCase() === collectionParam?.toLowerCase()
-    );
+    const allProducts = useMemo(() => getAllProducts(), []);
+
+    const filteredProducts = useMemo(() => {
+        if (!collectionParam) return [];
+
+        let options: FilterOptions = {
+            categories: [decodeURIComponent(collectionParam)],
+        };
+
+        if (activeFilters) {
+            options = {
+                ...options,
+                sizes: activeFilters.sizes,
+                colors: activeFilters.colors,
+                genders: activeFilters.genders,
+                priceRange: [
+                    Number(activeFilters.priceRange.min) || 0,
+                    Number(activeFilters.priceRange.max) || 10000
+                ],
+                sortBy: activeFilters.sortBy
+            }
+        }
+
+        return filterAndSortProducts(allProducts, options);
+    }, [collectionParam, activeFilters, allProducts]);
 
     useEffect(() => {
         fetchCollections();
     }, []);
-
-    useEffect(() => {
-        if (collectionParam) {
-            // Fetch products for specific collection
-            fetchCollectionProducts(collectionParam);
-        } else {
-            setProducts([]);
-        }
-    }, [collectionParam]);
 
     const fetchCollections = async () => {
         try {
@@ -71,31 +68,6 @@ export default function CatalogPage() {
             console.error('Failed to fetch collections:', error);
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const fetchCollectionProducts = async (collectionName: string) => {
-        try {
-            const response = await fetch('/api/products');
-            const data = await response.json();
-            
-            if (data.success && data.products && Array.isArray(data.products)) {
-                // Filter products that belong to this collection
-                const collectionProducts = data.products.filter((p: Product) => {
-                    const decodedCollectionName = decodeURIComponent(collectionName.toLowerCase());
-                    const productCategory = p.category?.toLowerCase();
-                    const productSubCategory = p.subcategory?.toLowerCase();
-                    
-                    return productCategory === decodedCollectionName || productSubCategory === decodedCollectionName;
-                })
-                setProducts(collectionProducts);
-            } else {
-                console.error('Invalid data structure:', data);
-                setProducts([]);
-            }
-        } catch (error) {
-            console.error('Failed to fetch collection products:', error);
-            setProducts([]);
         }
     };
 
@@ -114,7 +86,11 @@ export default function CatalogPage() {
     return (
         <main className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
             {/* Banner Section */}
-            <CatalogBanner />
+            <CatalogBanner
+                title={collectionParam ? decodeURIComponent(collectionParam).toUpperCase() : "CATALOG"}
+                subtitle={collectionParam ? `Explore our ${decodeURIComponent(collectionParam)} collection` : "Explore our complete collection"}
+                backgroundImage="/banners/b2.JPG"
+            />
 
             <div className="max-w-[1400px] mx-auto px-5 py-8">
                 {/* Categories/Products Section */}
@@ -130,87 +106,94 @@ export default function CatalogPage() {
                             <span className="text-black font-medium capitalize">{collectionParam}</span>
                         </div>
 
-                        <div className="mb-8">
-                            <h1 className="text-3xl font-bold text-black capitalize">
-                                {collectionParam}
-                            </h1>
-                            <p className="text-gray-600 mt-2">
-                                Showing products in {collectionParam} collection
-                            </p>
+                        <div className="mb-8 flex justify-between items-center bg-gray-50 p-6">
+                            <div className="flex items-center gap-6">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-black capitalize">
+                                        {collectionParam}
+                                    </h1>
+                                    <p className="text-gray-600 mt-2">
+                                        Showing {filteredProducts.length} pieces in {collectionParam} collection
+                                    </p>
+                                </div>
+                                <div className="hidden md:flex items-center gap-3 pl-6 border-l">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Sort:</span>
+                                    <select
+                                        value={activeFilters?.sortBy || 'name'}
+                                        onChange={(e) => setActiveFilters(prev => ({
+                                            ...prev || { genders: [], sizes: [], colors: [], priceRange: { min: null, max: null }, sortBy: 'name' },
+                                            sortBy: e.target.value as any
+                                        }))}
+                                        className="text-xs font-bold uppercase tracking-widest bg-transparent border-none focus:ring-0 cursor-pointer text-black"
+                                    >
+                                        <option value="name">Featured</option>
+                                        <option value="price-low">Price: Low to High</option>
+                                        <option value="price-high">Price: High to Low</option>
+                                        <option value="rating">Top Rated</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsFilterOpen(true)}
+                                className="flex items-center gap-2 px-6 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all flex-shrink-0"
+                            >
+                                <Sliders size={18} />
+                                Refine
+                            </button>
                         </div>
 
-                        {products.length === 0 ? (
+                        {filteredProducts.length === 0 ? (
                             <div className="flex justify-center items-center py-20">
                                 <div className="text-center">
-                                    <p className="text-gray-600 text-lg mb-4">No products found in this collection</p>
-                                    <Link 
-                                        href="/catalog" 
+                                    <p className="text-gray-600 text-lg mb-4">No products found matching your filters</p>
+                                    <button
+                                        onClick={() => setActiveFilters(null)}
                                         className="inline-flex items-center justify-center px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors duration-300 text-sm tracking-wide uppercase"
                                     >
-                                        Back to Catalog
-                                    </Link>
+                                        Clear Filters
+                                    </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                                {products.map((product) => (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+                                {filteredProducts.map((product: Product) => (
                                     <Link
                                         href={`/product/${product.id}`}
                                         key={product.id}
                                         className="group block"
                                     >
-                                        <div className="relative overflow-hidden bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 mb-4">
-                                            {/* Product Image */}
-                                            <div className="relative aspect-[4/5] overflow-hidden rounded-t-lg">
-                                                {(product.images && product.images.length > 0) || product.image || product.imageUrl ? (
-                                                    <img
-                                                        src={product.images?.[0] || product.image || product.imageUrl}
-                                                        alt={product.name}
-                                                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                                                        <span className="text-gray-500 text-sm">No Image</span>
+                                        <div className="relative overflow-hidden bg-[#F9F9F9] mb-4 aspect-[3/4]">
+                                            <img
+                                                src={product.images?.[0] || product.image || product.imageUrl}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                                            />
+                                            <div className="absolute top-4 left-4 z-10 flex gap-2">
+                                                {product.isNew && (
+                                                    <div className="bg-black text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest">
+                                                        NEW
                                                     </div>
                                                 )}
-                                                
-                                                {/* Badges */}
-                                                <div className="absolute top-4 left-4 z-10 flex gap-2">
-                                                    {product.isNew && (
-                                                        <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                                            NEW
-                                                        </div>
-                                                    )}
-                                                    {product.onSale && (
-                                                        <div className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                                            SALE
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                {product.onSale && (
+                                                    <div className="bg-red-600 text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest">
+                                                        SALE
+                                                    </div>
+                                                )}
                                             </div>
-                                            
-                                            {/* Product Info */}
-                                            <div className="p-4 space-y-2">
-                                                <h3 className="font-medium text-black text-sm uppercase tracking-wide mb-2">
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-start">
+                                                <h3 className="text-xs font-bold uppercase tracking-widest text-black group-hover:text-gray-600 transition-colors pr-4">
                                                     {product.name}
                                                 </h3>
-                                                
-                                                <div className="flex items-baseline gap-2">
-                                                    <p className="text-black font-semibold text-lg">
-                                                        ₹{product.salePrice || product.price}
-                                                    </p>
-                                                    {product.salePrice && (
-                                                        <>
-                                                            <span className="text-gray-400 line-through text-sm">
-                                                                ₹{product.price}
-                                                            </span>
-                                                            <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">
-                                                                {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
-                                                            </span>
-                                                        </>
-                                                    )}
-                                                </div>
+                                                <span className="text-xs font-bold text-black whitespace-nowrap">
+                                                    ₹{product.price.toLocaleString()}
+                                                </span>
                                             </div>
+                                            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400">
+                                                {product.category}
+                                            </p>
                                         </div>
                                     </Link>
                                 ))}
@@ -223,7 +206,7 @@ export default function CatalogPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {collections.map((collection) => (
+                        {collections.map((collection: Collection) => (
                             <Link
                                 href={`/catalog?collection=${encodeURIComponent(collection.name)}`}
                                 key={collection.id}
@@ -259,6 +242,16 @@ export default function CatalogPage() {
                     </div>
                 )}
             </div>
+
+            <FilterDrawer
+                isOpen={isFilterOpen}
+                onClose={() => setIsFilterOpen(false)}
+                onApplyFilters={(filters) => {
+                    setActiveFilters(filters)
+                    setIsFilterOpen(false)
+                }}
+                initialFilters={activeFilters || undefined}
+            />
         </main>
     );
 }

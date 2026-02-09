@@ -33,6 +33,7 @@ export function HeroBanner({
 }: HeroBannerProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
   const textRef = useRef<HTMLDivElement | null>(null)
+  const imageRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!sectionRef.current || !textRef.current) return
@@ -40,6 +41,7 @@ export function HeroBanner({
     gsap.registerPlugin(ScrollTrigger)
 
     const ctx = gsap.context(() => {
+      // Common scroll parallax effect
       gsap.fromTo(
         textRef.current,
         { y: 0 },
@@ -54,6 +56,36 @@ export function HeroBanner({
           }
         }
       )
+
+      // Entrance animation - for ALL hero banners when they scroll into view
+      if (imageRef.current && textRef.current) {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 90%", // Animation starts when top of banner hits 90% of viewport (entered 10%)
+            end: "bottom top",
+            toggleActions: "play none none reverse" // Replays when scrolling back up
+          }
+        });
+
+        // Initial states
+        gsap.set(imageRef.current, { scale: 1.2, opacity: 0 });
+        gsap.set(textRef.current, { y: 100, opacity: 0 });
+
+        // Animation sequence
+        tl.to(imageRef.current, {
+          scale: 1,
+          opacity: 1,
+          duration: 1.5,
+          ease: "power2.out"
+        })
+          .to(textRef.current, {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out"
+          }, 0.2); // Start text animation 0.2s after image starts (absolute time)
+      }
     }, sectionRef)
 
     return () => ctx.revert()
@@ -65,7 +97,7 @@ export function HeroBanner({
       className={`relative w-full overflow-hidden ${isFirst ? 'h-[110vh] -mt-32 pt-32' : 'h-screen'}`}
     >
       {/* Background Image */}
-      <div className="absolute inset-0 z-0 bg-gray-50">
+      <div ref={imageRef} className="absolute inset-0 z-0 bg-gray-50">
         {backgroundImage && (
           <>
             <Image
@@ -86,8 +118,8 @@ export function HeroBanner({
 
       {/* Content */}
       <div ref={textRef} className="relative z-10 flex h-full flex-col items-center justify-center p-4">
-        <h1 className={`mb-4 text-center font-serif text-5xl font-bold md:text-6xl lg:text-7xl ${backgroundImage ? 'text-white' : 'text-[#003300]'}`} style={{ fontFamily: "'Birds of Paradise Personal use Regular', serif" }}>
-          {title}
+        <h1 className={`mb-4 text-center font-birds text-5xl font-normal tracking-wide md:text-6xl lg:text-7xl ${backgroundImage ? 'text-white' : 'text-[#003300]'} capitalize`}>
+          {title.toLowerCase()}
         </h1>
         <p className={`mb-8 text-center text-base md:text-lg ${backgroundImage ? 'text-white' : 'text-red-800'}`}>
           {subtitle}

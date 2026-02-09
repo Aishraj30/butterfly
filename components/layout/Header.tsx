@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  ShoppingBag
+  ShoppingBag,
+  Package
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -44,6 +45,7 @@ const navigation = [
 export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [expandedSections, setExpandedSections] = useState<string[]>(['catalog', 'featured'])
   const [isCatalogHovered, setIsCatalogHovered] = useState(false)
   const [isCatalogDrawerOpen, setIsCatalogDrawerOpen] = useState(false)
   const [isFeaturedDrawerOpen, setIsFeaturedDrawerOpen] = useState(false)
@@ -167,7 +169,7 @@ export function Header() {
           </nav>
 
           {/* Action Icons */}
-          <div className={`flex items-center gap-3 md:gap-6 transition-colors ${textColor}`}>
+          <div className={`flex items-center gap-6 transition-colors ${textColor}`}>
             {/* Search Bar - Desktop Only */}
             <div className="relative hidden md:flex items-center">
               {isSearchOpen ? (
@@ -210,9 +212,9 @@ export function Header() {
                     <User size={20} strokeWidth={1.5} />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  className="w-56" 
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56"
                   sideOffset={4}
                   alignOffset={0}
                   avoidCollisions={true}
@@ -273,68 +275,161 @@ export function Header() {
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-white z-50 md:hidden flex flex-col p-8 pt-24 space-y-6 overflow-y-auto">
-          <button
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="absolute top-8 right-6 text-black"
-          >
-            <X size={32} />
-          </button>
+      {/* Mobile Menu Drawer */}
+      <>
+        {/* Backdrop Overlay */}
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          className={`fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm cursor-pointer transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}
+        />
 
-          {navigation.map((item) => (
-            <div key={item.name}>
-              <Link
-                href={item.href}
+        {/* Mobile Menu Panel */}
+        <div
+          className={`fixed top-0 left-0 z-[101] h-screen w-full max-w-[320px] bg-white shadow-2xl transition-transform duration-500 md:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
+        >
+          <div className="flex h-full flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b px-6 py-6">
+              <h2 className="text-xl font-bold uppercase tracking-[0.2em] text-black">
+                Menu
+              </h2>
+              <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-2xl font-serif text-black tracking-widest uppercase border-b border-black/10 pb-4 block"
+                className="group rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer bg-gray-100"
               >
-                {item.name}
-              </Link>
-              {item.hasDropdown && collections.length > 0 && (
-                <div className="pl-6 pt-4 space-y-2">
-                  {collections.map((collection) => (
-                    <Link
-                      key={collection.id}
-                      href={`/catalog?collection=${collection.name}`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block text-sm text-black/60 py-2 hover:text-black transition-colors"
-                    >
-                      {collection.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
+                <X size={24} className="transition-transform duration-300 group-hover:rotate-90 text-black" />
+              </button>
             </div>
-          ))}
 
-          <div className="pt-8 space-y-4">
-            <Link href="/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-black/70 text-lg">
-              <Heart size={20} /> Wishlist
-            </Link>
-            <Link href="/search" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-black/70 text-lg">
-              <Search size={20} /> Search
-            </Link>
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-6 space-y-2">
+                {navigation.map((item) => (
+                  <div key={item.name} className="border-b border-gray-100">
+                    <button
+                      onClick={() => {
+                        setExpandedSections(prev =>
+                          prev.includes(item.name.toLowerCase())
+                            ? prev.filter(s => s !== item.name.toLowerCase())
+                            : [...prev, item.name.toLowerCase()]
+                        )
+                      }}
+                      className="flex items-center justify-between w-full py-4 text-left"
+                    >
+                      <span className="text-lg font-semibold text-black uppercase tracking-wide">
+                        {item.name}
+                      </span>
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform duration-200 ${expandedSections.includes(item.name.toLowerCase()) ? 'rotate-180' : ''
+                          }`}
+                      />
+                    </button>
 
-            <div className="pt-4 border-t border-black/10">
-              {user ? (
-                <div className="space-y-4">
-                  <p className="text-black/50 text-sm">Logged in as {user.name}</p>
-                  <button onClick={logout} className="text-red-500 text-lg flex items-center gap-2">
-                    <LogOut size={20} /> Logout
-                  </button>
+                    {expandedSections.includes(item.name.toLowerCase()) && (
+                      <div className="pb-4 space-y-2">
+                        {item.hasDropdown && collections.length > 0 ? (
+                          collections.map((collection, idx) => (
+                            <Link
+                              key={collection.id || idx}
+                              href={`/catalog?collection=${collection.name}`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="block pl-4 py-2 text-sm text-gray-600 hover:text-black transition-colors"
+                            >
+                              {collection.name}
+                            </Link>
+                          ))
+                        ) : (
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block pl-4 py-2 text-sm text-gray-600 hover:text-black transition-colors"
+                          >
+                            View {item.name}
+                          </Link>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Additional Links */}
+                <div className="pt-4 space-y-2 border-t border-gray-100">
+                  <Link
+                    href="/wishlist"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                  >
+                    <Heart size={18} />
+                    <span className="text-sm">Wishlist</span>
+                  </Link>
+                  <Link
+                    href="/search"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                  >
+                    <Search size={18} />
+                    <span className="text-sm">Search</span>
+                  </Link>
                 </div>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="bg-[#CDA45D] text-white py-4 text-center font-bold tracking-widest">LOGIN</Link>
-                  <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} className="border border-black/20 text-black py-4 text-center font-bold tracking-widest">SIGN UP</Link>
+
+                {/* User Section */}
+                <div className="pt-4 space-y-2 border-t border-gray-100">
+                  {user ? (
+                    <>
+                      <Link
+                        href="/orders"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                      >
+                        <Package size={18} />
+                        <span className="text-sm">Orders</span>
+                      </Link>
+                      {user.role === 'admin' && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block pl-4 py-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          logout()
+                          setIsMobileMenuOpen(false)
+                        }}
+                        className="w-full text-left pl-4 py-2 text-sm text-red-600 hover:text-red-700 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <div className="space-y-3">
+                      <Link
+                        href="/login"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block w-full bg-black text-white py-3 text-center font-medium tracking-wide hover:bg-gray-800 transition-colors"
+                      >
+                        LOGIN
+                      </Link>
+                      <Link
+                        href="/signup"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block w-full border border-gray-300 text-black py-3 text-center font-medium tracking-wide hover:bg-gray-50 transition-colors"
+                      >
+                        SIGN UP
+                      </Link>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </>
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
       <CatalogDrawer isOpen={isCatalogDrawerOpen} onClose={() => setIsCatalogDrawerOpen(false)} />

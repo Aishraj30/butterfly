@@ -225,49 +225,137 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     {/* Left: Image */}
                     <div className="flex gap-4">
                         <div className="flex-1">
-                            <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden rounded-lg max-w-[480px] max-h-[600px]">
-                                <div className="w-full h-full relative flex items-center justify-center bg-gray-50">
-                                    {displayImage ? (
-                                        <img
-                                            src={displayImage}
-                                            alt={product.name}
-                                            className="w-full h-full object-cover object-top"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
-                                    )}
+                            {/* Mobile Image Carousel */}
+                            <div className="md:hidden">
+                                <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden rounded-lg">
+                                    <div className="w-full h-full relative">
+                                        {displayImage ? (
+                                            <img
+                                                src={displayImage}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover object-top"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
+                                        )}
 
-                                    {/* Badge */}
-                                    {(product.isNew || product.onSale) && (
-                                        <div className="absolute top-4 left-4 z-10">
-                                            {product.isNew && (
-                                                <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2">
-                                                    NEW
-                                                </div>
-                                            )}
-                                            {product.onSale && (
-                                                <div className="bg-red-600 text-white text-xs font-bold px-3 py-1">
-                                                    SALE
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                        {/* Badge */}
+                                        {(product.isNew || product.onSale) && (
+                                            <div className="absolute top-4 left-4 z-10">
+                                                {product.isNew && (
+                                                    <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2">
+                                                        NEW
+                                                    </div>
+                                                )}
+                                                {product.onSale && (
+                                                    <div className="bg-red-600 text-white text-xs font-bold px-3 py-1">
+                                                        SALE
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Navigation Arrows */}
+                                        {allImages.length > 1 && (
+                                            <>
+                                                <button
+                                                    onClick={() => setSelectedImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length)}
+                                                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg z-20"
+                                                >
+                                                    <ChevronLeft size={16} className="text-black" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedImageIndex((prev) => (prev + 1) % allImages.length)}
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg z-20"
+                                                >
+                                                    <ChevronLeft size={16} className="text-black rotate-180" />
+                                                </button>
+                                            </>
+                                        )}
+
+                                        {/* Image Indicators */}
+                                        {allImages.length > 1 && (
+                                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                                                {allImages.map((_, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setSelectedImageIndex(index)}
+                                                        className={`w-2 h-2 rounded-full transition-colors ${selectedImageIndex === index
+                                                            ? 'bg-black'
+                                                            : 'bg-white/60 hover:bg-white/80'
+                                                            }`}
+                                                    >
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Desktop Image */}
+                            <div className="hidden md:block group">
+                                <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden rounded-lg max-w-[480px] max-h-[600px]">
+                                    <div className="w-full h-full relative flex items-center justify-center bg-gray-50">
+                                        {displayImage ? (
+                                            <img
+                                                src={displayImage}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover object-top"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
+                                        )}
+
+                                        {/* Badge */}
+                                        {(product.isNew || product.onSale) && (
+                                            <div className="absolute top-4 left-4 z-10">
+                                                {product.isNew && (
+                                                    <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2">
+                                                        NEW
+                                                    </div>
+                                                )}
+                                                {product.onSale && (
+                                                    <div className="bg-red-600 text-white text-xs font-bold px-3 py-1">
+                                                        SALE
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Desktop Navigation Arrows */}
+                                        {allImages.length > 1 && (
+                                            <>
+                                                <button
+                                                    onClick={() => setSelectedImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length)}
+                                                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <ChevronLeft size={20} className="text-black" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedImageIndex((prev) => (prev + 1) % allImages.length)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-lg z-20 hover:bg-white transition-colors group opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <ChevronLeft size={20} className="text-black rotate-180" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        {/* Thumbnail Gallery */}
-                        <div className="flex flex-col gap-4">
+
+                        {/* Thumbnail Gallery - Desktop Only */}
+                        <div className="hidden md:flex flex-col gap-4">
                             {allImages.length > 1 ? (
                                 allImages.map((image, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setSelectedImageIndex(index)}
-                                        className={`w-40 h-46 border-2 rounded overflow-hidden transition-all ${
-                                            selectedImageIndex === index 
-                                                ? 'border-black opacity-100' 
-                                                : 'border-gray-300 opacity-70 hover:opacity-100 hover:border-gray-400'
-                                        }`}
+                                        className={`w-40 h-46 border-2 rounded overflow-hidden transition-all ${selectedImageIndex === index
+                                            ? 'border-black opacity-100'
+                                            : 'border-gray-300 opacity-70 hover:opacity-100 hover:border-gray-400'
+                                            }`}
                                     >
                                         <img
                                             src={image}
@@ -375,9 +463,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             )}
                         </div>
 
-                        
-
-                        
                         {/* Size Selector */}
                         <div>
                             <h3 className="font-semibold text-black mb-3">Available Sizes</h3>
@@ -481,11 +566,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 <p><strong>Sleeve Type:</strong> {product.sleeveType || 'N/A'}</p>
                                 <p><strong>Wash Care:</strong> {product.washCare || 'N/A'}</p>
                                 <p><strong>Country of Manufacture:</strong> {product.countryOfManufacture || 'N/A'}</p>
-
-                                                            </div>
+                            </div>
                         </div>
 
-                
                     </div>
                 </div>
             </div>

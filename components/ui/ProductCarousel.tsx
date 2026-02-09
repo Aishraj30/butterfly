@@ -42,7 +42,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
   }
 
   return (
-    <section className="w-full pt-4 md:pt-2 pb-1 md:pb-1 text-black bg-white">
+    <section className="w-full pt-1 md:pt-2 pb-1 md:pb-1 text-black bg-white">
       <div className="w-full">
         {/* Carousel Container */}
         <div className="relative overflow-hidden">
@@ -79,7 +79,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
           <div className="hidden md:block">
             <div
               ref={carouselRef}
-              className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pl-0.5 md:pl-1 lg:pl-1.5"
+              className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pl-0.5 md:pl-1 lg:pl-1.5 pb-1"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
