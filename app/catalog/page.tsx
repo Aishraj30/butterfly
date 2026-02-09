@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CatalogBanner } from '@/components/catalog/CatalogBanner';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ interface Collection {
     products?: Product[];
 }
 
-export default function CatalogPage() {
+function CatalogContent() {
     const [collections, setCollections] = useState<Collection[]>([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
@@ -253,5 +253,13 @@ export default function CatalogPage() {
                 initialFilters={activeFilters || undefined}
             />
         </main>
+    );
+}
+
+export default function CatalogPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-white"><p className="text-gray-500 animate-pulse uppercase tracking-widest text-xs font-bold">Initializing Catalog...</p></div>}>
+            <CatalogContent />
+        </Suspense>
     );
 }
