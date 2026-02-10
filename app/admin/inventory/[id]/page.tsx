@@ -22,7 +22,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 
-export default function InventoryDetailPage({ params }) {
+export default function InventoryDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const { id } = params;
     const { item, isLoading, mutate } = useInventoryItem(id);
@@ -40,7 +40,7 @@ export default function InventoryDetailPage({ params }) {
             // Ideally refresh history too, but it's a separate hook. 
             // SWR revalidation might be needed on that key or just reload page.
             window.location.reload();
-        } catch (err) {
+        } catch (err: any) {
             alert(err.message);
         }
     };
@@ -87,7 +87,7 @@ export default function InventoryDetailPage({ params }) {
                                         type="number"
                                         min="1"
                                         value={restockQuantity}
-                                        onChange={(e) => setRestockQuantity(e.target.value)}
+                                        onChange={(e) => setRestockQuantity(Number(e.target.value))}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -200,7 +200,7 @@ export default function InventoryDetailPage({ params }) {
                                         <TableHead>Date</TableHead>
                                         <TableHead>Type</TableHead>
                                         <TableHead>Quantity</TableHead>
-                                        <TableHead>Stock (Before -> After)</TableHead>
+                                        <TableHead>Stock (Before &rarr; After)</TableHead>
                                         <TableHead>Reason</TableHead>
                                     </TableRow>
                                 </TableHeader>
