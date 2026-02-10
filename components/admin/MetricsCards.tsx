@@ -16,7 +16,7 @@ function MetricCard({ title, value, change, changeText, icon, color }: MetricCar
   const isNegative = change < 0
 
   return (
-    <div className="bg-white border border-[#D7C69D]/30 rounded-xl p-6 shadow-sm">
+    <div className="bg-white border border-[#D7C69D]/30 rounded-xl p-4 lg:p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <span className="text-gray-600 text-sm font-medium">
           {title}
@@ -25,16 +25,15 @@ function MetricCard({ title, value, change, changeText, icon, color }: MetricCar
           {icon}
         </div>
       </div>
-      
+
       <div className="space-y-2">
         <p className="text-2xl font-bold text-[#003300]">
           {value}
         </p>
-        
+
         <div className="flex items-center gap-2">
-          <div className={`flex items-center gap-1 text-sm font-medium ${
-            isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-600'
-          }`}>
+          <div className={`flex items-center gap-1 text-sm font-medium ${isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-600'
+            }`}>
             {isPositive ? <TrendingUp size={16} /> : isNegative ? <TrendingDown size={16} /> : null}
             {Math.abs(change)}%
           </div>

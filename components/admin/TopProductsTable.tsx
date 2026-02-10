@@ -43,11 +43,10 @@ function StarRating({ rating }: { rating: number }) {
           <Star
             key={i}
             size={14}
-            className={`${
-              i < Math.floor(rating)
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-gray-300 dark:text-gray-600'
-            }`}
+            className={`${i < Math.floor(rating)
+              ? 'fill-yellow-400 text-yellow-400'
+              : 'text-gray-300 dark:text-gray-600'
+              }`}
           />
         ))}
       </div>
@@ -60,7 +59,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export function TopProductsTable() {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 lg:p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -80,7 +79,7 @@ export function TopProductsTable() {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-700">
               <th className="text-left py-3 px-2 text-sm font-medium text-gray-600 dark:text-gray-400">

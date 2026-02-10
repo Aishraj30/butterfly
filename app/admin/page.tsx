@@ -19,32 +19,32 @@ export default function AdminDashboard() {
         <DashboardHeader />
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 lg:p-6">
           {/* Dashboard Title */}
-          <div className="mb-6">
+          <div className="mb-4 lg:mb-6">
             <h1 className="text-2xl font-bold text-[#005500]">
               Dashboard
             </h1>
           </div>
 
           {/* Metrics Cards */}
-          <div className="mb-8">
+          <div className="mb-6 lg:mb-8">
             <MetricsCards />
           </div>
 
           {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
             <SalesRevenueChart />
             <CustomerStatisticsChart />
           </div>
 
           {/* Bottom Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             <DistributionMap />
             <TopProductsTable />
           </div>
         </div>
-        
+
         {/* Theme Test Component - Remove in production */}
         <ThemeTest />
       </main>

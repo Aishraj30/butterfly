@@ -11,7 +11,7 @@ const Loading = () => <div className="p-8 text-center text-foreground/60">Loadin
 
 export default function AdminProductsPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -37,7 +37,7 @@ export default function AdminProductsPage() {
     }
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return
 
     try {
@@ -61,7 +61,7 @@ export default function AdminProductsPage() {
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
   ) : []
 
-  const toggleSelectProduct = (id: number) => {
+  const toggleSelectProduct = (id: string) => {
     setSelectedProducts((prev) =>
       prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
     )
@@ -83,7 +83,7 @@ export default function AdminProductsPage() {
         <main className="flex-1 lg:ml-0">
           {/* Header */}
           <div className="bg-white border-b border-[#D7C69D]/30 sticky top-0 z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:ml-0">
+            <div className="max-w-7xl mx-auto px-4 pl-14 sm:px-6 lg:px-8 py-6 lg:ml-0">
               <div className="flex justify-between items-center">
                 <div>
                   <h1 className="font-serif text-3xl font-bold text-[#005500]">
@@ -145,7 +145,7 @@ export default function AdminProductsPage() {
             {/* Products Table */}
             <div className="bg-white border border-[#D7C69D]/30 rounded-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[800px]">
                   <thead className="bg-[#F7E6CA]/50 border-b border-[#D7C69D]/30">
                     <tr>
                       <th className="px-6 py-4 text-left w-12">
@@ -217,8 +217,8 @@ export default function AdminProductsPage() {
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <span className={`font-medium ${!product.inStock
-                                ? 'text-red-600'
-                                : 'text-green-600'
+                              ? 'text-red-600'
+                              : 'text-green-600'
                               }`}>
                               {product.inStock ? 'In Stock' : 'Out of Stock'}
                             </span>
@@ -228,8 +228,8 @@ export default function AdminProductsPage() {
                           </td>
                           <td className="px-6 py-4">
                             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${product.inStock
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
                               }`}>
                               {product.inStock ? 'Active' : 'Allocated'}
                             </span>

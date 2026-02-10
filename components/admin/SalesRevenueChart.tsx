@@ -29,7 +29,7 @@ export function SalesRevenueChart() {
   const [selectedFilter, setSelectedFilter] = useState('1y')
 
   return (
-    <div className="bg-white border border-[#D7C69D]/30 rounded-xl p-6 shadow-sm">
+    <div className="bg-white border border-[#D7C69D]/30 rounded-xl p-4 lg:p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-lg font-semibold text-[#003300]">
@@ -39,18 +39,17 @@ export function SalesRevenueChart() {
             Monthly sales overview
           </p>
         </div>
-        
+
         {/* Time Filters */}
         <div className="flex bg-[#F7E6CA]/50 rounded-lg p-1">
           {timeFilters.map((filter) => (
             <button
               key={filter.value}
               onClick={() => setSelectedFilter(filter.value)}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                selectedFilter === filter.value
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${selectedFilter === filter.value
                   ? 'bg-white text-[#003300] shadow-sm border border-[#D7C69D]/30'
                   : 'text-gray-600 hover:text-[#003300]'
-              }`}
+                }`}
             >
               {filter.label}
             </button>
@@ -63,17 +62,17 @@ export function SalesRevenueChart() {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={monthlyData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis 
-              dataKey="month" 
+            <XAxis
+              dataKey="month"
               tick={{ fill: '#6b7280', fontSize: 12 }}
               axisLine={{ stroke: '#e5e7eb' }}
             />
-            <YAxis 
+            <YAxis
               tick={{ fill: '#6b7280', fontSize: 12 }}
               axisLine={{ stroke: '#e5e7eb' }}
               tickFormatter={(value) => `₹${(value / 1000)}k`}
             />
-            <Tooltip 
+            <Tooltip
               formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Revenue']}
               contentStyle={{
                 backgroundColor: '#ffffff',
@@ -82,9 +81,9 @@ export function SalesRevenueChart() {
                 fontSize: '12px'
               }}
             />
-            <Bar 
-              dataKey="revenue" 
-              fill="#D7C69D" 
+            <Bar
+              dataKey="revenue"
+              fill="#D7C69D"
               radius={[8, 8, 0, 0]}
             />
           </BarChart>

@@ -45,16 +45,15 @@ export function AdminSidebar() {
       {/* Mobile Toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-40 p-2 bg-primary text-primary-foreground rounded-sm"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-primary text-primary-foreground rounded-sm"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 overflow-y-auto transition-all duration-300 lg:static ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 overflow-y-auto transition-all duration-300 lg:static z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
@@ -76,11 +75,10 @@ export function AdminSidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${
-                  isActive
-                    ? 'bg-[#F7E6CA] text-[#003300] border border-[#D7C69D]/30'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-[#F7E6CA]/50 hover:text-[#003300]'
-                }`}
+                className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${isActive
+                  ? 'bg-[#F7E6CA] text-[#003300] border border-[#D7C69D]/30'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-[#F7E6CA]/50 hover:text-[#003300]'
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon size={20} />
@@ -94,10 +92,10 @@ export function AdminSidebar() {
               </Link>
             )
           })}
-          
+
           {/* Divider */}
           <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
-          
+
           {/* Other Menu Items */}
           <Link
             href="/admin/settings"
@@ -107,7 +105,7 @@ export function AdminSidebar() {
             <Settings size={20} />
             <span className="font-medium">Settings</span>
           </Link>
-          
+
           <Link
             href="/admin/help"
             onClick={() => setIsOpen(false)}
@@ -116,7 +114,7 @@ export function AdminSidebar() {
             <HelpCircle size={20} />
             <span className="font-medium">Help & Privacy</span>
           </Link>
-          
+
           {/* Logout Button */}
           <button
             onClick={handleLogout}
@@ -126,7 +124,7 @@ export function AdminSidebar() {
             <span className="font-medium">Logout</span>
           </button>
         </nav>
-        
+
         {/* Theme Toggle */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <ThemeToggle />
