@@ -13,7 +13,14 @@ import { AnnouncementBar } from "@/components/layout/AnnouncementBar"
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter"
 import { LoadingProvider } from "@/components/LoadingProvider"
 
+import localFont from 'next/font/local'
+
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' })
+const birds = localFont({
+  src: './fonts/BirdsofParadise-PersonaluseOnly.woff2',
+  variable: '--font-birds',
+  display: 'swap',
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -50,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${birds.variable}`} suppressHydrationWarning>
       <body className={`font-sans antialiased bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AuthProvider>

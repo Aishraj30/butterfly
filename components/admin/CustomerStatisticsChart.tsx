@@ -30,10 +30,10 @@ export function CustomerStatisticsChart() {
 
   const renderCustomLabel = () => {
     return (
-      <text 
-        x="50%" 
-        y="50%" 
-        textAnchor="middle" 
+      <text
+        x="50%"
+        y="50%"
+        textAnchor="middle"
         dominantBaseline="middle"
         className="fill-gray-900 dark:fill-white"
       >
@@ -44,7 +44,7 @@ export function CustomerStatisticsChart() {
   }
 
   return (
-    <div className="bg-white border border-[#D7C69D]/30 rounded-xl p-6 shadow-sm">
+    <div className="bg-white border border-[#D7C69D]/30 rounded-xl p-4 lg:p-6 shadow-sm">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-[#005500]">
           Customers Statistics
@@ -83,7 +83,7 @@ export function CustomerStatisticsChart() {
         {customerData.map((item, index) => (
           <div key={item.name} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div 
+              <div
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: COLORS[index] }}
               />

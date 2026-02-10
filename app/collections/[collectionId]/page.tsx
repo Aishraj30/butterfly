@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { CatalogBanner } from '@/components/catalog/CatalogBanner'
 import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer'
@@ -31,6 +32,7 @@ interface Product {
     reviews: number;
     image?: string;
     imageUrl?: string;
+    images?: string[];
     inStock: boolean;
     onSale?: boolean;
     salePrice?: number;
@@ -38,61 +40,34 @@ interface Product {
     collection?: string;
 }
 
-const collections = [
-    {
-        id: 1,
-        name: 'Evening Wear',
+// Collection data mapping
+const collectionData: { [key: string]: { title: string; description: string; image: string } } = {
+    'summer-2026': {
+        title: 'Summer 2026',
+        description: 'Light, airy fabrics and vibrant colors perfect for the warmer months',
+        image: 'https://images.unsplash.com/photo-1469334031218-e382a71b9164?q=80&w=1920&auto=format&fit=crop'
+    },
+    'evening-wear': {
+        title: 'Evening Wear',
         description: 'Exquisite gowns and evening dresses for special occasions',
-        image: 'bg-gradient-to-br from-purple-100 to-pink-100',
-        href: '/shop?category=Evening Wear',
-        itemCount: 24,
+        image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1920&auto=format&fit=crop'
     },
-    {
-        id: 2,
-        name: 'Casual Elegance',
+    'casual-elegance': {
+        title: 'Casual Elegance',
         description: 'Effortlessly chic pieces for everyday luxury',
-        image: 'bg-gradient-to-br from-blue-100 to-indigo-100',
-        href: '/shop?category=Casual',
-        itemCount: 32,
+        image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1920&auto=format&fit=crop'
     },
-    {
-        id: 3,
-        name: 'Blazers & Jackets',
+    'blazers-jackets': {
+        title: 'Blazers & Jackets',
         description: 'Structured and sophisticated outerwear',
-        image: 'bg-gradient-to-br from-slate-100 to-gray-100',
-        href: '/shop?category=Jacket',
-        itemCount: 18,
+        image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1920&auto=format&fit=crop'
     },
-    {
-        id: 4,
-        name: 'Accessories',
+    'accessories': {
+        title: 'Accessories',
         description: 'Finishing touches that complete your look',
-        image: 'bg-gradient-to-br from-yellow-100 to-amber-100',
-        href: '/shop?category=Accessories',
-        itemCount: 45,
-    },
-]
-
-const seasonalCollections = [
-    {
-        title: 'Spring/Summer 2024',
-        description: 'Light, airy fabrics and vibrant colors perfect for warmer months',
-        featured: 'Ethereal Drape Jacket',
-        image: 'bg-gradient-to-br from-green-100 to-blue-100',
-    },
-    {
-        title: 'Fall/Winter 2024',
-        description: 'Rich textures and deep tones for the cooler season',
-        featured: 'Premium Wool Coat',
-        image: 'bg-gradient-to-br from-orange-100 to-red-100',
-    },
-    {
-        title: 'Special Occasion',
-        description: 'Statement pieces for unforgettable moments',
-        featured: 'Silk Butterfly Gown',
-        image: 'bg-gradient-to-br from-pink-100 to-rose-100',
-    },
-]
+        image: 'https://images.unsplash.com/photo-1524863479829-916d8e77f114?q=80&w=1920&auto=format&fit=crop'
+    }
+}
 
 export default function CollectionPage() {
     const [products, setProducts] = useState<Product[]>([])
@@ -106,25 +81,36 @@ export default function CollectionPage() {
     const [activeGender, setActiveGender] = useState<string | null>(null)
     const [gridView, setGridView] = useState<'3' | '4'>('4') // Desktop grid
 
-    useEffect(() => {
-        fetchAllProducts()
-    }, [])
+    const params = useParams()
+    const collectionId = params.collectionId as string
 
-    const fetchAllProducts = async () => {
+    useEffect(() => {
+        fetchCollectionProducts()
+    }, [collectionId])
+
+    const fetchCollectionProducts = async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/products')
+            const response = await fetch(`/api/collections/${collectionId}`)
             const data = await response.json()
 
-            if (data.success && data.products && Array.isArray(data.products)) {
-                setProducts(data.products)
-                setFilteredProducts(data.products)
+            if (data.success && data.collection) {
+                // The collection object has a populated 'products' array
+                const collectionProducts = (data.collection.products || []).map((p: any) => ({
+                    ...p,
+                    // Map images array to imageUrl if needed, or just use images[0]
+                    imageUrl: p.images && p.images.length > 0 ? p.images[0] : null
+                }))
+                setProducts(collectionProducts)
+                setFilteredProducts(collectionProducts)
             } else {
                 setProducts([])
+                setFilteredProducts([])
             }
         } catch (error) {
-            console.error('Failed to fetch products:', error)
+            console.error('Failed to fetch collection products:', error)
             setProducts([])
+            setFilteredProducts([])
         } finally {
             setLoading(false)
         }
@@ -230,14 +216,25 @@ export default function CollectionPage() {
         })
     }
 
+    const getCollectionInfo = (collectionId: string) => {
+        const decodedId = decodeURIComponent(collectionId.toLowerCase())
+        return collectionData[decodedId] || {
+            title: decodeURIComponent(collectionId).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            description: 'Explore our curated collection',
+            image: 'https://images.unsplash.com/photo-1441986300917-64674bd168d5?q=80&w=1920&auto=format&fit=crop'
+        }
+    }
+
+    const collectionInfo = getCollectionInfo(collectionId)
+
     return (
         <main className="min-h-screen bg-white w-full pb-20 md:pb-0">
             {/* Added padding-bottom on mobile to prevent content being hidden behind sticky button */}
 
             <CatalogBanner
-                title="Collections"
-                subtitle="Explore our curated collections, each designed to tell a unique story of elegance and sophistication."
-                backgroundImage="https://images.unsplash.com/photo-1441986300917-64674bd168d5?q=80&w=1920&auto=format&fit=crop"
+                title={collectionInfo.title}
+                subtitle={collectionInfo.description}
+                backgroundImage={collectionInfo.image}
             />
 
             {/* --- MOBILE FILTER BAR (Top Sticky) --- */}
@@ -276,75 +273,6 @@ export default function CollectionPage() {
 
             <div className="max-w-[1400px] mx-auto px-5 py-8 relative z-10">
 
-                {/* --- COLLECTION CATEGORIES --- */}
-                <div className="mb-12">
-                    <h2 className="font-serif text-3xl font-bold text-primary mb-8">
-                        Shop by Collection
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                        {collections.map((collection) => (
-                            <Link
-                                key={collection.id}
-                                href={`/collections/${collection.name.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '').replace(/\s+/g, '-')}`}
-                                className="group"
-                            >
-                                <div className="relative overflow-hidden rounded-sm aspect-square mb-4">
-                                    <div className={`w-full h-full ${collection.image} flex items-center justify-center transition-transform duration-300 group-hover:scale-105`}>
-                                        <span className="text-foreground/20">Collection Image</span>
-                                    </div>
-                                    <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300 flex items-center justify-center">
-                                        <div className="text-center">
-                                            <h3 className="font-serif text-2xl font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                {collection.name}
-                                            </h3>
-                                        </div>
-                                    </div>
-                                </div>
-                                <h3 className="font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                                    {collection.name}
-                                </h3>
-                                <p className="text-sm text-foreground/60 mb-2">
-                                    {collection.description}
-                                </p>
-                                <p className="text-xs text-primary font-medium">
-                                    {collection.itemCount} items
-                                </p>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-
-                {/* --- SEASONAL COLLECTIONS --- */}
-                <div className="mb-12">
-                    <h2 className="font-serif text-3xl font-bold text-primary mb-8">
-                        Seasonal Collections
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        {seasonalCollections.map((collection, idx) => (
-                            <Link
-                                key={idx}
-                                href={`/collections/${collection.title.toLowerCase().replace(/\s+/g, '-').replace(/\//g, '')}`}
-                                className="group"
-                            >
-                                <div className="relative overflow-hidden rounded-sm aspect-video mb-4">
-                                    <div className={`w-full h-full ${collection.image} flex items-center justify-center transition-transform duration-300 group-hover:scale-105`}>
-                                        <span className="text-foreground/20">Collection Image</span>
-                                    </div>
-                                </div>
-                                <h3 className="font-serif text-xl font-bold text-primary mb-2">
-                                    {collection.title}
-                                </h3>
-                                <p className="text-sm text-foreground/70 mb-2">
-                                    {collection.description}
-                                </p>
-                                <p className="text-xs text-primary font-medium">
-                                    Featured: {collection.featured}
-                                </p>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-
                 {/* --- DESKTOP FILTER BAR (Hidden on Mobile) --- */}
                 <div className="hidden md:flex items-center justify-between mb-6 border-b pb-4">
                     <button
@@ -370,8 +298,8 @@ export default function CollectionPage() {
                                 key={size}
                                 onClick={() => handleSizeSelect(size)}
                                 className={`px-4 py-2 border text-sm font-medium transition-colors ${selectedSizes.includes(size)
-                                        ? 'bg-black text-white border-black'
-                                        : 'bg-white text-black border-gray-300 hover:border-black'
+                                    ? 'bg-black text-white border-black'
+                                    : 'bg-white text-black border-gray-300 hover:border-black'
                                     }`}
                             >
                                 {size}
@@ -393,70 +321,64 @@ export default function CollectionPage() {
                     </div>
                 </div>
 
-                {/* --- ALL PRODUCTS GRID --- */}
-                <div className="mb-12">
-                    <h2 className="font-serif text-3xl font-bold text-primary mb-8">
-                        All Products
-                    </h2>
-                    {loading ? (
-                        <div className="flex items-center justify-center py-20">
-                            <div className="animate-pulse flex flex-col items-center">
-                                <div className="h-4 w-32 bg-gray-200 rounded mb-4"></div>
-                                <p className="text-gray-500">Loading products...</p>
-                            </div>
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="animate-pulse flex flex-col items-center">
+                            <div className="h-4 w-32 bg-gray-200 rounded mb-4"></div>
+                            <p className="text-gray-500">Loading products...</p>
                         </div>
-                    ) : filteredProducts.length === 0 ? (
-                        <div className="flex items-center justify-center py-20">
-                            <div className="text-center">
-                                <p className="text-gray-600 text-lg mb-4">No products found matching your filters</p>
-                                <button
-                                    onClick={() => {
-                                        setFilteredProducts(products)
-                                        setIsFilterOpen(true)
-                                    }}
-                                    className="inline-flex items-center justify-center px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors duration-300 text-sm tracking-wide uppercase"
-                                >
-                                    Clear Filters
-                                </button>
-                            </div>
+                    </div>
+                ) : filteredProducts.length === 0 ? (
+                    <div className="flex items-center justify-center py-20">
+                        <div className="text-center">
+                            <p className="text-gray-600 text-lg mb-4">No products found matching your filters</p>
+                            <button
+                                onClick={() => {
+                                    setFilteredProducts(products)
+                                    setIsFilterOpen(true)
+                                }}
+                                className="inline-flex items-center justify-center px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors duration-300 text-sm tracking-wide uppercase"
+                            >
+                                Clear Filters
+                            </button>
                         </div>
-                    ) : (
-                        // --- PRODUCTS GRID ---
-                        <div className={`grid gap-4 md:gap-8 
-                            ${/* Mobile Layout Logic */ mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'} 
-                            ${/* Desktop Layout Overrides */ gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'}
-                        `}>
-                            {filteredProducts.map((product) => (
-                                <Link
-                                    key={product._id}
-                                    href={`/product/${product._id}`}
-                                    className="group block"
-                                >
-                                    <div className="bg-gray-50 rounded-lg overflow-hidden transition-shadow duration-300">
-                                        <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
-                                            <div className={`w-full h-full ${product.imageUrl || 'bg-gradient-to-br from-pink-100 to-rose-100'} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}>
-                                                {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />}
-                                                {product.onSale && <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">Sale</div>}
-                                                {product.isNew && <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">New</div>}
-                                            </div>
-                                        </div>
-                                        <div className="p-4">
-                                            <h3 className="font-normal text-xs text-black text-left uppercase mb-2 font-inter truncate">{product.name}</h3>
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-black font-normal text-base font-inter">₹{product.salePrice || product.price}</p>
-                                                {product.salePrice && (
-                                                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                                        {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
-                                                    </span>
-                                                )}
-                                            </div>
+                    </div>
+                ) : (
+                    // --- PRODUCTS GRID ---
+                    <div className={`grid gap-4 md:gap-8 
+                        ${/* Mobile Layout Logic */ mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'} 
+                        ${/* Desktop Layout Overrides */ gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'}
+                    `}>
+                        {filteredProducts.map((product) => (
+                            <Link
+                                key={product._id}
+                                href={`/product/${product._id}`}
+                                className="group block"
+                            >
+                                <div className="bg-gray-50 rounded-lg overflow-hidden transition-shadow duration-300">
+                                    <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
+                                        <div className={`w-full h-full ${product.imageUrl || 'bg-gradient-to-br from-pink-100 to-rose-100'} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}>
+                                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />}
+                                            {product.onSale && <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">Sale</div>}
+                                            {product.isNew && <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">New</div>}
                                         </div>
                                     </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                                    <div className="p-4">
+                                        <h3 className="font-normal text-xs text-black text-left uppercase mb-2 font-inter truncate">{product.name}</h3>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-black font-normal text-base font-inter">₹{product.salePrice || product.price}</p>
+                                            {product.salePrice && (
+                                                <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                    {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* --- MOBILE FLOATING FILTER BUTTON (Bottom Sticky) --- */}

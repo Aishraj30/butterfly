@@ -140,9 +140,10 @@ export interface FilterOptions {
   categories?: string[]
   sizes?: string[]
   colors?: string[]
+  genders?: string[]
   priceRange?: [number, number]
   search?: string
-  sortBy?: 'newest' | 'price-low' | 'price-high' | 'rating'
+  sortBy?: 'name' | 'price-low' | 'price-high' | 'rating'
 }
 
 export function filterAndSortProducts(
@@ -166,6 +167,13 @@ export function filterAndSortProducts(
     filtered = filtered.filter((p) => filters.categories!.includes(p.category))
   }
 
+  // Gender filter
+  if (filters.genders && filters.genders.length > 0) {
+    filtered = filtered.filter((p) =>
+      p.gender && filters.genders!.some(g => g.toLowerCase() === p.gender?.toLowerCase())
+    )
+  }
+
   // Color filter
   if (filters.colors && filters.colors.length > 0) {
     filtered = filtered.filter((p) => filters.colors!.includes(p.color))
@@ -184,23 +192,31 @@ export function filterAndSortProducts(
     filtered = filtered.filter((p) => p.price >= min && p.price <= max)
   }
 
-  // Sorting
-  if (filters.sortBy) {
-    switch (filters.sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price)
-        break
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price)
-        break
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating)
-        break
-      case 'newest':
-      default:
-        // Keep original order (newest first)
-        break
-    }
+  // Sorting - Always apply a default if none specified
+  const sortKey = filters.sortBy || 'name'
+
+  switch (sortKey) {
+    case 'price-low':
+      filtered.sort((a, b) => {
+        const priceA = a.onSale && a.salePrice ? a.salePrice : a.price
+        const priceB = b.onSale && b.salePrice ? b.salePrice : b.price
+        return priceA - priceB
+      })
+      break
+    case 'price-high':
+      filtered.sort((a, b) => {
+        const priceA = a.onSale && a.salePrice ? a.salePrice : a.price
+        const priceB = b.onSale && b.salePrice ? b.salePrice : b.price
+        return priceB - priceA
+      })
+      break
+    case 'rating':
+      filtered.sort((a, b) => b.rating - a.rating)
+      break
+    case 'name':
+    default:
+      filtered.sort((a, b) => a.name.localeCompare(b.name))
+      break
   }
 
   return filtered
