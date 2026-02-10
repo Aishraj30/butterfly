@@ -45,6 +45,7 @@ const navigation = [
 export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [expandedSections, setExpandedSections] = useState<string[]>(['catalog', 'featured'])
   const [isCatalogHovered, setIsCatalogHovered] = useState(false)
   const [isCatalogDrawerOpen, setIsCatalogDrawerOpen] = useState(false)
   const [isFeaturedDrawerOpen, setIsFeaturedDrawerOpen] = useState(false)

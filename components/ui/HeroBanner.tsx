@@ -41,38 +41,38 @@ export function HeroBanner({
     gsap.registerPlugin(ScrollTrigger)
 
     const ctx = gsap.context(() => {
-      // Common scroll parallax effect
+      // Premium floating parallax effect - Text moves from absolute top to bottom through the container
       gsap.fromTo(
         textRef.current,
-        { y: 0 },
+        { y: -350 }, // Start shifted high up
         {
-          y: 500,
+          y: 350, // End shifted far down
           ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top top',
+            start: 'top bottom',
             end: 'bottom top',
-            scrub: true
+            scrub: 1 // Slightly more lag for a dreamier luxury feel
           }
         }
       )
 
-      // Entrance animation - for ALL hero banners when they scroll into view
+      // Entrance animation for Opacity/Scale - Smoothly fade in as section enters
       if (imageRef.current && textRef.current) {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: "top 90%", // Animation starts when top of banner hits 90% of viewport (entered 10%)
+            start: "top 95%",
             end: "bottom top",
-            toggleActions: "play none none reverse" // Replays when scrolling back up
+            toggleActions: "play none none reverse"
           }
         });
 
-        // Initial states
-        gsap.set(imageRef.current, { scale: 1.2, opacity: 0 });
-        gsap.set(textRef.current, { y: 100, opacity: 0 });
+        // Initial states (Y is now strictly managed by parallax above)
+        gsap.set(imageRef.current, { scale: 1.1, opacity: 0 });
+        gsap.set(textRef.current, { opacity: 0 });
 
-        // Animation sequence
+        // Fade/Scale sequence
         tl.to(imageRef.current, {
           scale: 1,
           opacity: 1,
@@ -80,11 +80,10 @@ export function HeroBanner({
           ease: "power2.out"
         })
           .to(textRef.current, {
-            y: 0,
             opacity: 1,
-            duration: 1,
-            ease: "power3.out"
-          }, 0.2); // Start text animation 0.2s after image starts (absolute time)
+            duration: 1.2,
+            ease: "power1.out"
+          }, 0.2);
       }
     }, sectionRef)
 
@@ -121,13 +120,19 @@ export function HeroBanner({
         <h1 className={`mb-4 text-center font-birds text-5xl font-normal tracking-wide md:text-6xl lg:text-7xl ${backgroundImage ? 'text-white' : 'text-[#003300]'} capitalize`}>
           {title.toLowerCase()}
         </h1>
-        <p className={`mb-8 text-center text-base md:text-lg ${backgroundImage ? 'text-white' : 'text-red-800'}`}>
+        <p className={`mb-2 text-center text-base md:text-lg ${backgroundImage ? 'text-white' : 'text-red-800'}`}>
           {subtitle}
         </p>
         {buttonText && buttonLink && (
-          <Button asChild className={`rounded-md px-6 py-3 text-sm ${backgroundImage ? 'bg-white text-black hover:bg-gray-100' : 'bg-[#003300] text-white hover:bg-[#004400]'}`}>
-            <Link href={buttonLink}>{buttonText}</Link>
-          </Button>
+          <Link
+            href={buttonLink}
+            className={`group/btn relative mt-0 py-2 ${backgroundImage ? 'text-white' : 'text-black'}`}
+          >
+            <span className="text-xs font-bold uppercase tracking-[0.3em] transition-colors">
+              {buttonText}
+            </span>
+            <span className="absolute bottom-0 left-0 w-full h-[1px] bg-current transform scale-x-0 transition-transform duration-500 ease-out origin-left group-hover/btn:scale-x-100" />
+          </Link>
         )}
       </div>
     </section>

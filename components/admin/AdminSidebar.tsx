@@ -17,6 +17,7 @@ import {
   LogOut,
   Sparkles,
   Layers,
+  Clipboard,
 } from 'lucide-react'
 import { useState } from 'react'
 import { ThemeToggle } from './ThemeToggle'
@@ -25,6 +26,7 @@ const menuItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Messages', href: '/admin/messages', icon: MessageSquare, badge: '150' },
   { label: 'Products', href: '/admin/products', icon: Package },
+  { label: 'Inventory', href: '/admin/inventory', icon: Clipboard },
   { label: 'Collections', href: '/admin/collections', icon: Layers },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { label: 'Customers', href: '/admin/customers', icon: Users },

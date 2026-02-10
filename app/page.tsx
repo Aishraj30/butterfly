@@ -82,7 +82,7 @@ export default async function Home() {
                   id: p._id.toString(),
                   name: p.name,
                   price: `₹${p.price.toLocaleString()}`,
-                  image: p.images?.[0] || "/uploads/product-1769084011566.jpeg"
+                  images: p.images && p.images.length > 0 ? p.images : ["/uploads/product-1769084011566.jpeg"]
                 }))}
                 shopAllLink={`/catalog?collection=${encodeURIComponent(col.name)}`}
               />

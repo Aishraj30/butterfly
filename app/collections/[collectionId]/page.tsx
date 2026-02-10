@@ -7,16 +7,16 @@ import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer'
 
 // --- ICONS FOR MOBILE VIEW ---
 const SingleColumnIcon = ({ active }: { active: boolean }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="4" y="4" width="16" height="16" fill={active ? "black" : "#D1D5DB"} />
-  </svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="16" height="16" fill={active ? "black" : "#D1D5DB"} />
+    </svg>
 )
 
 const DoubleColumnIcon = ({ active }: { active: boolean }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="5" y="4" width="6" height="16" fill={active ? "black" : "#D1D5DB"} />
-    <rect x="13" y="4" width="6" height="16" fill={active ? "black" : "#D1D5DB"} />
-  </svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="4" width="6" height="16" fill={active ? "black" : "#D1D5DB"} />
+        <rect x="13" y="4" width="6" height="16" fill={active ? "black" : "#D1D5DB"} />
+    </svg>
 )
 
 interface Product {
@@ -32,6 +32,7 @@ interface Product {
     reviews: number;
     image?: string;
     imageUrl?: string;
+    images?: string[];
     inStock: boolean;
     onSale?: boolean;
     salePrice?: number;
@@ -41,31 +42,31 @@ interface Product {
 
 // Collection data mapping
 const collectionData: { [key: string]: { title: string; description: string; image: string } } = {
-  'summer-2026': {
-    title: 'Summer 2026',
-    description: 'Light, airy fabrics and vibrant colors perfect for the warmer months',
-    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b9164?q=80&w=1920&auto=format&fit=crop'
-  },
-  'evening-wear': {
-    title: 'Evening Wear',
-    description: 'Exquisite gowns and evening dresses for special occasions',
-    image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1920&auto=format&fit=crop'
-  },
-  'casual-elegance': {
-    title: 'Casual Elegance',
-    description: 'Effortlessly chic pieces for everyday luxury',
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1920&auto=format&fit=crop'
-  },
-  'blazers-jackets': {
-    title: 'Blazers & Jackets',
-    description: 'Structured and sophisticated outerwear',
-    image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1920&auto=format&fit=crop'
-  },
-  'accessories': {
-    title: 'Accessories',
-    description: 'Finishing touches that complete your look',
-    image: 'https://images.unsplash.com/photo-1524863479829-916d8e77f114?q=80&w=1920&auto=format&fit=crop'
-  }
+    'summer-2026': {
+        title: 'Summer 2026',
+        description: 'Light, airy fabrics and vibrant colors perfect for the warmer months',
+        image: 'https://images.unsplash.com/photo-1469334031218-e382a71b9164?q=80&w=1920&auto=format&fit=crop'
+    },
+    'evening-wear': {
+        title: 'Evening Wear',
+        description: 'Exquisite gowns and evening dresses for special occasions',
+        image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1920&auto=format&fit=crop'
+    },
+    'casual-elegance': {
+        title: 'Casual Elegance',
+        description: 'Effortlessly chic pieces for everyday luxury',
+        image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1920&auto=format&fit=crop'
+    },
+    'blazers-jackets': {
+        title: 'Blazers & Jackets',
+        description: 'Structured and sophisticated outerwear',
+        image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=1920&auto=format&fit=crop'
+    },
+    'accessories': {
+        title: 'Accessories',
+        description: 'Finishing touches that complete your look',
+        image: 'https://images.unsplash.com/photo-1524863479829-916d8e77f114?q=80&w=1920&auto=format&fit=crop'
+    }
 }
 
 export default function CollectionPage() {
@@ -74,7 +75,7 @@ export default function CollectionPage() {
     const [loading, setLoading] = useState(true)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [selectedSizes, setSelectedSizes] = useState<string[]>([])
-    
+
     // --- NEW STATES FOR MOBILE ---
     const [mobileLayout, setMobileLayout] = useState<'1' | '2'>('2') // Default to 2 columns
     const [activeGender, setActiveGender] = useState<string | null>(null)
@@ -90,27 +91,26 @@ export default function CollectionPage() {
     const fetchCollectionProducts = async () => {
         try {
             setLoading(true)
-            const response = await fetch('/api/products')
+            const response = await fetch(`/api/collections/${collectionId}`)
             const data = await response.json()
-            
-            if (data.success && data.products && Array.isArray(data.products)) {
-                const collectionProducts = data.products.filter((p: Product) => {
-                    const decodedCollectionId = decodeURIComponent(collectionId.toLowerCase())
-                    const productCollection = p.collection?.toLowerCase()
-                    
-                    // Filter by collection name or category/subcategory mapping
-                    return productCollection === decodedCollectionId || 
-                           p.category?.toLowerCase() === decodedCollectionId ||
-                           p.subCategory?.toLowerCase() === decodedCollectionId
-                })
+
+            if (data.success && data.collection) {
+                // The collection object has a populated 'products' array
+                const collectionProducts = (data.collection.products || []).map((p: any) => ({
+                    ...p,
+                    // Map images array to imageUrl if needed, or just use images[0]
+                    imageUrl: p.images && p.images.length > 0 ? p.images[0] : null
+                }))
                 setProducts(collectionProducts)
                 setFilteredProducts(collectionProducts)
             } else {
                 setProducts([])
+                setFilteredProducts([])
             }
         } catch (error) {
             console.error('Failed to fetch collection products:', error)
             setProducts([])
+            setFilteredProducts([])
         } finally {
             setLoading(false)
         }
@@ -121,7 +121,7 @@ export default function CollectionPage() {
 
         // Filter by gender
         if (filters.genders.length > 0) {
-            filtered = filtered.filter(product => 
+            filtered = filtered.filter(product =>
                 product.gender && filters.genders.some(g => g.toLowerCase() === product.gender?.toLowerCase())
             )
         }
@@ -129,27 +129,27 @@ export default function CollectionPage() {
         // Filter by size
         const allSelectedSizes = [...new Set([...filters.sizes, ...selectedSizes])]
         if (allSelectedSizes.length > 0) {
-            filtered = filtered.filter(product => 
+            filtered = filtered.filter(product =>
                 product.size && product.size.some(size => allSelectedSizes.includes(size))
             )
         }
 
         // Filter by price range
         if (filters.priceRange.min !== null) {
-            filtered = filtered.filter(product => 
+            filtered = filtered.filter(product =>
                 (product.salePrice || product.price) >= filters.priceRange.min!
             )
         }
         if (filters.priceRange.max !== null) {
-            filtered = filtered.filter(product => 
+            filtered = filtered.filter(product =>
                 (product.salePrice || product.price) <= filters.priceRange.max!
             )
         }
 
         // Filter by color
         if (filters.colors.length > 0) {
-            filtered = filtered.filter(product => 
-                product.color && filters.colors.some(color => 
+            filtered = filtered.filter(product =>
+                product.color && filters.colors.some(color =>
                     product.color.toLowerCase() === color.toLowerCase()
                 )
             )
@@ -176,11 +176,11 @@ export default function CollectionPage() {
 
     // Handle Quick Size Select
     const handleSizeSelect = (size: string) => {
-        const newSelectedSizes = selectedSizes.includes(size) 
-            ? selectedSizes.filter(s => s !== size) 
+        const newSelectedSizes = selectedSizes.includes(size)
+            ? selectedSizes.filter(s => s !== size)
             : [...selectedSizes, size]
         setSelectedSizes(newSelectedSizes)
-        
+
         applyFilters({
             genders: activeGender ? [activeGender] : [],
             sizes: newSelectedSizes,
@@ -194,7 +194,7 @@ export default function CollectionPage() {
     const handleFilterApply = (filters: FilterState) => {
         setSelectedSizes(filters.sizes)
         // Sync mobile gender toggle if modified in drawer
-        if(filters.genders.length === 1) {
+        if (filters.genders.length === 1) {
             setActiveGender(filters.genders[0])
         } else {
             setActiveGender(null)
@@ -206,7 +206,7 @@ export default function CollectionPage() {
     const toggleMobileGender = (gender: string) => {
         const newGender = activeGender === gender ? null : gender
         setActiveGender(newGender)
-        
+
         applyFilters({
             genders: newGender ? [newGender] : [],
             sizes: selectedSizes,
@@ -228,10 +228,10 @@ export default function CollectionPage() {
     const collectionInfo = getCollectionInfo(collectionId)
 
     return (
-        <main className="min-h-screen bg-white w-full pb-20 md:pb-0"> 
+        <main className="min-h-screen bg-white w-full pb-20 md:pb-0">
             {/* Added padding-bottom on mobile to prevent content being hidden behind sticky button */}
-            
-            <CatalogBanner 
+
+            <CatalogBanner
                 title={collectionInfo.title}
                 subtitle={collectionInfo.description}
                 backgroundImage={collectionInfo.image}
@@ -246,14 +246,14 @@ export default function CollectionPage() {
 
                 {/* Gender Toggles */}
                 <div className="flex items-center gap-4 text-xs font-medium uppercase tracking-wide">
-                    <button 
+                    <button
                         onClick={() => toggleMobileGender('Male')}
                         className={`transition-colors ${activeGender?.toLowerCase() === 'male' ? 'text-black font-bold' : 'text-gray-300'}`}
                     >
                         Male
                     </button>
-                    <button 
-                         onClick={() => toggleMobileGender('Female')}
+                    <button
+                        onClick={() => toggleMobileGender('Female')}
                         className={`transition-colors ${activeGender?.toLowerCase() === 'female' ? 'text-black font-bold' : 'text-gray-300'}`}
                     >
                         Female
@@ -272,23 +272,23 @@ export default function CollectionPage() {
             </div>
 
             <div className="max-w-[1400px] mx-auto px-5 py-8 relative z-10">
-                
+
                 {/* --- DESKTOP FILTER BAR (Hidden on Mobile) --- */}
                 <div className="hidden md:flex items-center justify-between mb-6 border-b pb-4">
                     <button
                         onClick={() => setIsFilterOpen(true)}
                         className="flex items-center gap-2 px-4 py-2 border border-gray-300 hover:border-black transition-colors text-sm font-medium"
                     >
-                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="4" y1="21" x2="4" y2="14"/>
-                            <line x1="4" y1="10" x2="4" y2="3"/>
-                            <line x1="12" y1="21" x2="12" y2="12"/>
-                            <line x1="12" y1="8" x2="12" y2="3"/>
-                            <line x1="20" y1="21" x2="20" y2="16"/>
-                            <line x1="20" y1="12" x2="20" y2="3"/>
-                            <circle cx="4" cy="7" r="1"/>
-                            <circle cx="12" cy="5" r="1"/>
-                            <circle cx="20" cy="9" r="1"/>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="4" y1="21" x2="4" y2="14" />
+                            <line x1="4" y1="10" x2="4" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12" y2="3" />
+                            <line x1="20" y1="21" x2="20" y2="16" />
+                            <line x1="20" y1="12" x2="20" y2="3" />
+                            <circle cx="4" cy="7" r="1" />
+                            <circle cx="12" cy="5" r="1" />
+                            <circle cx="20" cy="9" r="1" />
                         </svg>
                         FILTER & SORT
                     </button>
@@ -297,11 +297,10 @@ export default function CollectionPage() {
                             <button
                                 key={size}
                                 onClick={() => handleSizeSelect(size)}
-                                className={`px-4 py-2 border text-sm font-medium transition-colors ${
-                                    selectedSizes.includes(size)
+                                className={`px-4 py-2 border text-sm font-medium transition-colors ${selectedSizes.includes(size)
                                         ? 'bg-black text-white border-black'
                                         : 'bg-white text-black border-gray-300 hover:border-black'
-                                }`}
+                                    }`}
                             >
                                 {size}
                             </button>
@@ -313,10 +312,10 @@ export default function CollectionPage() {
                         </span>
                         <div className="flex items-center gap-1">
                             <button onClick={() => setGridView('3')} className={`p-2 rounded ${gridView === '3' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
                             </button>
                             <button onClick={() => setGridView('4')} className={`p-2 rounded ${gridView === '4' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="4" height="4"/><rect x="10" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="4"/><rect x="3" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="17" y="10" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="10" y="17" width="4" height="4"/><rect x="17" y="17" width="4" height="4"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="4" height="4" /><rect x="10" y="3" width="4" height="4" /><rect x="17" y="3" width="4" height="4" /><rect x="3" y="10" width="4" height="4" /><rect x="10" y="10" width="4" height="4" /><rect x="17" y="10" width="4" height="4" /><rect x="3" y="17" width="4" height="4" /><rect x="10" y="17" width="4" height="4" /><rect x="17" y="17" width="4" height="4" /></svg>
                             </button>
                         </div>
                     </div>
@@ -359,7 +358,7 @@ export default function CollectionPage() {
                                 <div className="bg-gray-50 rounded-lg overflow-hidden transition-shadow duration-300">
                                     <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
                                         <div className={`w-full h-full ${product.imageUrl || 'bg-gradient-to-br from-pink-100 to-rose-100'} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}>
-                                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover"/>}
+                                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />}
                                             {product.onSale && <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">Sale</div>}
                                             {product.isNew && <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">New</div>}
                                         </div>
