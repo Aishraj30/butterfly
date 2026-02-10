@@ -135,14 +135,18 @@ export default function CollectionPage() {
         }
 
         // Filter by price range
-        if (filters.priceRange.min !== null) {
+        // Filter by price range
+        // Ensure accurate number conversion and handle potentially falsy 0 values correctly
+        if (filters.priceRange.min !== null && !isNaN(Number(filters.priceRange.min))) {
+            const minPrice = Number(filters.priceRange.min)
             filtered = filtered.filter(product =>
-                (product.salePrice || product.price) >= filters.priceRange.min!
+                (product.salePrice ?? product.price) >= minPrice
             )
         }
-        if (filters.priceRange.max !== null) {
+        if (filters.priceRange.max !== null && !isNaN(Number(filters.priceRange.max))) {
+            const maxPrice = Number(filters.priceRange.max)
             filtered = filtered.filter(product =>
-                (product.salePrice || product.price) <= filters.priceRange.max!
+                (product.salePrice ?? product.price) <= maxPrice
             )
         }
 
@@ -298,8 +302,8 @@ export default function CollectionPage() {
                                 key={size}
                                 onClick={() => handleSizeSelect(size)}
                                 className={`px-4 py-2 border text-sm font-medium transition-colors ${selectedSizes.includes(size)
-                                        ? 'bg-black text-white border-black'
-                                        : 'bg-white text-black border-gray-300 hover:border-black'
+                                    ? 'bg-black text-white border-black'
+                                    : 'bg-white text-black border-gray-300 hover:border-black'
                                     }`}
                             >
                                 {size}

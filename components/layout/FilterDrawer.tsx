@@ -133,7 +133,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
                     {/* Header - Sleek & Minimal */}
                     <div className="flex items-center justify-between px-8 py-7 bg-white">
                         <div>
-                            <h2 className="text-lg font-bold uppercase tracking-[0.25em] text-black">
+                            <h2 className="text-lg font-medium uppercase tracking-[0.25em] text-black">
                                 Refine
                             </h2>
                             <div className="h-0.5 w-8 bg-black mt-1" />
@@ -152,15 +152,15 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
 
                             {/* Gender Selection */}
                             <section className="space-y-5">
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black/40">Selection</h3>
+                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Selection</h3>
                                 <div className="flex flex-wrap gap-3">
                                     {['Male', 'Female', 'Unisex'].map((gender) => (
                                         <button
                                             key={gender}
                                             onClick={() => toggleGender(gender)}
-                                            className={`px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest border transition-all duration-300 ${selectedGenders.includes(gender)
+                                            className={`px-5 py-2.5 text-[11px] font-medium uppercase tracking-widest border transition-all duration-300 ${selectedGenders.includes(gender)
                                                 ? 'bg-black text-white border-black shadow-md'
-                                                : 'bg-white text-gray-500 border-gray-100 hover:border-gray-300 hover:text-black'
+                                                : 'bg-gray-50 text-gray-500 border-gray-100 hover:border-gray-300 hover:text-black'
                                                 }`}
                                         >
                                             {gender}
@@ -173,15 +173,15 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
 
                             {/* Size Selection */}
                             <section className="space-y-5">
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black/40">Size</h3>
+                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Size</h3>
                                 <div className="grid grid-cols-3 gap-2">
                                     {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
                                         <button
                                             key={size}
                                             onClick={() => toggleSize(size)}
-                                            className={`py-3 text-[10px] font-bold tracking-tighter border transition-all duration-300 ${selectedSizes.includes(size)
+                                            className={`py-3 text-[10px] font-medium tracking-tighter border transition-all duration-300 ${selectedSizes.includes(size)
                                                 ? 'bg-black text-white border-black scale-[1.02]'
-                                                : 'bg-gray-50/50 text-gray-400 border-transparent hover:border-gray-200 hover:text-black hover:bg-white'
+                                                : 'bg-gray-50 text-black border-transparent hover:border-black hover:text-black hover:bg-white'
                                                 }`}
                                         >
                                             {size}
@@ -194,26 +194,26 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
 
                             {/* Price Selection */}
                             <section className="space-y-5">
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black/40">Price Range</h3>
+                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Price Range</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">₹</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-medium">₹</span>
                                         <input
                                             type="number"
                                             placeholder="Min"
                                             value={priceRange.min}
                                             onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                                            className="w-full pl-8 pr-4 py-3 text-xs bg-gray-50/50 border border-transparent focus:bg-white focus:border-black transition-all outline-none font-medium"
+                                            className="w-full pl-8 pr-4 py-3 text-xs bg-gray-50 border border-transparent focus:bg-white focus:border-black transition-all outline-none font-medium"
                                         />
                                     </div>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">₹</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-medium">₹</span>
                                         <input
                                             type="number"
                                             placeholder="Max"
                                             value={priceRange.max}
                                             onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-                                            className="w-full pl-8 pr-4 py-3 text-xs bg-gray-50/50 border border-transparent focus:bg-white focus:border-black transition-all outline-none font-medium"
+                                            className="w-full pl-8 pr-4 py-3 text-xs bg-gray-50 border border-transparent focus:bg-white focus:border-black transition-all outline-none font-medium"
                                         />
                                     </div>
                                 </div>
@@ -223,7 +223,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
 
                             {/* Color Selection */}
                             <section className="space-y-5">
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black/40">Palette</h3>
+                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Palette</h3>
                                 <div className="flex flex-wrap gap-3">
                                     {['Black', 'White', 'Gray', 'Brown', 'Blue', 'Red', 'Navy', 'Cream', 'Gold', 'Camel'].map((color) => (
                                         <button
@@ -262,7 +262,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
 
                             {/* Sort Selection */}
                             <section className="space-y-5 pb-10">
-                                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black/40">Sort By</h3>
+                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Sort By</h3>
                                 <div className="space-y-1">
                                     {[
                                         { value: 'name', label: 'Featured' },
@@ -278,7 +278,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
                                             <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-300 mr-4 ${sortBy === option.value ? 'border-black bg-black' : 'border-gray-200 group-hover:border-gray-400'}`}>
                                                 {sortBy === option.value && <div className="w-1 h-1 rounded-full bg-white" />}
                                             </div>
-                                            <span className={`text-xs uppercase tracking-widest transition-colors duration-300 ${sortBy === option.value ? 'text-black font-bold' : 'text-gray-400 group-hover:text-black'}`}>
+                                            <span className={`text-xs uppercase tracking-widest transition-colors duration-300 ${sortBy === option.value ? 'text-black font-medium' : 'text-gray-800 group-hover:text-black'}`}>
                                                 {option.label}
                                             </span>
                                         </button>
@@ -289,16 +289,16 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
                     </div>
 
                     {/* Footer - Elegant Controls */}
-                    <div className="px-8 py-8 bg-white border-t border-gray-50 flex gap-4">
+                    <div className="px-8 py-8 bg-white border-t border-gray-100 flex gap-4">
                         <button
                             onClick={clearAllFilters}
-                            className="flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors border border-transparent hover:border-gray-100"
+                            className="flex-1 py-4 text-[10px] font-medium uppercase tracking-[0.2em] text-gray-600 hover:text-black transition-colors border border-transparent hover:border-gray-100"
                         >
                             Reset
                         </button>
                         <button
                             onClick={applyFilters}
-                            className="flex-[2] bg-black text-white py-4 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-900 transition-all shadow-xl hover:shadow-2xl active:scale-[0.98]"
+                            className="flex-[2] bg-black text-white py-4 text-[10px] font-medium uppercase tracking-[0.2em] hover:bg-gray-900 transition-all shadow-xl hover:shadow-2xl active:scale-[0.98]"
                         >
                             Update Results
                         </button>

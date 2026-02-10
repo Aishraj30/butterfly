@@ -50,7 +50,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
           <div className="md:hidden">
             <div className="flex overflow-x-auto scrollbar-hide px-2 pb-0 snap-x snap-mandatory scroll-pl-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {products.map((product) => (
-                <div key={product.id} className="flex-none w-[80vw] snap-start group border-r border-gray-100 px-1 last:border-r-0">
+                <div key={product.id} className="flex-none w-[80vw] snap-start group border-r border-gray-300 px-1 last:border-r-0">
                   <div className="cursor-pointer group mb-4">
                     {/* Nested Image Scroll */}
                     <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-gray-100">
@@ -108,10 +108,10 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
               }}
             >
               {products.map((product) => (
-                <div key={product.id} className="flex-none w-[calc(25%-2px)] sm:w-[calc(25%-2px)] md:w-[calc(30%-2px)] lg:w-[calc(22%-2px)] group border-r border-gray-100 px-2 last:border-r-0">
+                <div key={product.id} className="flex-none w-[calc(25%-2px)] sm:w-[calc(25%-2px)] md:w-[calc(30%-2px)] lg:w-[calc(22%-2px)] group border-r border-gray-300 px-2 last:border-r-0">
                   <div className="cursor-pointer group flex flex-col h-full mb-0">
                     {/* Nested Image Scroll */}
-                    <div className="relative h-[65vh] overflow-hidden rounded-xl bg-gray-100 mb-2 group/img">
+                    <div className="relative h-[55vh] overflow-hidden rounded-xl bg-gray-100 mb-2 group/img">
                       {/* Primary Image */}
                       <Image
                         src={product.images[0]}
