@@ -45,7 +45,6 @@ const navigation = [
 export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [expandedSections, setExpandedSections] = useState<string[]>(['catalog', 'featured'])
   const [isCatalogHovered, setIsCatalogHovered] = useState(false)
   const [isCatalogDrawerOpen, setIsCatalogDrawerOpen] = useState(false)
   const [isFeaturedDrawerOpen, setIsFeaturedDrawerOpen] = useState(false)
@@ -308,49 +307,36 @@ export function Header() {
               <div className="p-6 space-y-2">
                 {navigation.map((item) => (
                   <div key={item.name} className="border-b border-gray-100">
-                    <button
-                      onClick={() => {
-                        setExpandedSections(prev =>
-                          prev.includes(item.name.toLowerCase())
-                            ? prev.filter(s => s !== item.name.toLowerCase())
-                            : [...prev, item.name.toLowerCase()]
-                        )
-                      }}
-                      className="flex items-center justify-between w-full py-4 text-left"
-                    >
-                      <span className="text-lg font-semibold text-black uppercase tracking-wide">
-                        {item.name}
-                      </span>
-                      <ChevronDown
-                        size={16}
-                        className={`transition-transform duration-200 ${expandedSections.includes(item.name.toLowerCase()) ? 'rotate-180' : ''
-                          }`}
-                      />
-                    </button>
-
-                    {expandedSections.includes(item.name.toLowerCase()) && (
-                      <div className="pb-4 space-y-2">
-                        {item.hasDropdown && collections.length > 0 ? (
-                          collections.map((collection, idx) => (
-                            <Link
-                              key={collection.id || idx}
-                              href={`/catalog?collection=${collection.name}`}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="block pl-4 py-2 text-sm text-gray-600 hover:text-black transition-colors"
-                            >
-                              {collection.name}
-                            </Link>
-                          ))
-                        ) : (
-                          <Link
-                            href={item.href}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block pl-4 py-2 text-sm text-gray-600 hover:text-black transition-colors"
-                          >
-                            View {item.name}
-                          </Link>
-                        )}
-                      </div>
+                    {item.hasDropdown ? (
+                      <button
+                        onClick={() => {
+                          setIsMobileMenuOpen(false)
+                          if (item.name === 'Catalog') {
+                            setIsCatalogDrawerOpen(true)
+                          } else if (item.name === 'Featured') {
+                            setIsFeaturedDrawerOpen(true)
+                          }
+                        }}
+                        className="flex items-center justify-between w-full py-4 text-left group"
+                      >
+                        <span className="text-lg font-semibold text-black uppercase tracking-wide group-hover:text-gray-600 transition-colors">
+                          {item.name}
+                        </span>
+                        <ChevronDown
+                          size={16}
+                          className="transform -rotate-90 text-gray-400 group-hover:text-gray-600"
+                        />
+                      </button>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center justify-between w-full py-4 text-left group"
+                      >
+                        <span className="text-lg font-semibold text-black uppercase tracking-wide group-hover:text-gray-600 transition-colors">
+                          {item.name}
+                        </span>
+                      </Link>
                     )}
                   </div>
                 ))}

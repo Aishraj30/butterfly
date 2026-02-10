@@ -23,20 +23,66 @@ export function Footer() {
   ]
 
   return (
-    <footer className="bg-black text-white pt-16 pb-8 border-t border-white/5 font-sans">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-        
-        {/* Top Section: Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
-          
-          {/* Left Column: Brand Statement */}
+    <footer className="bg-black text-white pt-8 md:pt-16 pb-8 border-t border-white/5 font-sans">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-12">
+
+        {/* Mobile View: Accordion Navigation */}
+        <div className="block md:hidden mb-8">
+          <div className="space-y-4 mb-8">
+            <p className="text-sm font-light leading-relaxed text-gray-200">
+              Butterfly is a premier contemporary label that aims at <span className="italic font-serif">reinterpreting</span> global heritage.
+            </p>
+            {/* Social Icons - Mobile */}
+            <div className="flex gap-4">
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Instagram className="w-4 h-4" />
+                <span className="sr-only">Instagram</span>
+              </Link>
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Twitter className="w-4 h-4" />
+                <span className="sr-only">Twitter</span>
+              </Link>
+              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Facebook className="w-4 h-4" />
+                <span className="sr-only">Facebook</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="border-t border-white/10">
+            {['About', 'Get in Touch', 'Join Us'].map((section) => (
+              <details key={section} className="group border-b border-white/10">
+                <summary className="flex justify-between items-center font-medium cursor-pointer list-none py-3 text-sm uppercase tracking-widest text-white">
+                  {section}
+                  <span className="transition group-open:rotate-180">
+                    <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                  </span>
+                </summary>
+                <div className="text-gray-400 mt-2 mb-4 group-open:animate-fadeIn">
+                  <ul className="space-y-2 pl-2">
+                    {section === 'About' && ['About Us', 'Press', 'Lookbook', 'Our Story'].map(item => (
+                      <li key={item}><Link href="#" className="block text-xs uppercase tracking-wide hover:text-white">{item}</Link></li>
+                    ))}
+                    {section === 'Get in Touch' && ['Contact', 'Returns', 'Shipping', 'Terms'].map(item => (
+                      <li key={item}><Link href="#" className="block text-xs uppercase tracking-wide hover:text-white">{item}</Link></li>
+                    ))}
+                    {section === 'Join Us' && (
+                      <li><Link href="#" className="block text-xs uppercase tracking-wide hover:text-white">Enclave</Link></li>
+                    )}
+                  </ul>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop View: Grid Layout */}
+        <div className="hidden md:grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div className="space-y-8">
               <p className="text-lg md:text-xl font-light leading-relaxed text-gray-200 max-w-md">
                 Butterfly is a premier contemporary label that aims at <span className="italic font-serif">reinterpreting</span> global heritage and artisanship.
               </p>
-              
-              {/* Social Icons */}
               <div className="flex gap-6">
                 <Link href="#" className="hover:text-gray-400 transition-colors">
                   <Instagram className="w-5 h-5" />
@@ -53,11 +99,8 @@ export function Footer() {
               </div>
             </div>
           </div>
-
           <div className="hidden lg:block lg:col-span-1"></div>
-
-          {/* Right Columns: Navigation Links */}
-          <div className="lg:col-span-6 grid grid-cols-2 md:grid-cols-3 gap-10">
+          <div className="lg:col-span-6 grid grid-cols-3 gap-10">
             <div>
               <h3 className="font-medium text-xs mb-6 uppercase tracking-widest text-white">About</h3>
               <ul className="space-y-4">
@@ -70,7 +113,6 @@ export function Footer() {
                 ))}
               </ul>
             </div>
-
             <div>
               <h3 className="font-medium text-xs mb-6 uppercase tracking-widest text-white">Get in Touch</h3>
               <ul className="space-y-4">
@@ -83,7 +125,6 @@ export function Footer() {
                 ))}
               </ul>
             </div>
-
             <div>
               <h3 className="font-medium text-xs mb-6 uppercase tracking-widest text-white">Join Us</h3>
               <ul className="space-y-4">
@@ -98,30 +139,26 @@ export function Footer() {
         </div>
 
         {/* Bottom Section: Copyright & Payments */}
-        <div className="flex flex-col-reverse md:flex-row justify-between items-start md:items-end gap-8 pt-6 border-t border-white/10">
-          
-          <div className="space-y-4 text-xs text-gray-500">
-            <p className="uppercase tracking-wider text-white mb-2">USD / EN</p>
-            <p>Copyright © 2026, Butterfly. All rights reserved. <br className="md:hidden"/> See our terms of use and privacy notice.</p>
+        <div className="flex flex-col-reverse md:flex-row justify-between items-center md:items-end gap-6 pt-6 border-t border-white/10">
+          <div className="space-y-2 text-[10px] md:text-xs text-center md:text-left text-gray-500 w-full md:w-auto">
+            <p className="uppercase tracking-wider text-white mb-1">USD / EN</p>
+            <p>Copyright © 2026, Butterfly. All rights reserved. <br className="hidden md:block" /> See our terms of use and privacy notice.</p>
           </div>
 
-          {/* Payment Icons */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 justify-center">
             {paymentMethods.map((method) => (
-              <div 
-                key={method.name} 
-                className="bg-white px-2 py-1 rounded w-10 h-6 flex items-center justify-center overflow-hidden"
+              <div
+                key={method.name}
+                className="bg-white px-1.5 py-0.5 md:px-2 md:py-1 rounded w-8 h-5 md:w-10 md:h-6 flex items-center justify-center overflow-hidden"
               >
-                 {/* Using standard img tag for simplicity with external URLs */}
-                 <img 
-                   src={method.src} 
-                   alt={method.name} 
-                   className="w-full h-full object-contain"
-                 />
+                <img
+                  src={method.src}
+                  alt={method.name}
+                  className="w-full h-full object-contain"
+                />
               </div>
             ))}
           </div>
-
         </div>
       </div>
     </footer>
