@@ -69,6 +69,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         }
     }, [id]);
 
+    // Scroll to top when product page loads
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     const fetchProductDetails = async () => {
         try {
             setLoading(true);
