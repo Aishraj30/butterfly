@@ -1,5 +1,6 @@
 import { InventoryController } from "../../../../../controllers/inventoryController.js";
 
 export async function POST(req, { params }) {
-    return InventoryController.reserve(req, { params });
+    const p = await params;
+    return InventoryController.reserve(req, { params: p });
 }

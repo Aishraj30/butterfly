@@ -1,13 +1,24 @@
+import mongoose, { Types } from 'mongoose'
 import { NextRequest, NextResponse } from 'next/server'
 import { connectDB } from '@/lib/db'
 import Order from '@/models/Order'
 import Contact from '@/models/Contact'
+import Inventory from '@/models/inventory'
 
 export async function POST(request: NextRequest) {
   try {
     await connectDB()
     const body = await request.json()
-    const { items, total, customer, shipping: shippingAddress, billing: billingAddress } = body
+    const {
+      items,
+      total,
+      customer,
+      shipping: shippingAddress,
+      billing: billingAddress,
+      paymentMethod = 'COD',
+      paymentStatus = 'pending',
+      transactionId = ''
+    } = body
 
     // Validate required fields
     if (!items?.length || !customer?.email || !shippingAddress?.address || !billingAddress?.address) {
@@ -24,14 +35,70 @@ export async function POST(request: NextRequest) {
       shipping: shippingAddress,
       billing: billingAddress,
       status: 'pending',
+      paymentMethod,
+      paymentStatus,
+      transactionId
     })
+
+    // --- Dynamic Inventory Synchronization Logic ---
+    try {
+      console.log(`🚀 [INVENTORY] Synchronizing stock for Order: ${order.orderId}`);
+
+      for (const item of items) {
+        if (!item.productId) {
+          console.warn(`⚠️ [INVENTORY] Skipping item ${item.name} - No Product ID provided.`);
+          continue;
+        }
+
+        // Validate Product ID
+        if (!Types.ObjectId.isValid(item.productId)) {
+          console.error(`❌ [INVENTORY] Invalid Product ID format: ${item.productId} for item: ${item.name}`);
+          continue;
+        }
+
+        const pId = new Types.ObjectId(item.productId);
+        const itemSize = item.size || 'N/A';
+        const itemColor = item.color || 'N/A';
+
+        // 🔍 MULTI-STAGE DYNAMIC MATCHING
+        let inventoryItem = await Inventory.findOne({ productId: pId, size: itemSize, color: itemColor });
+
+        if (!inventoryItem) {
+          console.log(`🔍 [INVENTORY] No exact match for ${item.name} (${itemSize}/${itemColor}), trying Size-Only fallback...`);
+          inventoryItem = await Inventory.findOne({ productId: pId, size: itemSize, color: 'N/A' });
+        }
+
+        if (!inventoryItem) {
+          console.log(`🔍 [INVENTORY] No Size-Only match, trying Generic fallback...`);
+          inventoryItem = await Inventory.findOne({ productId: pId, size: 'N/A', color: 'N/A' });
+        }
+
+        if (inventoryItem) {
+          console.log(`🎯 [INVENTORY] Match Found! Inventory Record ID: ${inventoryItem._id}`);
+
+          // Trigger persistent update
+          await inventoryItem.reserve(item.quantity);
+          console.log(`🔒 [INVENTORY] Reserved ${item.quantity} units. New Available: ${inventoryItem.availableStock}`);
+
+          if (paymentMethod === 'COD') {
+            await inventoryItem.commitSold(item.quantity);
+            console.log(`✅ [INVENTORY] COD Order: Committed ${item.quantity} units to SOLD.`);
+          }
+        } else {
+          console.warn(`❌ [INVENTORY] CRITICAL: No inventory record found in DB for Product ID ${item.productId} (${item.name})`);
+        }
+      }
+    } catch (inventoryError: any) {
+      console.error('❌ [INVENTORY] System Failure during sync:', inventoryError.message);
+    }
+    // ----------------------------------------------
 
     // Create order confirmation email notification (saving to database as contact submission)
     await Contact.create({
       name: customer.name,
       email: customer.email,
       subject: `Order Confirmation: ${order.orderId}`,
-      message: `Your order has been received. Order ID: ${order.orderId}. Total: ₹${order.total.toLocaleString()}`,
+      message: `Your order has been received. Order ID: ${order.orderId}. Total: IDR ${order.total.toLocaleString()}`,
     })
 
     return NextResponse.json({

@@ -174,19 +174,19 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <div className="space-y-3 mb-6">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold uppercase tracking-widest text-gray-400">Subtotal</span>
-                                    <span className="text-lg font-bold">₹{cart.subtotal.toFixed(2)}</span>
+                                    <span className="text-lg font-bold">IDR {cart.subtotal.toLocaleString()}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold uppercase tracking-widest text-gray-400">Shipping</span>
-                                    <span className="text-lg font-bold">₹{cart.shipping.toFixed(2)}</span>
+                                    <span className="text-lg font-bold">IDR {cart.shipping.toLocaleString()}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-bold uppercase tracking-widest text-gray-400">Tax</span>
-                                    <span className="text-lg font-bold">₹{cart.tax.toFixed(2)}</span>
+                                    <span className="text-lg font-bold">IDR {cart.tax.toLocaleString()}</span>
                                 </div>
                                 <div className="flex items-center justify-between pt-3 border-t">
                                     <span className="text-sm font-bold uppercase tracking-widest text-black">Total</span>
-                                    <span className="text-xl font-bold text-black">₹{cart.total.toFixed(2)}</span>
+                                    <span className="text-xl font-bold text-black">IDR {cart.total.toLocaleString()}</span>
                                 </div>
                             </div>
                             <Link

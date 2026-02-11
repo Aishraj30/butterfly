@@ -14,7 +14,9 @@ export function useInventory(params = {}) {
 
     const key = `/api/inventory?${queryParams.toString()}`;
 
-    const { data, error, isLoading, mutate } = useSWR(key, fetcher);
+    const { data, error, isLoading, mutate } = useSWR(key, fetcher, {
+        refreshInterval: 5000, // Auto-refresh every 5 seconds for dynamic updates
+    });
 
     return {
         inventory: data,

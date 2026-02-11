@@ -4,6 +4,8 @@ import Inventory from "../models/inventory.js";
 import Product from "../models/Product.js"; // Optional: to verify product existence
 import InventoryMovement from "../models/InventoryMovement.js";
 
+import Order from "../models/Order.js";
+
 // Helper to log movement
 async function logMovement({ inventoryId, productId, type, quantity, previousStock, newStock, reason, referenceId, performedBy }) {
     try {
@@ -23,6 +25,77 @@ async function logMovement({ inventoryId, productId, type, quantity, previousSto
     }
 }
 
+async function syncWithPendingOrders() {
+    try {
+        // Aggregation pipeline to sum quantities of pending items per product variant
+        const pendingAgg = await Order.aggregate([
+            { $match: { status: "pending" } },
+            { $unwind: "$items" },
+            {
+                $group: {
+                    _id: {
+                        productId: "$items.productId",
+                        size: "$items.size",
+                        color: "$items.color"
+                    },
+                    totalPending: { $sum: "$items.quantity" }
+                }
+            }
+        ]);
+
+        // Reset all reservedStock to 0 first (to clear zombie reservations)
+        // Note: This might be heavy on large datasets, but ensures 100% accuracy.
+        // Optimization: Only reset items that are NOT in the pendingAgg list? 
+        // Safer: Update all.
+        // Reset all reservedStock to 0 first (to clear zombie reservations)
+        // AND reset availableStock to totalStock (since reserved is 0)
+        await Inventory.updateMany({}, [
+            { $set: { reservedStock: 0 } },
+            { $set: { availableStock: "$totalStock" } }
+        ]);
+
+        // Update with actual pending counts
+        // Since we need robust matching (fallback to N/A), we can't easily use bulkWrite with simple filters.
+        // We will iterate through the aggregated results and find the best match for each.
+        for (const p of pendingAgg) {
+            const pId = p._id.productId;
+            if (!pId) continue;
+
+            // Note: The Order items might contain null/undefined for size/color.
+            const itemSize = p._id.size || "N/A";
+            const itemColor = p._id.color || "N/A";
+            const qty = p.totalPending;
+
+            // 🔍 MULTI-STAGE DYNAMIC MATCHING (Same as Order Creation)
+            let inventoryItem = await Inventory.findOne({ productId: pId, size: itemSize, color: itemColor });
+
+            if (!inventoryItem) {
+                // Fallback 1: Size Only
+                inventoryItem = await Inventory.findOne({ productId: pId, size: itemSize, color: 'N/A' });
+            }
+
+            if (!inventoryItem) {
+                // Fallback 2: Generic
+                inventoryItem = await Inventory.findOne({ productId: pId, size: 'N/A', color: 'N/A' });
+            }
+
+            if (inventoryItem) {
+                // We add to the reserved stock because multiple variants might map to the same generic inventory item
+                // NOTE: Since we reset everything to 0 above, this accumulation logic works correctly
+                // even if multiple order variants point to the same inventory item.
+                inventoryItem.reservedStock += qty;
+                await inventoryItem.save();
+                // console.log(`🔄 [AUTO-SYNC] Updated Reserved Stock for ${inventoryItem.sku}: +${qty}`);
+            }
+        }
+        // console.log("Inventory synced with pending orders.");
+
+    } catch (error) {
+        console.error("Auto-sync failed:", error);
+    }
+}
+
+
 export class InventoryController {
 
     // =====================
@@ -31,6 +104,10 @@ export class InventoryController {
     static async getAll(request) {
         try {
             await connectDB();
+
+            // AUTO-SYNC: Ensure Reserved Stock matches Pending Orders exactly
+            await syncWithPendingOrders();
+
             const { searchParams } = new URL(request.url);
             const productId = searchParams.get("productId");
             const lowStock = searchParams.get("lowStock");
@@ -48,7 +125,14 @@ export class InventoryController {
 
             const items = await Inventory.find(query).populate("productId", "name brand");
 
-            return NextResponse.json(items, { status: 200 });
+            // Recalculate availableStock for display just in case pre-save didn't fire
+            const result = items.map(item => {
+                const doc = item.toObject();
+                doc.availableStock = doc.totalStock - (doc.reservedStock || 0);
+                return doc;
+            });
+
+            return NextResponse.json(result, { status: 200 });
         } catch (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
@@ -137,10 +221,9 @@ export class InventoryController {
 
             const previousStock = originalItem.totalStock;
 
-            const updatedItem = await Inventory.findByIdAndUpdate(id, body, {
-                new: true,
-                runValidators: true
-            });
+            // Apply updates and use .save() to trigger pre-save hooks
+            Object.assign(originalItem, body);
+            const updatedItem = await originalItem.save();
 
             // Log if stock changed manually via update
             if (updatedItem.totalStock !== previousStock) {

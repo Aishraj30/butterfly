@@ -1,13 +1,16 @@
 import { InventoryController } from "@/controllers/inventoryController";
 
 export async function GET(req, { params }) {
-    return InventoryController.getById(req, { params });
+    const p = await params;
+    return InventoryController.getById(req, { params: p });
 }
 
 export async function PUT(req, { params }) {
-    return InventoryController.update(req, { params });
+    const p = await params;
+    return InventoryController.update(req, { params: p });
 }
 
 export async function DELETE(req, { params }) {
-    return InventoryController.delete(req, { params });
+    const p = await params;
+    return InventoryController.delete(req, { params: p });
 }
