@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { X, ChevronRight, ChevronDown, Star } from 'lucide-react'
+import { X, ChevronRight, Star } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface FeaturedDrawerProps {
     isOpen: boolean
@@ -24,7 +25,7 @@ interface Collection {
 
 export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
-    const backdropRef = useRef<HTMLDivElement>(null)
+    const { user } = useAuth()
     const [expandedItems, setExpandedItems] = useState<string[]>([])
     const [collections, setCollections] = useState<Collection[]>([])
     const [loading, setLoading] = useState(true)
@@ -50,12 +51,17 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden'
+            document.body.style.position = 'fixed'
+            document.body.style.width = '100%'
         } else {
             document.body.style.overflow = ''
+            document.body.style.position = ''
+            document.body.style.width = ''
         }
-
         return () => {
             document.body.style.overflow = ''
+            document.body.style.position = ''
+            document.body.style.width = ''
         }
     }, [isOpen])
 
@@ -69,71 +75,111 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
 
     return (
         <>
-            {/* Backdrop Overlay */}
+            {/* Backdrop */}
             <div
-                ref={backdropRef}
                 onClick={onClose}
-                className={`fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm cursor-pointer transition-opacity duration-300 ${
-                    isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-                }`}
+                className={`fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
             />
 
             {/* Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed top-0 left-0 z-[101] h-screen w-full max-w-[480px] bg-white shadow-2xl transition-transform duration-500 ${
-                    isOpen ? 'translate-x-0' : '-translate-x-full'
-                }`}
+                className={`fixed top-0 left-0 z-[101] h-[100dvh] w-full max-w-[320px] 
+                    bg-black/40 backdrop-blur-2xl 
+                    border-r border-white/20 shadow-[20px_0_50px_rgba(0,0,0,0.1)]
+                    font-sans text-white
+                    transition-transform duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] 
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
-                <div className="flex h-full flex-col">
-                    {/* Header */}
-                    <div className="flex items-center justify-between border-b px-8 py-6">
-                        <h2 className="text-xl font-bold uppercase tracking-[0.2em] text-black">
+                {/* Noise/Texture Overlay */}
+                <div className="absolute inset-0 bg-black/20 pointer-events-none mix-blend-multiply opacity-50" />
+
+                <div className="relative flex h-full flex-col px-8 pt-12 pb-8">
+
+                    {/* Header: Minimal & Centered */}
+                    <div className="relative flex items-center justify-between mb-12">
+                        {/* Empty div for spacing balance */}
+                        <div className="w-6" /> 
+                        
+                        <h2 className="text-xl tracking-[0.3em] uppercase text-white font-medium">
                             Featured
                         </h2>
+
                         <button
                             onClick={onClose}
-                            className="group rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer bg-gray-100"
+                            className="group text-white/60 hover:text-white transition-colors"
+                            aria-label="Close menu"
                         >
-                            <X size={24} className="transition-transform duration-300 group-hover:rotate-90 text-black" />
+                            <X className="w-5 h-5 transition-transform duration-500 group-hover:rotate-180" strokeWidth={1.5} />
                         </button>
                     </div>
 
-                    {/* Body */}
-                    <div className="flex-1 overflow-y-auto p-8">
-                        <div className="space-y-2">
-                            {/* Featured Collections */}
-                            <div className="mb-6">
-                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Featured Collections</h3>
-                                
-                                {loading ? (
-                                    <div className="flex justify-center py-8">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
-                                    </div>
-                                ) : collections.length > 0 ? (
-                                    collections.map((collection) => (
+                    {/* Main Content */}
+                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent space-y-8">
+                        
+                        {/* Featured Collections */}
+                        <div className="space-y-6">
+                            <div className="text-xs font-semibold text-red-400 uppercase tracking-[0.2em]">
+                                Featured Collections
+                            </div>
+                            
+                            {loading ? (
+                                <div className="space-y-8 animate-pulse px-2 mt-8">
+                                    {[1, 2, 3, 4].map((i) => (
+                                        <div key={i} className="flex justify-between items-center border-b border-black/5 pb-2">
+                                            <div className="h-4 bg-black/10 rounded w-1/2"></div>
+                                            <div className="h-3 bg-black/10 rounded w-4"></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : collections.length > 0 ? (
+                                <div className="space-y-6">
+                                    {collections.map((collection) => (
                                         <Link 
                                             key={collection._id}
                                             href={`/collections/${collection.slug}`} 
                                             onClick={onClose}
-                                            className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors group mb-3"
+                                            className="flex items-center justify-between group"
                                         >
                                             <div className="flex items-center gap-3">
-                                                <ChevronRight size={16} className="text-gray-400 group-hover:text-black transition-colors" />
-                                                <span className="font-medium text-black">{collection.name}</span>
+                                                <Star className="w-3 h-3 text-white/40" />
+                                                <span className="text-sm uppercase tracking-[0.2em] text-white group-hover:opacity-70 transition-opacity">
+                                                    {collection.name}
+                                                </span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-xs text-gray-400">{collection.products?.length || 0} items</span>
-                                                <ChevronRight size={16} className="text-gray-400 group-hover:text-black transition-colors" />
+                                                <span className="text-[10px] uppercase tracking-[0.15em] text-white/50 font-sans">
+                                                    {collection.products?.length || 0} items
+                                                </span>
+                                                <ChevronRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                                             </div>
                                         </Link>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8 text-gray-500">
-                                        <p>No featured collections available</p>
-                                    </div>
-                                )}
-                            </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <p className="text-sm text-white/40 font-sans">No featured collections available</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="pt-8 border-t border-black/5">
+                        {!user && (
+                            <Link
+                                href="/account"
+                                onClick={onClose}
+                                className="block text-xs uppercase tracking-[0.15em] text-white/60 hover:text-white transition-colors mb-4 font-sans"
+                            >
+                                Log In
+                            </Link>
+                        )}
+                        <div className="flex gap-4">
+                             {/* Socials or other footer items could go here */}
+                             <div className="w-2 h-2 rounded-full bg-white/20"></div>
+                             <div className="w-2 h-2 rounded-full bg-white/20"></div>
                         </div>
                     </div>
                 </div>

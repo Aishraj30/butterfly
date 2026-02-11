@@ -52,6 +52,8 @@ export function Header() {
   const [collections, setCollections] = useState<Collection[]>([])
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchSuggestions, setSearchSuggestions] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const { cart } = useCart()
@@ -79,6 +81,24 @@ export function Header() {
       handleSearch();
     }
   };
+
+  // Fetch search suggestions
+  useEffect(() => {
+    if (searchQuery.trim().length >= 2) {
+      setIsSearching(true);
+      fetch(`/api/products/search?q=${encodeURIComponent(searchQuery.trim())}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setSearchSuggestions(data.products || []);
+          }
+        })
+        .catch(error => console.error('Failed to fetch suggestions:', error))
+        .finally(() => setIsSearching(false));
+    } else {
+      setSearchSuggestions([]);
+    }
+  }, [searchQuery]);
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
@@ -175,22 +195,68 @@ export function Header() {
               {isSearchOpen ? (
                 <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50">
                   <div className="relative w-full px-4 pt-4">
-                    <div className="relative">
+                    <div className="relative max-w-2xl mx-auto">
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="SEARCH"
-                        className="w-full py-4 px-4 border-b-2 border-gray-400 focus:outline-none text-lg text-black bg-transparent"
+                        className="w-full py-4 px-4 border-b-2 border-white/60 focus:outline-none text-lg text-white bg-transparent"
                         autoFocus
                       />
                       <button
                         onClick={() => setIsSearchOpen(false)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/60 hover:text-white"
                       >
                         <X size={20} />
                       </button>
+
+                      {/* Search Suggestions Dropdown */}
+                      {searchSuggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg shadow-2xl max-h-96 overflow-y-auto">
+                          <div className="p-2">
+                            {isSearching ? (
+                              <div className="text-center py-4 text-white/60 font-sans text-sm">
+                                Searching...
+                              </div>
+                            ) : (
+                              <div className="space-y-1">
+                                {searchSuggestions.map((product, index) => (
+                                  <Link
+                                    key={product._id || index}
+                                    href={`/product/${product._id}`}
+                                    onClick={() => {
+                                      setIsSearchOpen(false);
+                                      setSearchQuery('');
+                                      setSearchSuggestions([]);
+                                    }}
+                                    className="block p-3 hover:bg-white/20 rounded-md transition-colors group"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      {product.image && (
+                                        <img
+                                          src={product.image}
+                                          alt={product.name}
+                                          className="w-10 h-10 object-cover rounded bg-white/10"
+                                        />
+                                      )}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="text-white font-medium text-sm truncate group-hover:text-white/80 transition-colors">
+                                          {product.name}
+                                        </div>
+                                        <div className="text-white/60 text-xs font-sans truncate">
+                                          {product.category} • ₹{product.price}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

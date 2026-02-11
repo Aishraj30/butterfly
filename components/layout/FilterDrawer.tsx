@@ -126,12 +126,12 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
 
             <div
                 ref={drawerRef}
-                className={`fixed top-0 right-0 z-[101] h-screen w-full max-w-[400px] bg-white shadow-[-20px_0_50px_rgba(0,0,0,0.1)] transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                className={`fixed top-0 right-0 z-[101] h-screen w-full max-w-[400px] bg-white/80 backdrop-blur-xl shadow-[-20px_0_50px_rgba(0,0,0,0.1)] border-l border-white/20 transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
                     }`}
             >
                 <div className="flex h-full flex-col font-sans">
                     {/* Header - Sleek & Minimal */}
-                    <div className="flex items-center justify-between px-8 py-7 bg-white">
+                    <div className="flex items-center justify-between px-8 py-7 bg-white/60 backdrop-blur-md border-b border-white/20">
                         <div>
                             <h2 className="text-lg font-medium uppercase tracking-[0.25em] text-black">
                                 Refine
@@ -289,7 +289,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
                     </div>
 
                     {/* Footer - Elegant Controls */}
-                    <div className="px-8 py-8 bg-white border-t border-gray-100 flex gap-4">
+                    <div className="px-8 py-8 bg-white/60 backdrop-blur-md border-t border-white/20 flex gap-4">
                         <button
                             onClick={clearAllFilters}
                             className="flex-1 py-4 text-[10px] font-medium uppercase tracking-[0.2em] text-gray-600 hover:text-black transition-colors border border-transparent hover:border-gray-100"

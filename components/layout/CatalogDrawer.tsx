@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { X, ArrowRight, Plus, Minus, Search, ShoppingBag } from 'lucide-react'
+import { X, ArrowRight, Plus, Minus, Search } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 // --- Types ---
 interface CatalogDrawerProps {
@@ -28,13 +29,12 @@ interface CategoryData {
 
 // --- Components ---
 
-// A simple skeleton loader for the category list
 const CategorySkeleton = () => (
-    <div className="space-y-6 animate-pulse px-2">
-        {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex justify-between items-center">
-                <div className="h-6 bg-gray-100 rounded w-1/3"></div>
-                <div className="h-4 bg-gray-100 rounded w-4"></div>
+    <div className="space-y-8 animate-pulse px-2 mt-8">
+        {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex justify-between items-center border-b border-white/10 pb-2">
+                <div className="h-4 bg-white/20 rounded w-1/2"></div>
+                <div className="h-3 bg-white/20 rounded w-4"></div>
             </div>
         ))}
     </div>
@@ -42,6 +42,7 @@ const CategorySkeleton = () => (
 
 export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
+    const { user } = useAuth()
 
     // State
     const [expandedItems, setExpandedItems] = useState<string[]>([])
@@ -50,7 +51,6 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
     // Fetch logic
     useEffect(() => {
-        // Only fetch if we haven't already or if we want to refresh on open (usually once is enough)
         if (Object.keys(categories).length === 0) {
             setIsLoading(true)
             fetch('/api/products')
@@ -63,7 +63,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                 .catch(error => console.error('Failed to fetch products:', error))
                 .finally(() => setIsLoading(false))
         }
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [])
 
     const organizeProductsByCategory = (products: Product[]) => {
         const organized: CategoryData = {}
@@ -79,11 +79,22 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
     // Body Scroll Lock
     useEffect(() => {
-        document.body.style.overflow = isOpen ? 'hidden' : ''
-        return () => { document.body.style.overflow = '' }
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'
+            document.body.style.position = 'fixed'
+            document.body.style.width = '100%'
+        } else {
+            document.body.style.overflow = ''
+            document.body.style.position = ''
+            document.body.style.width = ''
+        }
+        return () => {
+            document.body.style.overflow = ''
+            document.body.style.position = ''
+            document.body.style.width = ''
+        }
     }, [isOpen])
 
-    // Accordion Toggle
     const toggleExpanded = (key: string) => {
         setExpandedItems(prev =>
             prev.includes(key) ? prev.filter(item => item !== key) : [...prev, key]
@@ -92,85 +103,78 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
     return (
         <>
-            {/* Backdrop */}
+            {/* Backdrop - Significantly lighter */}
             <div
                 onClick={onClose}
-                className={`fixed inset-0 z-[100] bg-black/20 backdrop-blur-md transition-opacity duration-500 ease-in-out ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             />
 
             {/* Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed top-0 left-0 z-[101] h-[100dvh] w-full max-w-[500px] bg-white shadow-2xl transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) ${isOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                // Lighter tint (bg-black/5) and heavier blur (2xl) for contrast
+                className={`fixed top-0 left-0 z-[101] h-[100dvh] w-full max-w-[320px] 
+                    bg-black/40 backdrop-blur-2xl 
+                    border-r border-white/20 shadow-[20px_0_50px_rgba(0,0,0,0.1)]
+                    font-sans text-white
+                    transition-transform duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] 
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
-                <div className="flex h-full flex-col">
+                {/* Noise/Texture Overlay (Optional - made subtler) */}
+                <div className="absolute inset-0 bg-black/20 pointer-events-none mix-blend-multiply opacity-50" />
 
-                    {/* 1. Header Area */}
-                    <div className="flex items-center justify-between px-8 pt-8 pb-6 bg-white">
-                        <h2 className="text-2xl font-bold tracking-tighter text-black flex gap-2 items-center">
-                            <ShoppingBag className="w-6 h-6" />
-                            Store<span className="text-gray-400">.</span>
+                <div className="relative flex h-full flex-col px-8 pt-12 pb-8">
+
+                    {/* 1. Header: Minimal & Centered */}
+                    <div className="relative flex items-center justify-between mb-12">
+                        <div className="w-6" /> 
+                        {/* Added drop-shadow to help text pop against lighter glass */}
+                        <h2 className="text-xl tracking-[0.3em] uppercase text-white font-medium drop-shadow-md">
+                            Store
                         </h2>
+
                         <button
                             onClick={onClose}
-                            className="group p-2 -mr-2 text-gray-400 hover:text-black transition-colors"
+                            className="group text-white/60 hover:text-white transition-colors"
                             aria-label="Close menu"
                         >
-                            <X className="w-6 h-6 transition-transform duration-500 group-hover:rotate-90" />
+                            <X className="w-5 h-5 transition-transform duration-500 group-hover:rotate-180 drop-shadow-sm" strokeWidth={1.5} />
                         </button>
                     </div>
 
-                    {/* 2. Scrollable Content */}
-                    <div className="flex-1 overflow-y-auto px-8 pb-10 scrollbar-hide">
-
-                        {/* Search Bar Placeholder */}
-                        <div className="relative mb-8 group">
-                            <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                            <input
-                                type="text"
-                                placeholder="Search collection..."
-                                className="w-full border-b border-gray-200 py-3 pl-8 text-sm outline-none focus:border-black transition-colors bg-transparent placeholder:text-gray-400"
-                            />
-                        </div>
-
-                        {/* Highlights Section */}
-                        <div className="grid grid-cols-2 gap-4 mb-10">
+                    {/* 3. Main Navigation */}
+                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent space-y-8">
+                        
+                        {/* Static Links (New / Sale) */}
+                        <div className="space-y-4 pb-8 border-b border-white/10">
                             <Link
                                 href="/new-arrival"
                                 onClick={onClose}
-                                className="flex flex-col justify-between p-4 bg-gray-50 hover:bg-black group transition-colors duration-300 rounded-xl"
+                                className="flex items-center justify-between group"
                             >
-                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 group-hover:text-gray-400">Collection</span>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-semibold text-black group-hover:text-white">New Arrivals</span>
-                                    <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-white" />
-                                </div>
+                                <span className="text-sm uppercase tracking-[0.2em] text-white group-hover:opacity-70 transition-opacity drop-shadow-sm">
+                                    New Arrivals
+                                </span>
+                                <ArrowRight className="w-3 h-3 text-white opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 drop-shadow-sm" />
                             </Link>
-
+                            
                             <Link
                                 href="/sale"
                                 onClick={onClose}
-                                className="flex flex-col justify-between p-4 bg-red-50 hover:bg-red-600 group transition-colors duration-300 rounded-xl"
+                                className="flex items-center justify-between group"
                             >
-                                <span className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-2 group-hover:text-red-200">Limited</span>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-semibold text-red-600 group-hover:text-white">Sale</span>
-                                    <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-white" />
-                                </div>
+                                <span className="text-sm uppercase tracking-[0.2em] text-red-500 group-hover:opacity-70 transition-opacity">
+                                    Sale
+                                </span>
                             </Link>
                         </div>
 
-                        <div className="mb-4 text-xs font-semibold text-gray-400 uppercase tracking-[0.2em]">
-                            Categories
-                        </div>
-
-                        {/* Main Categories List */}
+                        {/* Dynamic Categories */}
                         {isLoading ? (
                             <CategorySkeleton />
                         ) : (
-                            <div className="space-y-1">
+                            <div className="space-y-6">
                                 {Object.entries(categories).map(([category, subCategories]) => {
                                     const isExpanded = expandedItems.includes(category)
 
@@ -178,37 +182,38 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                         <div key={category} className="group">
                                             <button
                                                 onClick={() => toggleExpanded(category)}
-                                                className="w-full flex items-center justify-between py-4 text-left group-hover:text-gray-600 transition-colors select-none"
+                                                className="w-full flex items-center justify-between py-1 text-left hover:opacity-60 transition-opacity select-none"
                                             >
-                                                <span className="text-lg font-medium text-black tracking-wide">
+                                                <span className="text-sm uppercase tracking-[0.2em] text-white drop-shadow-sm">
                                                     {category}
                                                 </span>
                                                 {isExpanded ? (
-                                                    <Minus className="w-5 h-5 text-black" strokeWidth={1.5} />
+                                                    <Minus className="w-3 h-3 text-white/80 drop-shadow-sm" strokeWidth={1} />
                                                 ) : (
-                                                    <Plus className="w-5 h-5 text-gray-400 group-hover:text-black transition-colors" strokeWidth={1.5} />
+                                                    <Plus className="w-3 h-3 text-white/80 drop-shadow-sm" strokeWidth={1} />
                                                 )}
                                             </button>
 
                                             {/* Accordion Content */}
                                             <div
-                                                className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                                                    }`}
+                                                className={`overflow-hidden transition-[max-height,opacity] duration-500 ease-in-out ${
+                                                    isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                                                }`}
                                             >
-                                                <div className="pl-4 border-l-2 border-gray-100 mb-4 space-y-1 ml-1">
+                                                <div className="pt-4 pl-2 space-y-3 border-l border-white/10 ml-1 mt-2">
                                                     <Link
                                                         href={`/catalog/${encodeURIComponent(category)}`}
                                                         onClick={onClose}
-                                                        className="block py-2 pl-4 text-sm font-semibold text-black hover:text-gray-600 transition-colors"
+                                                        className="block text-[10px] uppercase tracking-[0.15em] text-white/70 hover:text-white transition-colors font-sans drop-shadow-sm"
                                                     >
-                                                        Shop All {category}
+                                                        View All
                                                     </Link>
                                                     {Object.keys(subCategories).map((subCategory) => (
                                                         <Link
                                                             key={subCategory}
                                                             href={`/catalog/${encodeURIComponent(category)}/${encodeURIComponent(subCategory)}`}
                                                             onClick={onClose}
-                                                            className="block py-2 pl-4 text-sm text-gray-500 hover:text-black hover:translate-x-1 transition-all"
+                                                            className="block text-[10px] uppercase tracking-[0.15em] text-white/50 hover:text-white hover:translate-x-1 transition-all font-sans drop-shadow-sm"
                                                         >
                                                             {subCategory}
                                                         </Link>
@@ -222,16 +227,22 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                         )}
                     </div>
 
-                    {/* 3. Footer / CTA */}
-                    <div className="p-8 border-t border-gray-100 bg-gray-50/50">
-                        <Link
-                            href="/catalog"
-                            onClick={onClose}
-                            className="flex w-full items-center justify-center gap-2 bg-black text-white py-4 rounded-full font-medium hover:bg-gray-900 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-xl shadow-black/10"
-                        >
-                            Browse Full Catalog
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
+                    {/* 4. Footer */}
+                    <div className="pt-8 border-t border-black/5">
+                        {!user && (
+                            <Link
+                                href="/account"
+                                onClick={onClose}
+                                className="block text-xs uppercase tracking-[0.15em] text-black/60 hover:text-black transition-colors mb-4 font-sans"
+                            >
+                                Log In
+                            </Link>
+                        )}
+                        <div className="flex gap-4">
+                             {/* Socials or other footer items could go here */}
+                             <div className="w-2 h-2 rounded-full bg-black/20"></div>
+                             <div className="w-2 h-2 rounded-full bg-black/20"></div>
+                        </div>
                     </div>
                 </div>
             </div>
