@@ -101,7 +101,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
           <div className="hidden md:block">
             <div
               ref={carouselRef}
-              className="flex overflow-x-auto scrollbar-hide scroll-smooth px-4 pb-0 pt-2"
+              className="flex overflow-x-auto scrollbar-hide scroll-smooth px-4 pb-2 pt-2"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -109,9 +109,9 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
             >
               {products.map((product) => (
                 <div key={product.id} className="flex-none w-[calc(25%-2px)] sm:w-[calc(25%-2px)] md:w-[calc(30%-2px)] lg:w-[calc(22%-2px)] group border-r border-gray-300 px-2 last:border-r-0">
-                  <div className="cursor-pointer group flex flex-col h-full mb-0">
+                  <div className="cursor-pointer group flex flex-col h-full">
                     {/* Nested Image Scroll */}
-                    <div className="relative h-[55vh] overflow-hidden rounded-xl bg-gray-100 mb-2 group/img">
+                    <div className="relative h-[70vh] overflow-hidden rounded-xl bg-gray-100 group/img">
                       {/* Primary Image */}
                       <Image
                         src={product.images[0]}
@@ -146,7 +146,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
 
                     {/* Product Info Below Card */}
                     <Link href={`/product/${product.id}`}>
-                      <div className="px-0 mt-auto pt-4 pb-6">
+                      <div className="px-0 mt-auto pt-4 pb-4">
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="text-xs font-bold uppercase tracking-widest text-black group-hover:text-gray-600 transition-colors pr-4">
                             {product.name}
