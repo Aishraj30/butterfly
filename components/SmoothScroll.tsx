@@ -1,16 +1,25 @@
 'use client';
-import { useEffect } from 'react';
+import { ReactLenis } from 'lenis/react';
+import { ReactNode } from 'react';
 
-export default function SmoothScroll() {
-    useEffect(() => {
-        // Enable native smooth scrolling for the entire page
-        document.documentElement.style.scrollBehavior = 'smooth';
-        
-        return () => {
-            // Cleanup: reset scroll behavior when component unmounts
-            document.documentElement.style.scrollBehavior = 'auto';
-        };
-    }, [])
+interface SmoothScrollProps {
+    children: ReactNode;
+}
 
-    return null
+export default function SmoothScroll({ children }: SmoothScrollProps) {
+    return (
+        <ReactLenis
+            root
+            options={{
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smoothWheel: true,
+                wheelMultiplier: 1,
+                touchMultiplier: 2,
+                infinite: false,
+            }}
+        >
+            {children}
+        </ReactLenis>
+    );
 }

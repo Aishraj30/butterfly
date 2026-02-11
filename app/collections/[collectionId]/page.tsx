@@ -66,6 +66,11 @@ const collectionData: { [key: string]: { title: string; description: string; ima
         title: 'Accessories',
         description: 'Finishing touches that complete your look',
         image: 'https://images.unsplash.com/photo-1524863479829-916d8e77f114?q=80&w=1920&auto=format&fit=crop'
+    },
+    'butterfly': {
+        title: 'Butterfly',
+        description: 'Exquisite designs that capture the essence of elegance',
+        image: '/banners/b1.JPG'
     }
 }
 
@@ -75,6 +80,7 @@ export default function CollectionPage() {
     const [loading, setLoading] = useState(true)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [selectedSizes, setSelectedSizes] = useState<string[]>([])
+    const [collectionDetails, setCollectionDetails] = useState<any>(null)
 
     // --- NEW STATES FOR MOBILE ---
     const [mobileLayout, setMobileLayout] = useState<'1' | '2'>('2') // Default to 2 columns
@@ -103,6 +109,7 @@ export default function CollectionPage() {
                 }))
                 setProducts(collectionProducts)
                 setFilteredProducts(collectionProducts)
+                setCollectionDetails(data.collection)
             } else {
                 setProducts([])
                 setFilteredProducts([])
@@ -236,9 +243,9 @@ export default function CollectionPage() {
             {/* Added padding-bottom on mobile to prevent content being hidden behind sticky button */}
 
             <CatalogBanner
-                title={collectionInfo.title}
-                subtitle={collectionInfo.description}
-                backgroundImage={collectionInfo.image}
+                title={collectionDetails?.name || collectionInfo.title}
+                subtitle={collectionDetails?.description || collectionInfo.description}
+                backgroundImage={collectionDetails?.bannerImage || collectionInfo.image}
             />
 
             {/* --- MOBILE FILTER BAR (Top Sticky) --- */}

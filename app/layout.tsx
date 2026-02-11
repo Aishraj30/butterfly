@@ -62,13 +62,14 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AuthProvider>
             <LoadingProvider>
-              <SmoothScroll />
-              <AnnouncementBar />
-              <Header />
-              {children}
-              <ConditionalFooter />
-              <ChatBot />
-              <Analytics />
+              <SmoothScroll>
+                <AnnouncementBar />
+                <Header />
+                {children}
+                <ConditionalFooter />
+                <ChatBot />
+                <Analytics />
+              </SmoothScroll>
             </LoadingProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -116,7 +116,7 @@ export function ChatBot() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 p-4 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-shadow z-40 hover:scale-110 duration-200"
+        className="fixed sm:bottom-6 sm:right-6 bottom-4 right-4 p-4 bg-primary text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-shadow z-40 hover:scale-110 duration-200"
         aria-label="Open chat"
       >
         <MessageSquare size={24} />
@@ -125,12 +125,17 @@ export function ChatBot() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 max-h-[32rem] bg-background border border-border rounded-lg shadow-2xl flex flex-col z-50">
+    <div className="fixed sm:bottom-6 sm:right-6 bottom-4 right-4 sm:w-96 w-[calc(100vw-2rem)] sm:max-h-[32rem] max-h-[70vh] bg-background border border-border rounded-xl shadow-2xl flex flex-col z-50 overflow-hidden transition-all duration-300 ease-in-out">
       {/* Header */}
-      <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between rounded-t-lg">
-        <div>
-          <h3 className="font-semibold">Butterfly Assistant</h3>
-          <p className="text-xs text-primary-foreground/80">Always here to help</p>
+      <div className="bg-gradient-to-r from-primary/95 to-primary text-primary-foreground p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <MessageSquare size={18} className="text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm leading-tight">Butterfly Assistant</h3>
+            <p className="text-[10px] text-primary-foreground/70">Always here to help</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <button
@@ -157,16 +162,14 @@ export function ChatBot() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
               >
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-foreground'
-                  }`}
+                  className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm ${message.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-tr-none'
+                      : 'bg-secondary text-foreground rounded-tl-none border border-border/50'
+                    }`}
                 >
                   {message.content}
                 </div>
@@ -190,12 +193,12 @@ export function ChatBot() {
           {messages.length === 1 && (
             <div className="px-4 pb-4 space-y-2">
               <p className="text-xs text-foreground/60 font-medium">Quick questions:</p>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-2">
                 {suggestedQuestions.map((question) => (
                   <button
                     key={question}
                     onClick={() => handleSendMessage(question)}
-                    className="w-full text-left px-3 py-2 text-sm border border-border rounded hover:bg-secondary transition-colors"
+                    className="w-full text-left px-4 py-2.5 text-xs bg-secondary/50 border border-border rounded-xl hover:bg-secondary hover:border-primary/30 transition-all duration-200"
                   >
                     {question}
                   </button>
@@ -211,20 +214,20 @@ export function ChatBot() {
                 e.preventDefault()
                 handleSendMessage()
               }}
-              className="flex gap-2"
+              className="flex gap-2 items-center"
             >
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
-                className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="flex-1 px-4 py-2.5 bg-secondary/30 border border-border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 disabled={isLoading}
               />
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="p-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                className="p-2.5 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50 shadow-md"
                 aria-label="Send message"
               >
                 <Send size={18} />
