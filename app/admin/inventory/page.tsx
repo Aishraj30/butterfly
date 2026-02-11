@@ -74,7 +74,7 @@ export default function InventoryPage() {
                 <div>
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 animate-pulse flex items-center gap-1.5 py-0.5 px-2">
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1.5 py-0.5 px-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                             LIVE SYNC
                         </Badge>

@@ -8,8 +8,8 @@ import { ThemeProvider } from 'next-themes'
 import SmoothScroll from '@/components/SmoothScroll'
 
 import './globals.css'
-import { Header } from "@/components/layout/Header"
-import { AnnouncementBar } from "@/components/layout/AnnouncementBar"
+import { ConditionalHeader } from "@/components/layout/ConditionalHeader"
+import { ConditionalAnnouncementBar } from "@/components/layout/ConditionalAnnouncementBar"
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter"
 import { LoadingProvider } from "@/components/LoadingProvider"
 
@@ -63,8 +63,8 @@ export default function RootLayout({
           <AuthProvider>
             <LoadingProvider>
               <SmoothScroll>
-                <AnnouncementBar />
-                <Header />
+                <ConditionalAnnouncementBar />
+                <ConditionalHeader />
                 {children}
                 <ConditionalFooter />
                 <ChatBot />
