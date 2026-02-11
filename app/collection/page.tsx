@@ -148,18 +148,8 @@ export default function CollectionPage() {
             )
         }
 
-        // Filter by price range
-        if (filters.priceRange.min !== null) {
-            filtered = filtered.filter(product =>
-                (product.salePrice || product.price) >= filters.priceRange.min!
-            )
-        }
-        if (filters.priceRange.max !== null) {
-            filtered = filtered.filter(product =>
-                (product.salePrice || product.price) <= filters.priceRange.max!
-            )
-        }
 
+        
         // Filter by color
         if (filters.colors.length > 0) {
             filtered = filtered.filter(product =>
