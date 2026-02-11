@@ -68,11 +68,14 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
     const organizeProductsByCategory = (products: Product[]) => {
         const organized: CategoryData = {}
         products.forEach(product => {
-            if (!organized[product.category]) organized[product.category] = {}
-            if (!organized[product.category][product.subCategory]) {
-                organized[product.category][product.subCategory] = []
+            const category = product.category || 'Uncategorized'
+            const subCategory = product.subCategory || 'General'
+
+            if (!organized[category]) organized[category] = {}
+            if (!organized[category][subCategory]) {
+                organized[category][subCategory] = []
             }
-            organized[product.category][product.subCategory].push(product)
+            organized[category][subCategory].push(product)
         })
         setCategories(organized)
     }
