@@ -1,9 +1,19 @@
 'use client'
 
 import { useTheme } from 'next-themes'
+import { useState, useEffect } from 'react'
 
 export function ThemeTest() {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null // Avoid hydration mismatch
+  }
 
   return (
     <div className="fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-lg">

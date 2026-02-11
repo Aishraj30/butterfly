@@ -47,13 +47,21 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             fetch('/api/brands').then(res => res.json())
         ]).then(([collectionsData, brandsData]) => {
             if (collectionsData.success) {
-                setCollections(collectionsData.data)
+                setCollections(collectionsData.collections || collectionsData.data || [])
+            } else {
+                console.error('Collections API error:', collectionsData.message)
+                setCollections([])
             }
             if (brandsData.success) {
-                setBrands(brandsData.data)
+                setBrands(brandsData.brands || brandsData.data || [])
+            } else {
+                console.error('Brands API error:', brandsData.message)
+                setBrands([])
             }
         }).catch(error => {
             console.error('Error fetching collections/brands:', error)
+            setCollections([])
+            setBrands([])
         })
     }, [])
 
@@ -176,7 +184,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                     >
                         <option value="">Select Collection</option>
-                        {collections.map((collection) => (
+                        {collections?.map((collection) => (
                             <option key={collection.id} value={collection.name}>
                                 {collection.name}
                             </option>
