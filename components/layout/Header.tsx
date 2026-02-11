@@ -53,6 +53,8 @@ export function Header() {
   const [collections, setCollections] = useState<Collection[]>([])
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchSuggestions, setSearchSuggestions] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const { cart } = useCart()
@@ -80,6 +82,24 @@ export function Header() {
       handleSearch();
     }
   };
+
+  // Fetch search suggestions
+  useEffect(() => {
+    if (searchQuery.trim().length >= 2) {
+      setIsSearching(true);
+      fetch(`/api/products/search?q=${encodeURIComponent(searchQuery.trim())}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setSearchSuggestions(data.products || []);
+          }
+        })
+        .catch(error => console.error('Failed to fetch suggestions:', error))
+        .finally(() => setIsSearching(false));
+    } else {
+      setSearchSuggestions([]);
+    }
+  }, [searchQuery]);
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
@@ -203,10 +223,56 @@ export function Header() {
                       />
                       <button
                         onClick={() => setIsSearchOpen(false)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-600 hover:text-black"
                       >
                         <X size={24} />
                       </button>
+
+                      {/* Search Suggestions Dropdown */}
+                      {searchSuggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto">
+                          <div className="p-2">
+                            {isSearching ? (
+                              <div className="text-center py-4 text-gray-600 font-sans text-sm">
+                                Searching...
+                              </div>
+                            ) : (
+                              <div className="space-y-1">
+                                {searchSuggestions.map((product, index) => (
+                                  <Link
+                                    key={product._id || index}
+                                    href={`/product/${product._id}`}
+                                    onClick={() => {
+                                      setIsSearchOpen(false);
+                                      setSearchQuery('');
+                                      setSearchSuggestions([]);
+                                    }}
+                                    className="block p-3 hover:bg-gray-100 rounded-md transition-colors group"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      {product.image && (
+                                        <img
+                                          src={product.image}
+                                          alt={product.name}
+                                          className="w-10 h-10 object-cover rounded bg-gray-100"
+                                        />
+                                      )}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="text-black font-medium text-sm truncate group-hover:text-gray-700 transition-colors">
+                                          {product.name}
+                                        </div>
+                                        <div className="text-gray-600 text-xs font-sans truncate">
+                                          {product.category} • ₹{product.price}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}

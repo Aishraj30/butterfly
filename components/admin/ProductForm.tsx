@@ -183,7 +183,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                     >
                         <option value="">Select Collection</option>
-                        {collections.map((collection) => (
+                        {collections?.map((collection) => (
                             <option key={collection.id} value={collection.name}>
                                 {collection.name}
                             </option>

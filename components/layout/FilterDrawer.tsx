@@ -1,9 +1,9 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { X, Check, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
 
+// --- Types ---
 interface FilterDrawerProps {
     isOpen: boolean
     onClose: () => void
@@ -21,10 +21,8 @@ export interface FilterState {
 
 export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }: FilterDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
-    const backdropRef = useRef<HTMLDivElement>(null)
-    const contentRef = useRef<HTMLDivElement>(null)
 
-    const [expandedSections, setExpandedSections] = useState<string[]>(['gender', 'size', 'price', 'color', 'sort'])
+    // State
     const [selectedGenders, setSelectedGenders] = useState<string[]>(initialFilters?.genders || [])
     const [selectedSizes, setSelectedSizes] = useState<string[]>(initialFilters?.sizes || [])
     const [priceRange, setPriceRange] = useState({
@@ -34,7 +32,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
     const [selectedColors, setSelectedColors] = useState<string[]>(initialFilters?.colors || [])
     const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'rating'>(initialFilters?.sortBy || 'name')
 
-    // Sync state if initialFilters changes
+    // Sync state
     useEffect(() => {
         if (initialFilters) {
             setSelectedGenders(initialFilters.genders)
@@ -48,7 +46,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
         }
     }, [initialFilters])
 
-    // Prevent body scroll when filter is open
+    // Body Scroll Lock
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden'
@@ -60,36 +58,17 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
         }
     }, [isOpen])
 
-    const toggleSection = (section: string) => {
-        setExpandedSections(prev =>
-            prev.includes(section)
-                ? prev.filter(s => s !== section)
-                : [...prev, section]
-        )
-    }
-
+    // Handlers
     const toggleGender = (gender: string) => {
-        setSelectedGenders(prev =>
-            prev.includes(gender)
-                ? prev.filter(g => g !== gender)
-                : [...prev, gender]
-        )
+        setSelectedGenders(prev => prev.includes(gender) ? prev.filter(g => g !== gender) : [...prev, gender])
     }
 
     const toggleSize = (size: string) => {
-        setSelectedSizes(prev =>
-            prev.includes(size)
-                ? prev.filter(s => s !== size)
-                : [...prev, size]
-        )
+        setSelectedSizes(prev => prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size])
     }
 
     const toggleColor = (color: string) => {
-        setSelectedColors(prev =>
-            prev.includes(color)
-                ? prev.filter(c => c !== color)
-                : [...prev, color]
-        )
+        setSelectedColors(prev => prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color])
     }
 
     const clearAllFilters = () => {
@@ -114,195 +93,199 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
         onClose()
     }
 
+    // Animation Helpers
+    // Staggered slide-up effect for internal content
+    const getAnimationClass = (delayIndex: number) => {
+        const baseClass = "transform transition-all duration-700 ease-[cubic-bezier(0.21,0.47,0.32,0.98)]"
+        const activeClass = isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        return `${baseClass} ${activeClass}`
+    }
+    
+    const getDelayStyle = (index: number) => ({ transitionDelay: `${200 + (index * 50)}ms` })
+
     return (
         <>
-            {/* Backdrop Overlay */}
+            {/* Backdrop */}
             <div
-                ref={backdropRef}
                 onClick={onClose}
-                className={`fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm cursor-pointer transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             />
 
+            {/* Right Side Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed top-0 right-0 z-[101] h-screen w-full max-w-[400px] bg-white shadow-[-20px_0_50px_rgba(0,0,0,0.1)] transition-transform duration-500 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
-                    }`}
+                className={`fixed inset-y-0 right-0 z-[101] w-full max-w-[420px]
+                    bg-black/60 backdrop-blur-2xl 
+                    border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.3)]
+                    font-sans text-white
+                    flex flex-col
+                    transition-transform duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] 
+                    ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >
-                <div className="flex h-full flex-col font-sans">
-                    {/* Header - Sleek & Minimal */}
-                    <div className="flex items-center justify-between px-8 py-7 bg-white">
-                        <div>
-                            <h2 className="text-lg font-medium uppercase tracking-[0.25em] text-black">
-                                Refine
-                            </h2>
-                            <div className="h-0.5 w-8 bg-black mt-1" />
+                {/* Noise Texture */}
+                <div className="absolute inset-0 bg-black/20 pointer-events-none mix-blend-multiply opacity-50" />
+
+                {/* 1. Header */}
+                <div className="relative flex items-center justify-between px-8 py-6 border-b border-white/10 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-lg tracking-[0.25em] uppercase text-white font-medium drop-shadow-md">
+                            Filters
+                        </h2>
+                        {(selectedGenders.length + selectedSizes.length + selectedColors.length) > 0 && (
+                            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white text-[10px] text-black font-bold">
+                                {selectedGenders.length + selectedSizes.length + selectedColors.length}
+                            </span>
+                        )}
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="group p-2 text-white/60 hover:text-white transition-colors"
+                        aria-label="Close menu"
+                    >
+                        <X className="w-5 h-5 transition-transform duration-500 group-hover:rotate-90" strokeWidth={1.5} />
+                    </button>
+                </div>
+
+                {/* 2. Scrollable Content */}
+                <div className="relative flex-1 overflow-y-auto px-8 py-8 space-y-10 scrollbar-hide">
+                    
+                    {/* Sort By */}
+                    <section className={getAnimationClass(0)} style={getDelayStyle(0)}>
+                        <h3 className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4 font-semibold">Sort By</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { value: 'name', label: 'Featured' },
+                                { value: 'price-low', label: 'Low Price' },
+                                { value: 'price-high', label: 'High Price' },
+                                { value: 'rating', label: 'Top Rated' }
+                            ].map(option => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => setSortBy(option.value as any)}
+                                    className={`px-3 py-3 text-[10px] uppercase tracking-widest border transition-all duration-300 text-center ${sortBy === option.value
+                                        ? 'bg-white text-black border-white font-semibold'
+                                        : 'bg-transparent text-white/60 border-white/10 hover:border-white/40 hover:text-white'
+                                        }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="group relative h-10 w-10 flex items-center justify-center rounded-full transition-all duration-300 hover:bg-gray-50"
-                        >
-                            <X size={20} className="transition-transform duration-500 group-hover:rotate-90 text-black/70 group-hover:text-black" />
-                        </button>
-                    </div>
+                    </section>
 
-                    {/* Body - Organized & Spacious */}
-                    <div ref={contentRef} className="flex-1 overflow-y-auto custom-scrollbar">
-                        <div className="px-8 py-4 space-y-10 group/container">
+                    <div className="h-px bg-white/5 w-full" />
 
-                            {/* Gender Selection */}
-                            <section className="space-y-5">
-                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Selection</h3>
-                                <div className="flex flex-wrap gap-3">
-                                    {['Male', 'Female', 'Unisex'].map((gender) => (
-                                        <button
-                                            key={gender}
-                                            onClick={() => toggleGender(gender)}
-                                            className={`px-5 py-2.5 text-[11px] font-medium uppercase tracking-widest border transition-all duration-300 ${selectedGenders.includes(gender)
-                                                ? 'bg-black text-white border-black shadow-md'
-                                                : 'bg-gray-50 text-gray-500 border-gray-100 hover:border-gray-300 hover:text-black'
-                                                }`}
-                                        >
-                                            {gender}
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
-
-                            <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-100 to-transparent" />
-
-                            {/* Size Selection */}
-                            <section className="space-y-5">
-                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Size</h3>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
-                                        <button
-                                            key={size}
-                                            onClick={() => toggleSize(size)}
-                                            className={`py-3 text-[10px] font-medium tracking-tighter border transition-all duration-300 ${selectedSizes.includes(size)
-                                                ? 'bg-black text-white border-black scale-[1.02]'
-                                                : 'bg-gray-50 text-black border-transparent hover:border-black hover:text-black hover:bg-white'
-                                                }`}
-                                        >
-                                            {size}
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
-
-                            <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-100 to-transparent" />
-
-                            {/* Price Selection */}
-                            <section className="space-y-5">
-                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Price Range</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-medium">₹</span>
-                                        <input
-                                            type="number"
-                                            placeholder="Min"
-                                            value={priceRange.min}
-                                            onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                                            className="w-full pl-8 pr-4 py-3 text-xs bg-gray-50 border border-transparent focus:bg-white focus:border-black transition-all outline-none font-medium"
-                                        />
-                                    </div>
-                                    <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-medium">₹</span>
-                                        <input
-                                            type="number"
-                                            placeholder="Max"
-                                            value={priceRange.max}
-                                            onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-                                            className="w-full pl-8 pr-4 py-3 text-xs bg-gray-50 border border-transparent focus:bg-white focus:border-black transition-all outline-none font-medium"
-                                        />
-                                    </div>
-                                </div>
-                            </section>
-
-                            <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-100 to-transparent" />
-
-                            {/* Color Selection */}
-                            <section className="space-y-5">
-                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Palette</h3>
-                                <div className="flex flex-wrap gap-3">
-                                    {['Black', 'White', 'Gray', 'Brown', 'Blue', 'Red', 'Navy', 'Cream', 'Gold', 'Camel'].map((color) => (
-                                        <button
-                                            key={color}
-                                            onClick={() => toggleColor(color)}
-                                            title={color}
-                                            className={`relative w-8 h-8 rounded-full border transition-all duration-300 ring-offset-2 ${selectedColors.includes(color)
-                                                ? 'ring-1 ring-gray-400 border-black scale-110'
-                                                : 'border-transparent hover:scale-110'
-                                                }`}
-                                            style={{
-                                                backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' :
-                                                    color.toLowerCase() === 'black' ? '#000000' :
-                                                        color.toLowerCase() === 'gray' ? '#6b7280' :
-                                                            color.toLowerCase() === 'brown' ? '#92400e' :
-                                                                color.toLowerCase() === 'blue' ? '#2563eb' :
-                                                                    color.toLowerCase() === 'red' ? '#dc2626' :
-                                                                        color.toLowerCase() === 'navy' ? '#001f3f' :
-                                                                            color.toLowerCase() === 'cream' ? '#fffdd0' :
-                                                                                color.toLowerCase() === 'gold' ? '#ffd700' :
-                                                                                    color.toLowerCase() === 'camel' ? '#c19a6b' : '#000000'
-                                            }}
-                                        >
-                                            {color === 'White' && <div className="absolute inset-0 rounded-full border border-gray-100" />}
-                                            {selectedColors.includes(color) && (
-                                                <div className={`absolute inset-0 flex items-center justify-center`}>
-                                                    <div className={`w-1 h-1 rounded-full ${['White', 'Cream', 'Gold'].includes(color) ? 'bg-black' : 'bg-white'}`} />
-                                                </div>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
-
-                            <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-100 to-transparent" />
-
-                            {/* Sort Selection */}
-                            <section className="space-y-5 pb-10">
-                                <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-black/60">Sort By</h3>
-                                <div className="space-y-1">
-                                    {[
-                                        { value: 'name', label: 'Featured' },
-                                        { value: 'price-low', label: 'Price: Low to High' },
-                                        { value: 'price-high', label: 'Price: High to Low' },
-                                        { value: 'rating', label: 'Recommended' }
-                                    ].map(option => (
-                                        <button
-                                            key={option.value}
-                                            onClick={() => setSortBy(option.value as any)}
-                                            className="flex items-center w-full py-3 group transition-all"
-                                        >
-                                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-300 mr-4 ${sortBy === option.value ? 'border-black bg-black' : 'border-gray-200 group-hover:border-gray-400'}`}>
-                                                {sortBy === option.value && <div className="w-1 h-1 rounded-full bg-white" />}
-                                            </div>
-                                            <span className={`text-xs uppercase tracking-widest transition-colors duration-300 ${sortBy === option.value ? 'text-black font-medium' : 'text-gray-800 group-hover:text-black'}`}>
-                                                {option.label}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </section>
+                    {/* Collection (Gender) */}
+                    <section className={getAnimationClass(1)} style={getDelayStyle(1)}>
+                        <h3 className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4 font-semibold">Collection</h3>
+                        <div className="grid grid-cols-3 gap-2">
+                            {['Male', 'Female', 'Unisex'].map((gender) => (
+                                <button
+                                    key={gender}
+                                    onClick={() => toggleGender(gender)}
+                                    className={`px-2 py-3 text-[10px] uppercase tracking-widest border transition-all duration-300 ${selectedGenders.includes(gender)
+                                        ? 'bg-white/10 text-white border-white/40'
+                                        : 'bg-transparent text-white/60 border-white/10 hover:border-white/40 hover:text-white'
+                                        }`}
+                                >
+                                    {gender}
+                                </button>
+                            ))}
                         </div>
-                    </div>
+                    </section>
 
-                    {/* Footer - Elegant Controls */}
-                    <div className="px-8 py-8 bg-white border-t border-gray-100 flex gap-4">
-                        <button
-                            onClick={clearAllFilters}
-                            className="flex-1 py-4 text-[10px] font-medium uppercase tracking-[0.2em] text-gray-600 hover:text-black transition-colors border border-transparent hover:border-gray-100"
-                        >
-                            Reset
-                        </button>
-                        <button
-                            onClick={applyFilters}
-                            className="flex-[2] bg-black text-white py-4 text-[10px] font-medium uppercase tracking-[0.2em] hover:bg-gray-900 transition-all shadow-xl hover:shadow-2xl active:scale-[0.98]"
-                        >
-                            Update Results
-                        </button>
-                    </div>
+                    {/* Size */}
+                    <section className={getAnimationClass(2)} style={getDelayStyle(2)}>
+                        <h3 className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4 font-semibold">Size</h3>
+                        <div className="grid grid-cols-4 gap-2">
+                            {['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'OS'].map((size) => (
+                                <button
+                                    key={size}
+                                    onClick={() => toggleSize(size)}
+                                    className={`h-10 text-[10px] font-medium border transition-all duration-300 flex items-center justify-center ${selectedSizes.includes(size)
+                                        ? 'bg-white text-black border-white'
+                                        : 'bg-transparent text-white/60 border-white/10 hover:border-white/40 hover:text-white'
+                                        }`}
+                                >
+                                    {size}
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Price Range */}
+                    <section className={getAnimationClass(3)} style={getDelayStyle(3)}>
+                        <h3 className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4 font-semibold">Price Range</h3>
+                        <div className="flex gap-4 items-center">
+                            <div className="relative flex-1 group">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-white/40 group-hover:text-white/60 transition-colors">Min</span>
+                                <input
+                                    type="number"
+                                    value={priceRange.min}
+                                    onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                                    className="w-full bg-transparent border border-white/10 text-white text-xs py-3 pl-10 pr-3 focus:outline-none focus:border-white/40 transition-colors placeholder-transparent"
+                                />
+                            </div>
+                            <span className="text-white/20">-</span>
+                            <div className="relative flex-1 group">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-white/40 group-hover:text-white/60 transition-colors">Max</span>
+                                <input
+                                    type="number"
+                                    value={priceRange.max}
+                                    onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                                    className="w-full bg-transparent border border-white/10 text-white text-xs py-3 pl-10 pr-3 focus:outline-none focus:border-white/40 transition-colors placeholder-transparent"
+                                />
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Colors */}
+                    <section className={getAnimationClass(4)} style={getDelayStyle(4)}>
+                        <h3 className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4 font-semibold">Colors</h3>
+                        <div className="grid grid-cols-5 gap-4">
+                            {['Black', 'White', 'Gray', 'Brown', 'Blue', 'Red', 'Navy', 'Cream', 'Gold', 'Green'].map((color) => (
+                                <button
+                                    key={color}
+                                    onClick={() => toggleColor(color)}
+                                    title={color}
+                                    className={`group relative flex items-center justify-center aspect-square rounded-full hover:scale-110 transition-all`}
+                                >
+                                    <div 
+                                        className={`w-6 h-6 rounded-full shadow-sm transition-all ${selectedColors.includes(color) ? 'ring-2 ring-white ring-offset-0' : ''}`}
+                                        style={{ 
+                                            backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' : 
+                                                             color.toLowerCase() === 'black' ? '#000000' :
+                                                             color.toLowerCase() === 'cream' ? '#F5F5DC' : 
+                                                             color.toLowerCase() === 'gold' ? '#FFD700' :
+                                                             color.toLowerCase() === 'navy' ? '#000080' : color 
+                                        }}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Spacer for bottom clearance */}
+                    <div className="h-10" />
+                </div>
+
+                {/* 3. Footer Actions */}
+                <div className="relative shrink-0 px-8 py-6 border-t border-white/10 bg-black/40 backdrop-blur-md flex gap-4">
+                    <button
+                        onClick={clearAllFilters}
+                        className="flex-1 flex items-center justify-center gap-2 py-3 border border-white/10 text-[10px] uppercase tracking-[0.2em] text-white/60 hover:text-white hover:border-white/30 transition-all"
+                    >
+                        <RotateCcw className="w-3 h-3" />
+                        Reset
+                    </button>
+                    
+                    <button
+                        onClick={applyFilters}
+                        className="flex-[2] bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white/90 transition-transform active:scale-[0.98]"
+                    >
+                        View Results
+                    </button>
                 </div>
             </div>
         </>

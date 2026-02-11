@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/lib/db';
+import Product from '@/models/Product';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,30 +14,35 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Fetch products from your database or API
-    // This is a placeholder - replace with your actual product fetching logic
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
-    const data = await response.json();
+    await connectDB();
 
-    if (!data.success) {
-      return NextResponse.json({
-        success: false,
-        message: 'Failed to fetch products'
-      });
-    }
-
-    // Filter products based on search query
+    // Search products in database
     const searchQuery = query.toLowerCase().trim();
-    const filteredProducts = data.products.filter((product: any) => 
-      product.name.toLowerCase().includes(searchQuery) ||
-      product.category.toLowerCase().includes(searchQuery) ||
-      product.brand?.toLowerCase().includes(searchQuery) ||
-      product.color?.toLowerCase().includes(searchQuery)
-    ).slice(0, 8); // Limit to 8 suggestions
+    const products = await Product.find({
+      isActive: true,
+      $or: [
+        { name: { $regex: searchQuery, $options: 'i' } },
+        { category: { $regex: searchQuery, $options: 'i' } },
+        { subCategory: { $regex: searchQuery, $options: 'i' } },
+        { brand: { $regex: searchQuery, $options: 'i' } },
+        { colors: { $in: [searchQuery] } }
+      ]
+    }).limit(8);
+
+    // Transform MongoDB documents to match frontend interface
+    const transformedProducts = products.map(product => ({
+      ...product.toObject(),
+      id: product._id.toString(), // Convert ObjectId to string and assign to id
+      color: product.colors?.[0] || '', // Use first color for backward compatibility
+      size: product.sizes || [], // Map sizes field
+      reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
+      imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
+      image: product.imageGradient || '', // Map imageGradient to image
+    }));
 
     return NextResponse.json({
       success: true,
-      products: filteredProducts
+      products: transformedProducts
     });
 
   } catch (error) {
