@@ -18,25 +18,181 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     const { cart, isLoading, removeFromCart, updateQuantity } = useCart()
     const { user } = useAuth()
 
-    // Prevent body scroll when cart is open
+    // Body Scroll Lock - ultra robust version to completely prevent background scrolling
     useEffect(() => {
+        const htmlElement = document.documentElement
+        const bodyElement = document.body
+        
+        // Store original styles
+        const originalHtmlOverflow = htmlElement.style.overflow
+        const originalBodyOverflow = bodyElement.style.overflow
+        const originalBodyPosition = bodyElement.style.position
+        const originalBodyTop = bodyElement.style.top
+        const originalBodyLeft = bodyElement.style.left
+        const originalBodyWidth = bodyElement.style.width
+        const originalBodyHeight = bodyElement.style.height
+        
         if (isOpen) {
-            document.body.style.overflow = 'hidden'
-            document.body.style.position = 'fixed'
-            document.body.style.top = `-${window.scrollY}px`
-            document.body.style.width = '100%'
+            // Save current scroll position
+            const scrollY = window.scrollY
+            const scrollX = window.scrollX
+            
+            // Apply comprehensive lock styles
+            htmlElement.style.overflow = 'hidden'
+            bodyElement.style.position = 'fixed'
+            bodyElement.style.top = `-${scrollY}px`
+            bodyElement.style.left = `-${scrollX}px`
+            bodyElement.style.width = '100vw'
+            bodyElement.style.height = '100vh'
+            bodyElement.style.overflow = 'hidden'
+            bodyElement.style.touchAction = 'none'
+            bodyElement.style.webkitUserSelect = 'none'
+            bodyElement.style.userSelect = 'none'
+            
+            // Store scroll positions for restoration
+            ;(bodyElement as any).storedScrollY = scrollY
+            ;(bodyElement as any).storedScrollX = scrollX
+            ;(bodyElement as any).originalStyles = {
+                htmlOverflow: originalHtmlOverflow,
+                bodyOverflow: originalBodyOverflow,
+                bodyPosition: originalBodyPosition,
+                bodyTop: originalBodyTop,
+                bodyLeft: originalBodyLeft,
+                bodyWidth: originalBodyWidth,
+                bodyHeight: originalBodyHeight
+            }
         } else {
-            document.body.style.overflow = ''
-            document.body.style.position = ''
-            document.body.style.top = ''
-            document.body.style.width = ''
-            window.scrollTo(0, parseInt(document.body.style.top || '0') * -1)
+            // Restore scroll position and styles
+            const storedScrollY = (bodyElement as any).storedScrollY || 0
+            const storedScrollX = (bodyElement as any).storedScrollX || 0
+            const storedStyles = (bodyElement as any).originalStyles || {}
+            
+            // Restore styles first
+            htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.position = storedStyles.bodyPosition || ''
+            bodyElement.style.top = storedStyles.bodyTop || ''
+            bodyElement.style.left = storedStyles.bodyLeft || ''
+            bodyElement.style.width = storedStyles.bodyWidth || ''
+            bodyElement.style.height = storedStyles.bodyHeight || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
+            bodyElement.style.touchAction = ''
+            bodyElement.style.webkitUserSelect = ''
+            bodyElement.style.userSelect = ''
+            
+            // Restore scroll position
+            window.scrollTo(storedScrollX, storedScrollY)
+            
+            // Clean up stored data
+            delete (bodyElement as any).storedScrollY
+            delete (bodyElement as any).storedScrollX
+            delete (bodyElement as any).originalStyles
         }
+        
         return () => {
-            document.body.style.overflow = ''
-            document.body.style.position = ''
-            document.body.style.top = ''
-            document.body.style.width = ''
+            // Ensure cleanup on unmount
+            const storedStyles = (bodyElement as any).originalStyles || {}
+            htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.position = storedStyles.bodyPosition || ''
+            bodyElement.style.top = storedStyles.bodyTop || ''
+            bodyElement.style.left = storedStyles.bodyLeft || ''
+            bodyElement.style.width = storedStyles.bodyWidth || ''
+            bodyElement.style.height = storedStyles.bodyHeight || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
+            bodyElement.style.touchAction = ''
+            bodyElement.style.webkitUserSelect = ''
+            bodyElement.style.userSelect = ''
+            delete (bodyElement as any).storedScrollY
+            delete (bodyElement as any).storedScrollX
+            delete (bodyElement as any).originalStyles
+        }
+    }, [isOpen])
+
+    // Prevent any background scrolling with comprehensive event blocking
+    useEffect(() => {
+        const preventAllScroll = (e: Event) => {
+            if (isOpen) {
+                const drawerElement = drawerRef.current
+                // Always prevent default and stop propagation for background elements
+                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    e.stopImmediatePropagation()
+                    return false
+                }
+                // For drawer elements, just stop propagation to prevent body scroll
+                if (drawerElement && drawerElement.contains(e.target as Node)) {
+                    e.stopPropagation()
+                }
+            }
+        }
+
+        const preventWheel = (e: Event) => {
+            if (isOpen) {
+                const drawerElement = drawerRef.current
+                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    e.stopImmediatePropagation()
+                    return false
+                }
+                // Allow wheel scrolling in drawer but prevent bubbling
+                e.stopPropagation()
+            }
+        }
+
+        const preventTouch = (e: TouchEvent) => {
+            if (isOpen) {
+                const drawerElement = drawerRef.current
+                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    e.stopImmediatePropagation()
+                    return false
+                }
+            }
+        }
+
+        const preventKeyScroll = (e: KeyboardEvent) => {
+            if (isOpen && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
+                const drawerElement = drawerRef.current
+                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    e.stopImmediatePropagation()
+                    return false
+                }
+            }
+        }
+
+        if (isOpen) {
+            // Block all possible scroll events with capture phase
+            document.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
+            document.addEventListener('mousewheel', preventWheel as EventListener, { passive: false, capture: true })
+            document.addEventListener('DOMMouseScroll', preventWheel as EventListener, { passive: false, capture: true })
+            document.addEventListener('touchmove', preventTouch, { passive: false, capture: true })
+            document.addEventListener('touchstart', preventAllScroll, { passive: false, capture: true })
+            document.addEventListener('touchend', preventAllScroll, { passive: false, capture: true })
+            document.addEventListener('keydown', preventKeyScroll, { capture: true })
+            document.addEventListener('scroll', preventAllScroll, { capture: true })
+            
+            // Also block on window level
+            window.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
+            window.addEventListener('scroll', preventAllScroll, { capture: true })
+        }
+
+        return () => {
+            // Clean up all event listeners
+            document.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
+            document.removeEventListener('mousewheel', preventWheel as EventListener, { capture: true })
+            document.removeEventListener('DOMMouseScroll', preventWheel as EventListener, { capture: true })
+            document.removeEventListener('touchmove', preventTouch, { capture: true })
+            document.removeEventListener('touchstart', preventAllScroll, { capture: true })
+            document.removeEventListener('touchend', preventAllScroll, { capture: true })
+            document.removeEventListener('keydown', preventKeyScroll, { capture: true })
+            document.removeEventListener('scroll', preventAllScroll, { capture: true })
+            
+            window.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
+            window.removeEventListener('scroll', preventAllScroll, { capture: true })
         }
     }, [isOpen])
 
@@ -101,7 +257,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     </div>
 
                     {/* Main Content */}
-                    <div ref={contentRef} className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                    <div ref={contentRef} className="flex-1 overflow-y-auto">
                         {isLoading ? (
                             <div className="flex h-full items-center justify-center">
                                 <div className="animate-pulse text-white/60 font-sans">Loading cart...</div>

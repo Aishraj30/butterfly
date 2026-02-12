@@ -117,7 +117,7 @@ export function Header() {
 
   return (
     <header className={`sticky top-0 w-full z-[999] transition-all duration-300 ${headerBg} py-4`}>
-      <nav className="max-w-[1400px] mx-auto px-2 py-0.5 grid grid-cols-3 items-center">
+      <nav className="max-w-[1400px] mx-auto px-6 py-0.5 grid grid-cols-3 items-center">
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
           {navigation.slice(0, 2).map((item) => (

@@ -27,14 +27,14 @@ interface Collection {
 // --- Components ---
 
 const CollectionSkeleton = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
-        {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="aspect-[4/3] border border-white/10 p-6 flex flex-col justify-between">
-                <div className="space-y-4">
-                    <div className="h-4 bg-white/20 rounded w-1/2"></div>
-                    <div className="h-3 bg-white/10 rounded w-3/4"></div>
+    <div className="space-y-2 animate-pulse">
+        {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="border-b border-white/10 pb-2">
+                <div className="h-4 bg-white/20 rounded w-3/4 mb-2"></div>
+                <div className="space-y-1 ml-4">
+                    <div className="h-3 bg-white/10 rounded w-1/2"></div>
+                    <div className="h-3 bg-white/10 rounded w-1/3"></div>
                 </div>
-                <div className="h-3 bg-white/10 rounded w-1/4"></div>
             </div>
         ))}
     </div>
@@ -67,15 +67,201 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
         }
     }, [])
 
-    // Body Scroll Lock
+    // Body Scroll Lock - ultra robust version to completely prevent background scrolling
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
+        const htmlElement = document.documentElement
+        const bodyElement = document.body
+        
+        // Store original styles
+        const originalHtmlOverflow = htmlElement.style.overflow
+        const originalBodyOverflow = bodyElement.style.overflow
+        const originalBodyPosition = bodyElement.style.position
+        const originalBodyTop = bodyElement.style.top
+        const originalBodyLeft = bodyElement.style.left
+        const originalBodyWidth = bodyElement.style.width
+        const originalBodyHeight = bodyElement.style.height
+        const originalBodyMarginRight = bodyElement.style.marginRight
+        
+        // Calculate scrollbar width to prevent layout shift
+        const getScrollbarWidth = () => {
+            // Create a temporary element to measure scrollbar width
+            const temp = document.createElement('div')
+            temp.style.cssText = 'position: absolute; top: -9999px; width: 100px; height: 100px; overflow: scroll; visibility: hidden;'
+            document.body.appendChild(temp)
+            const scrollbarWidth = temp.offsetWidth - temp.clientWidth
+            document.body.removeChild(temp)
+            return scrollbarWidth
         }
+        
+        if (isOpen) {
+            // Save current scroll position
+            const scrollY = window.scrollY
+            const scrollX = window.scrollX
+            const scrollbarWidth = getScrollbarWidth()
+            
+            // Apply comprehensive lock styles with scrollbar compensation
+            htmlElement.style.overflow = 'hidden'
+            bodyElement.style.position = 'fixed'
+            bodyElement.style.top = `-${scrollY}px`
+            bodyElement.style.left = `-${scrollX}px`
+            bodyElement.style.width = `calc(100vw - ${scrollbarWidth}px)`
+            bodyElement.style.height = '100vh'
+            bodyElement.style.overflow = 'hidden'
+            bodyElement.style.touchAction = 'none'
+            bodyElement.style.webkitUserSelect = 'none'
+            bodyElement.style.userSelect = 'none'
+            bodyElement.style.marginRight = `${scrollbarWidth}px`
+            
+            // Store scroll positions for restoration
+            ;(bodyElement as any).storedScrollY = scrollY
+            ;(bodyElement as any).storedScrollX = scrollX
+            ;(bodyElement as any).scrollbarWidth = scrollbarWidth
+            ;(bodyElement as any).originalStyles = {
+                htmlOverflow: originalHtmlOverflow,
+                bodyOverflow: originalBodyOverflow,
+                bodyPosition: originalBodyPosition,
+                bodyTop: originalBodyTop,
+                bodyLeft: originalBodyLeft,
+                bodyWidth: originalBodyWidth,
+                bodyHeight: originalBodyHeight,
+                bodyMarginRight: originalBodyMarginRight
+            }
+        } else {
+            // Restore scroll position and styles
+            const storedScrollY = (bodyElement as any).storedScrollY || 0
+            const storedScrollX = (bodyElement as any).storedScrollX || 0
+            const storedStyles = (bodyElement as any).originalStyles || {}
+            
+            // Restore styles first
+            htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.position = storedStyles.bodyPosition || ''
+            bodyElement.style.top = storedStyles.bodyTop || ''
+            bodyElement.style.left = storedStyles.bodyLeft || ''
+            bodyElement.style.width = storedStyles.bodyWidth || ''
+            bodyElement.style.height = storedStyles.bodyHeight || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
+            bodyElement.style.touchAction = ''
+            bodyElement.style.webkitUserSelect = ''
+            bodyElement.style.userSelect = ''
+            bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
+            
+            // Restore scroll position
+            window.scrollTo(storedScrollX, storedScrollY)
+            
+            // Clean up stored data
+            delete (bodyElement as any).storedScrollY
+            delete (bodyElement as any).storedScrollX
+            delete (bodyElement as any).scrollbarWidth
+            delete (bodyElement as any).originalStyles
+        }
+        
         return () => {
-            document.body.style.overflow = ''
+            // Ensure cleanup on unmount
+            const storedStyles = (bodyElement as any).originalStyles || {}
+            htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.position = storedStyles.bodyPosition || ''
+            bodyElement.style.top = storedStyles.bodyTop || ''
+            bodyElement.style.left = storedStyles.bodyLeft || ''
+            bodyElement.style.width = storedStyles.bodyWidth || ''
+            bodyElement.style.height = storedStyles.bodyHeight || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
+            bodyElement.style.touchAction = ''
+            bodyElement.style.webkitUserSelect = ''
+            bodyElement.style.userSelect = ''
+            bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
+            delete (bodyElement as any).storedScrollY
+            delete (bodyElement as any).storedScrollX
+            delete (bodyElement as any).scrollbarWidth
+            delete (bodyElement as any).originalStyles
+        }
+    }, [isOpen])
+
+    // Prevent any background scrolling with comprehensive event blocking
+    useEffect(() => {
+        const preventAllScroll = (e: Event) => {
+            if (isOpen) {
+                const drawerElement = drawerRef.current
+                // Always prevent default and stop propagation for background elements
+                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    e.stopImmediatePropagation()
+                    return false
+                }
+                // For drawer elements, just stop propagation to prevent body scroll
+                if (drawerElement && drawerElement.contains(e.target as Node)) {
+                    e.stopPropagation()
+                }
+            }
+        }
+
+        const preventWheel = (e: Event) => {
+            if (isOpen) {
+                const drawerElement = drawerRef.current
+                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    e.stopImmediatePropagation()
+                    return false
+                }
+                // Allow wheel scrolling in drawer but prevent bubbling
+                e.stopPropagation()
+            }
+        }
+
+        const preventTouch = (e: TouchEvent) => {
+            if (isOpen) {
+                const drawerElement = drawerRef.current
+                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    e.stopImmediatePropagation()
+                    return false
+                }
+            }
+        }
+
+        const preventKeyScroll = (e: KeyboardEvent) => {
+            if (isOpen && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
+                const drawerElement = drawerRef.current
+                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    e.stopImmediatePropagation()
+                    return false
+                }
+            }
+        }
+
+        if (isOpen) {
+            // Block all possible scroll events with capture phase
+            document.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
+            document.addEventListener('mousewheel', preventWheel as EventListener, { passive: false, capture: true })
+            document.addEventListener('DOMMouseScroll', preventWheel as EventListener, { passive: false, capture: true })
+            document.addEventListener('touchmove', preventTouch, { passive: false, capture: true })
+            document.addEventListener('touchstart', preventAllScroll, { passive: false, capture: true })
+            document.addEventListener('touchend', preventAllScroll, { passive: false, capture: true })
+            document.addEventListener('keydown', preventKeyScroll, { capture: true })
+            document.addEventListener('scroll', preventAllScroll, { capture: true })
+            
+            // Also block on window level
+            window.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
+            window.addEventListener('scroll', preventAllScroll, { capture: true })
+        }
+
+        return () => {
+            // Clean up all event listeners
+            document.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
+            document.removeEventListener('mousewheel', preventWheel as EventListener, { capture: true })
+            document.removeEventListener('DOMMouseScroll', preventWheel as EventListener, { capture: true })
+            document.removeEventListener('touchmove', preventTouch, { capture: true })
+            document.removeEventListener('touchstart', preventAllScroll, { capture: true })
+            document.removeEventListener('touchend', preventAllScroll, { capture: true })
+            document.removeEventListener('keydown', preventKeyScroll, { capture: true })
+            document.removeEventListener('scroll', preventAllScroll, { capture: true })
+            
+            window.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
+            window.removeEventListener('scroll', preventAllScroll, { capture: true })
         }
     }, [isOpen])
 
@@ -97,32 +283,26 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
                     }`}
             />
 
-            {/* Top Drawer Panel */}
+            {/* Left Side Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed top-0 left-0 z-[101] w-full 
-                    bg-black/20 backdrop-blur-2xl 
-                    border-b border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.2)]
+                className={`fixed top-0 left-0 z-[101] h-full w-full max-w-[320px] 
+                    bg-black/40 backdrop-blur-2xl 
+                    border-r border-white/20 shadow-[20px_0_50px_rgba(0,0,0,0.1)]
                     font-sans text-white
                     transition-transform duration-700 ease-[cubic-bezier(0.4, 0, 0.2, 1)] 
-                    ${isOpen ? 'translate-y-0' : '-translate-y-full'}`}
-                style={{ maxHeight: '85vh' }}
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 {/* Noise Texture */}
                 <div className="absolute inset-0 bg-black/20 pointer-events-none mix-blend-multiply opacity-50" />
 
-                <div className="relative flex flex-col px-6 md:px-12 py-8 max-h-[85vh] overflow-y-auto scrollbar-hide">
+                <div className="relative flex h-full flex-col px-6 pt-10 pb-6">
 
-                    {/* 1. Header Row */}
-                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-                        <div className="flex items-center gap-4">
-                            <h2 className="text-xl tracking-[0.3em] uppercase text-white font-medium drop-shadow-md">
-                                Collections
-                            </h2>
-                            <span className="hidden md:inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-[10px] text-white/80">
-                                {collections.length}
-                            </span>
-                        </div>
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-lg tracking-[0.3em] uppercase text-white font-normal drop-shadow-md">
+                            Collections
+                        </h2>
                         <button
                             onClick={onClose}
                             className="group p-2 text-white/60 hover:text-white transition-colors"
@@ -132,60 +312,58 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
                         </button>
                     </div>
 
-                    {/* 2. Main Grid Content */}
-                    <div className="flex-1 pb-12">
+                    {/* Main Content */}
+                    <div className="flex-1 overflow-y-auto space-y-1 pr-4" style={{
+                        scrollbarWidth: 'none',
+                        scrollbarColor: 'transparent transparent',
+                        '--webkit-scrollbar': 'none',
+                        '--webkit-scrollbar-track': 'transparent',
+                        '--webkit-scrollbar-thumb': 'transparent',
+                        '--webkit-scrollbar-thumb:hover': 'transparent',
+                        msOverflowStyle: 'none'
+                    } as React.CSSProperties & {
+                        '--webkit-scrollbar'?: string;
+                        '--webkit-scrollbar-track'?: string;
+                        '--webkit-scrollbar-thumb'?: string;
+                        '--webkit-scrollbar-thumb:hover'?: string;
+                        msOverflowStyle?: string;
+                    }}>
+                        
                         {loading ? (
                             <CollectionSkeleton />
                         ) : collections.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="space-y-1">
                                 {collections.map((collection, index) => (
                                     <Link 
                                         key={collection._id}
                                         href={`/collections/${collection.slug}`}
                                         onClick={onClose}
-                                        style={getDelayStyle(index)}
-                                        className={`group relative flex flex-col justify-between 
-                                            aspect-[4/3] md:aspect-square 
-                                            border border-white/10 bg-white/[0.02] 
-                                            p-6 hover:bg-white/[0.06] hover:border-white/20 
-                                            transition-all duration-500 ${getAnimationClass(index)}`}
+                                        className="flex items-center justify-between py-4 border-b border-white/10 group"
                                     >
-                                        {/* Top Section: Title & Arrow */}
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-start">
-                                                <span className="text-sm font-medium uppercase tracking-[0.2em] text-white group-hover:text-white/90 transition-colors max-w-[80%]">
-                                                    {collection.name}
-                                                </span>
-                                                <ArrowRight className="w-4 h-4 text-white/40 -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    {collection.isFeatured && (
+                                                        <Star className="w-3 h-3 fill-current text-amber-200/60" />
+                                                    )}
+                                                    <span className="text-xs font-light uppercase tracking-[0.2em] text-white">
+                                                        {collection.name}
+                                                    </span>
+                                                </div>
+                                                <ArrowRight className="w-4 h-4 text-white/40 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                                             </div>
                                             
                                             {collection.description && (
-                                                <p className="text-[11px] text-white/50 leading-relaxed line-clamp-2 font-light tracking-wide">
+                                                <p className="text-[10px] text-white/40 leading-relaxed line-clamp-1 font-light tracking-wide mt-1">
                                                     {collection.description}
                                                 </p>
-                                            )}
-                                        </div>
-
-                                        {/* Bottom Section: Meta Data */}
-                                        <div className="pt-6 mt-auto flex items-end justify-between border-t border-white/5">
-                                            <div className="flex items-center gap-2 text-white/40 group-hover:text-white/70 transition-colors">
-                                                <Layers className="w-3 h-3" />
-                                                <span className="text-[10px] uppercase tracking-[0.15em]">
-                                                    {collection.products?.length || 0} Items
-                                                </span>
-                                            </div>
-                                            
-                                            {collection.isFeatured && (
-                                                <div className="flex items-center gap-1.5 text-amber-200/80">
-                                                    <Star className="w-3 h-3 fill-current" />
-                                                </div>
                                             )}
                                         </div>
                                     </Link>
                                 ))}
                             </div>
                         ) : (
-                            <div className={`flex flex-col items-center justify-center py-20 border border-white/10 border-dashed ${getAnimationClass(0)}`}>
+                            <div className="flex flex-col items-center justify-center py-20 border border-white/10 border-dashed">
                                 <Layers className="w-8 h-8 text-white/20 mb-4" />
                                 <p className="text-sm uppercase tracking-[0.2em] text-white/40">
                                     No featured collections
@@ -194,25 +372,24 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
                         )}
                     </div>
 
-                    {/* 3. Footer */}
-                    <div 
-                        className={`pt-6 border-t border-white/10 flex justify-between items-center ${getAnimationClass(10)}`}
-                        style={getDelayStyle(5)}
-                    >
-                        <div className="flex gap-6">
-                            {!user && (
-                                <Link
-                                    href="/account"
-                                    onClick={onClose}
-                                    className="text-xs uppercase tracking-[0.15em] text-white/60 hover:text-white transition-colors"
-                                >
-                                    Log In / Sign Up
-                                </Link>
-                            )}
-                        </div>
-                         <div className="flex gap-2 opacity-50">
-                             <div className="w-1.5 h-1.5 rounded-full bg-white/40"></div>
-                             <div className="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+                    {/* Footer */}
+                    <div className="pt-6 border-t border-white/10 mt-6">
+                        <div className="flex justify-between items-center">
+                            <div className="flex gap-6">
+                                {!user && (
+                                    <Link
+                                        href="/account"
+                                        onClick={onClose}
+                                        className="text-xs uppercase tracking-[0.15em] text-white/60 hover:text-white transition-colors"
+                                    >
+                                        Log In / Sign Up
+                                    </Link>
+                                )}
+                            </div>
+                            <div className="flex gap-2 opacity-50">
+                                <div className="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+                                <div className="w-1.5 h-1.5 rounded-full bg-white/40"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
