@@ -101,7 +101,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
           <div className="hidden md:block">
             <div
               ref={carouselRef}
-              className="flex overflow-x-auto scrollbar-hide scroll-smooth px-4 pb-0 pt-2"
+              className="flex overflow-x-auto scrollbar-hide scroll-smooth px-4 py-4"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -111,7 +111,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
                 <div key={product.id} className="flex-none w-[calc(25%-2px)] sm:w-[calc(25%-2px)] md:w-[calc(30%-2px)] lg:w-[calc(22%-2px)] group border-r border-gray-300 px-2 last:border-r-0">
                   <div className="cursor-pointer group flex flex-col h-full mb-0">
                     {/* Nested Image Scroll */}
-                    <div className="relative h-[55vh] overflow-hidden rounded-xl bg-gray-100 mb-2 group/img">
+                    <div className="relative h-[75vh] overflow-hidden rounded-xl bg-gray-100 mb-2 group/img">
                       {/* Primary Image */}
                       <Image
                         src={product.images[0]}

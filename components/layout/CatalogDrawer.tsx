@@ -144,7 +144,8 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                     </div>
 
                     {/* 3. Main Navigation */}
-                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent space-y-8">
+                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/0 scrollbar-track-transparent pr-6 space-y-8" 
+                     style={{ scrollbarColor: 'rgba(255, 255, 255, 0.01) transparent' }}>
                         
                         {/* Static Links (New / Sale) */}
                         <div className="space-y-4 pb-8 border-b border-white/10">
@@ -179,7 +180,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                     const isExpanded = expandedItems.includes(category)
 
                                     return (
-                                        <div key={category} className="group">
+                                        <div key={category} className="group pb-4 border-b border-white/10">
                                             <button
                                                 onClick={() => toggleExpanded(category)}
                                                 className="w-full flex items-center justify-between py-1 text-left hover:opacity-60 transition-opacity select-none"
@@ -200,11 +201,11 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                                     isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                                                 }`}
                                             >
-                                                <div className="pt-4 pl-2 space-y-3 border-l border-white/10 ml-1 mt-2">
+                                                <div className="pt-6 pb-4 pl-2 space-y-4 ml-1 mt-2">
                                                     <Link
                                                         href={`/catalog/${encodeURIComponent(category)}`}
                                                         onClick={onClose}
-                                                        className="block text-[10px] uppercase tracking-[0.15em] text-white/70 hover:text-white transition-colors font-sans drop-shadow-sm"
+                                                        className="block text-[12px] uppercase tracking-[0.15em] text-white/70 hover:text-white transition-colors font-sans drop-shadow-sm py-2"
                                                     >
                                                         View All
                                                     </Link>
@@ -213,7 +214,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                                             key={subCategory}
                                                             href={`/catalog/${encodeURIComponent(category)}/${encodeURIComponent(subCategory)}`}
                                                             onClick={onClose}
-                                                            className="block text-[10px] uppercase tracking-[0.15em] text-white/50 hover:text-white hover:translate-x-1 transition-all font-sans drop-shadow-sm"
+                                                            className="block text-[12px] uppercase tracking-[0.15em] text-white/50 hover:text-white hover:translate-x-1 transition-all font-sans drop-shadow-sm py-2"
                                                         >
                                                             {subCategory}
                                                         </Link>
