@@ -22,12 +22,14 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [collections, setCollections] = useState<Collection[]>([])
+    const [styleCategories, setStyleCategories] = useState<Category[]>([])
     const [brands, setBrands] = useState<Brand[]>([])
     const [formData, setFormData] = useState<Partial<Product>>(
         initialData || {
             name: '',
             price: 0,
             category: '',
+            subCategory: '',
             gender: 'Unisex',
             brand: '',
             color: '',
@@ -41,19 +43,24 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const [imagePreview, setImagePreview] = useState('')
 
     useEffect(() => {
-        // Fetch collections and brands
+        // Fetch collections, categories (styles), and brands
         Promise.all([
             fetch('/api/collections').then(res => res.json()),
+            fetch('/api/categories').then(res => res.json()),
             fetch('/api/brands').then(res => res.json())
-        ]).then(([collectionsData, brandsData]) => {
+        ]).then(([collectionsData, styleCategoriesData, brandsData]) => {
             if (collectionsData.success) {
-                setCollections(collectionsData.data)
+                // Handle different API response formats
+                setCollections(collectionsData.collections || collectionsData.data || [])
+            }
+            if (styleCategoriesData.success) {
+                setStyleCategories(styleCategoriesData.data || [])
             }
             if (brandsData.success) {
-                setBrands(brandsData.data)
+                setBrands(brandsData.data || [])
             }
         }).catch(error => {
-            console.error('Error fetching collections/brands:', error)
+            console.error('Error fetching form data:', error)
         })
     }, [])
 
@@ -75,23 +82,23 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
         if (!file) return
 
         setUploadingImage(true)
-        
+
         try {
             const formData = new FormData()
             formData.append('file', file)
-            
+
             const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             })
-            
+
             const data = await response.json()
-            
+
             if (data.success) {
-                setFormData(prev => ({ 
-                    ...prev, 
+                setFormData(prev => ({
+                    ...prev,
                     image: data.url,
-                    imageUrl: data.url 
+                    imageUrl: data.url
                 }))
                 setImagePreview(data.url)
             } else {
@@ -176,9 +183,27 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                     >
                         <option value="">Select Collection</option>
-                        {collections.map((collection) => (
+                        {collections?.map((collection) => (
                             <option key={collection.id} value={collection.name}>
                                 {collection.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Sub-Category (Style)</label>
+                    <select
+                        name="subCategory"
+                        required
+                        value={formData.subCategory}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                    >
+                        <option value="">Select Style</option>
+                        {styleCategories.map((category) => (
+                            <option key={category.id} value={category.name}>
+                                {category.name}
                             </option>
                         ))}
                     </select>
@@ -241,11 +266,10 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                         : [...currentSizes, size]
                                     setFormData(prev => ({ ...prev, size: newSizes }))
                                 }}
-                                className={`px-4 py-2 rounded-sm font-medium transition-all border-2 ${
-                                    (Array.isArray(formData.size) ? formData.size : []).includes(size)
-                                        ? 'bg-primary text-primary-foreground border-primary'
-                                        : 'border-border text-foreground hover:border-primary bg-background'
-                                }`}
+                                className={`px-4 py-2 rounded-sm font-medium transition-all border-2 ${(Array.isArray(formData.size) ? formData.size : []).includes(size)
+                                    ? 'bg-primary text-primary-foreground border-primary'
+                                    : 'border-border text-foreground hover:border-primary bg-background'
+                                    }`}
                             >
                                 {size}
                             </button>
@@ -285,17 +309,17 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 </button>
                             )}
                         </div>
-                        
+
                         {(imagePreview || formData.imageUrl) && (
                             <div className="mt-4">
-                                <img 
-                                    src={imagePreview || formData.imageUrl} 
-                                    alt="Product preview" 
+                                <img
+                                    src={imagePreview || formData.imageUrl}
+                                    alt="Product preview"
                                     className="w-32 h-32 object-cover rounded-sm border border-border"
                                 />
                             </div>
                         )}
-                        
+
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-foreground">Or use CSS Gradient (fallback)</label>
                             <input

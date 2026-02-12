@@ -23,15 +23,19 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         if (isOpen) {
             document.body.style.overflow = 'hidden'
             document.body.style.position = 'fixed'
+            document.body.style.top = `-${window.scrollY}px`
             document.body.style.width = '100%'
         } else {
             document.body.style.overflow = ''
             document.body.style.position = ''
+            document.body.style.top = ''
             document.body.style.width = ''
+            window.scrollTo(0, parseInt(document.body.style.top || '0') * -1)
         }
         return () => {
             document.body.style.overflow = ''
             document.body.style.position = ''
+            document.body.style.top = ''
             document.body.style.width = ''
         }
     }, [isOpen])
@@ -83,7 +87,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <div className="relative flex items-center justify-between mb-12">
                         <div className="w-6" /> 
                         
-                        <h2 className="text-xl tracking-[0.3em] uppercase text-white font-medium">
+                        <h2 className="text-lg tracking-[0.3em] uppercase text-white font-medium font-sans">
                             Cart ({cartItems.length})
                         </h2>
 
@@ -109,14 +113,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                     <div className="absolute -bottom-2 -right-2 h-6 w-6 rounded-full bg-white/20" />
                                 </div>
                                 <div className="space-y-4">
-                                    <h3 className="font-serif text-2xl text-white">Your cart is empty</h3>
-                                    <p className="text-sm text-white/60 max-w-[240px] mx-auto font-sans">
+                                    <h3 className="font-sans text-xl text-white">Your cart is empty</h3>
+                                    <p className="text-xs text-white/60 max-w-[240px] mx-auto font-sans">
                                         Looks like you haven't added anything to your cart yet.
                                     </p>
                                 </div>
                                 <button
                                     onClick={onClose}
-                                    className="group relative overflow-hidden bg-white/20 backdrop-blur-md px-12 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-white/30 cursor-pointer border border-white/20"
+                                    className="group relative overflow-hidden bg-white/20 backdrop-blur-md px-10 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-white/30 cursor-pointer border border-white/20"
                                 >
                                     <span className="relative z-10">Continue Shopping</span>
                                 </button>
@@ -140,10 +144,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                                         {/* Product Details */}
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="font-medium text-white truncate">
+                                            <h4 className="font-medium text-sm text-white truncate font-sans">
                                                 {item.name || 'Product'}
                                             </h4>
-                                            <p className="text-sm text-white/60 font-sans">
+                                            <p className="text-xs text-white/60 font-sans">
                                                 Size: {item.size} | Color: {item.color}
                                             </p>
                                             <p className="font-semibold text-white mt-1">
@@ -159,7 +163,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                     >
                                                         <Minus size={14} />
                                                     </button>
-                                                    <span className="px-3 py-1 text-sm font-medium text-white">
+                                                    <span className="px-3 py-1 text-xs font-medium text-white font-sans">
                                                         {item.quantity}
                                                     </span>
                                                     <button
@@ -190,25 +194,25 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <div className="space-y-3 mb-6">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-semibold uppercase tracking-[0.15em] text-white/60 font-sans">Subtotal</span>
-                                    <span className="text-sm font-bold text-white">₹{cart.subtotal.toFixed(2)}</span>
+                                    <span className="text-xs font-bold text-white font-sans">₹{cart.subtotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-semibold uppercase tracking-[0.15em] text-white/60 font-sans">Shipping</span>
-                                    <span className="text-sm font-bold text-white">₹{cart.shipping.toFixed(2)}</span>
+                                    <span className="text-xs font-bold text-white font-sans">₹{cart.shipping.toFixed(2)}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-semibold uppercase tracking-[0.15em] text-white/60 font-sans">Tax</span>
-                                    <span className="text-sm font-bold text-white">₹{cart.tax.toFixed(2)}</span>
+                                    <span className="text-xs font-bold text-white font-sans">₹{cart.tax.toFixed(2)}</span>
                                 </div>
                                 <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                                    <span className="text-sm font-bold uppercase tracking-[0.15em] text-white font-sans">Total</span>
-                                    <span className="text-lg font-bold text-white">₹{cart.total.toFixed(2)}</span>
+                                    <span className="text-xs font-bold uppercase tracking-[0.15em] text-white font-sans">Total</span>
+                                    <span className="text-base font-bold text-white font-sans">₹{cart.total.toFixed(2)}</span>
                                 </div>
                             </div>
                             <Link
                                 href="/checkout"
                                 onClick={onClose}
-                                className="w-full bg-white/20 backdrop-blur-md text-white py-4 text-sm font-bold uppercase tracking-widest transition-all hover:bg-white/30 text-center block border border-white/20"
+                                className="w-full bg-white/20 backdrop-blur-md text-white py-3 text-xs font-bold uppercase tracking-widest transition-all hover:bg-white/30 text-center block border border-white/20 font-sans"
                             >
                                 Checkout
                             </Link>

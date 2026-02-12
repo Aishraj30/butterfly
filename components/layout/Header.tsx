@@ -28,6 +28,7 @@ import { CartDrawer } from './CartDrawer'
 import { CatalogDrawer } from './CatalogDrawer'
 import { FeaturedDrawer } from './FeaturedDrawer'
 import { useCart } from '@/hooks/useCart'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Collection {
   id: number
@@ -115,7 +116,7 @@ export function Header() {
   const logoColor = isHome && !isCatalog ? 'text-white' : 'text-black'
 
   return (
-    <header className={`relative w-full z-50 transition-all duration-300 ${headerBg} py-4`}>
+    <header className={`sticky top-0 w-full z-[999] transition-all duration-300 ${headerBg} py-4`}>
       <nav className="max-w-[1400px] mx-auto px-2 py-0.5 grid grid-cols-3 items-center">
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
@@ -146,7 +147,17 @@ export function Header() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className={`p-2 ${textColor}`}
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <AnimatePresence mode="wait">
+              {isMobileMenuOpen ? (
+                <motion.div key="close" initial={{ rotate: -90 }} animate={{ rotate: 0 }} exit={{ rotate: 90 }}>
+                  <X size={24} />
+                </motion.div>
+              ) : (
+                <motion.div key="menu" initial={{ rotate: 90 }} animate={{ rotate: 0 }} exit={{ rotate: -90 }}>
+                  <Menu size={24} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </button>
 
           {/* Search Icon */}
@@ -192,32 +203,37 @@ export function Header() {
           <div className={`flex items-center gap-6 transition-colors ${textColor}`}>
             {/* Search Bar - Desktop Only */}
             <div className="relative hidden md:flex items-center">
-              {isSearchOpen ? (
-                <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50">
-                  <div className="relative w-full px-4 pt-4">
-                    <div className="relative max-w-2xl mx-auto">
+              <AnimatePresence>
+                {isSearchOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50 px-4 pt-4"
+                  >
+                    <div className="relative max-w-4xl mx-auto">
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="SEARCH"
-                        className="w-full py-4 px-4 border-b-2 border-white/60 focus:outline-none text-lg text-white bg-transparent"
+                        className="w-full py-4 px-4 border-b-2 border-gray-400 focus:outline-none text-2xl text-black bg-transparent"
                         autoFocus
                       />
                       <button
                         onClick={() => setIsSearchOpen(false)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/60 hover:text-white"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-600 hover:text-black"
                       >
-                        <X size={20} />
+                        <X size={24} />
                       </button>
 
                       {/* Search Suggestions Dropdown */}
                       {searchSuggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg shadow-2xl max-h-96 overflow-y-auto">
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto">
                           <div className="p-2">
                             {isSearching ? (
-                              <div className="text-center py-4 text-white/60 font-sans text-sm">
+                              <div className="text-center py-4 text-gray-600 font-sans text-sm">
                                 Searching...
                               </div>
                             ) : (
@@ -231,21 +247,21 @@ export function Header() {
                                       setSearchQuery('');
                                       setSearchSuggestions([]);
                                     }}
-                                    className="block p-3 hover:bg-white/20 rounded-md transition-colors group"
+                                    className="block p-3 hover:bg-gray-100 rounded-md transition-colors group"
                                   >
                                     <div className="flex items-center gap-3">
                                       {product.image && (
                                         <img
                                           src={product.image}
                                           alt={product.name}
-                                          className="w-10 h-10 object-cover rounded bg-white/10"
+                                          className="w-10 h-10 object-cover rounded bg-gray-100"
                                         />
                                       )}
                                       <div className="flex-1 min-w-0">
-                                        <div className="text-white font-medium text-sm truncate group-hover:text-white/80 transition-colors">
+                                        <div className="text-black font-medium text-sm truncate group-hover:text-gray-700 transition-colors">
                                           {product.name}
                                         </div>
-                                        <div className="text-white/60 text-xs font-sans truncate">
+                                        <div className="text-gray-600 text-xs font-sans truncate">
                                           {product.category} • ₹{product.price}
                                         </div>
                                       </div>
@@ -258,9 +274,9 @@ export function Header() {
                         </div>
                       )}
                     </div>
-                  </div>
-                </div>
-              ) : null}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <button
                 onClick={() => setIsSearchOpen(true)}
@@ -342,147 +358,170 @@ export function Header() {
       </nav>
 
       {/* Mobile Menu Drawer */}
-      <>
-        {/* Backdrop Overlay */}
-        <div
-          onClick={() => setIsMobileMenuOpen(false)}
-          className={`fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm cursor-pointer transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-            }`}
-        />
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md cursor-pointer md:hidden"
+            />
 
-        {/* Mobile Menu Panel */}
-        <div
-          className={`fixed top-0 left-0 z-[101] h-screen w-full max-w-[320px] bg-white shadow-2xl transition-transform duration-500 md:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}
-        >
-          <div className="flex h-full flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b px-6 py-6">
-              <h2 className="text-xl font-bold uppercase tracking-[0.2em] text-black">
-                Menu
-              </h2>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="group rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer bg-gray-100"
-              >
-                <X size={24} className="transition-transform duration-300 group-hover:rotate-90 text-black" />
-              </button>
-            </div>
+            {/* Mobile Menu Panel */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 z-[101] h-screen w-full max-w-[320px] bg-white shadow-2xl md:hidden overflow-hidden flex flex-col"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b px-6 py-6">
+                <h2 className="text-xl font-bold uppercase tracking-[0.2em] text-black">
+                  Menu
+                </h2>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="group rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer bg-gray-100"
+                >
+                  <X size={24} className="text-black" />
+                </button>
+              </div>
 
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-6 space-y-2">
-                {navigation.map((item) => (
-                  <div key={item.name} className="border-b border-gray-100">
-                    {item.hasDropdown ? (
-                      <button
-                        onClick={() => {
-                          setIsMobileMenuOpen(false)
-                          if (item.name === 'Catalog') {
-                            setIsCatalogDrawerOpen(true)
-                          } else if (item.name === 'Featured') {
-                            setIsFeaturedDrawerOpen(true)
-                          }
-                        }}
-                        className="flex items-center justify-between w-full py-4 text-left group"
-                      >
-                        <span className="text-lg font-semibold text-black uppercase tracking-wide group-hover:text-gray-600 transition-colors">
-                          {item.name}
-                        </span>
-                        <ChevronDown
-                          size={16}
-                          className="transform -rotate-90 text-gray-400 group-hover:text-gray-600"
-                        />
-                      </button>
-                    ) : (
-                      <Link
-                        href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-between w-full py-4 text-left group"
-                      >
-                        <span className="text-lg font-semibold text-black uppercase tracking-wide group-hover:text-gray-600 transition-colors">
-                          {item.name}
-                        </span>
-                      </Link>
-                    )}
-                  </div>
-                ))}
-
-                {/* Additional Links */}
-                <div className="pt-4 space-y-2 border-t border-gray-100">
-                  <Link
-                    href="/wishlist"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
-                  >
-                    <Heart size={18} />
-                    <span className="text-sm">Wishlist</span>
-                  </Link>
-                  <Link
-                    href="/search"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
-                  >
-                    <Search size={18} />
-                    <span className="text-sm">Search</span>
-                  </Link>
-                </div>
-
-                {/* User Section */}
-                <div className="pt-4 space-y-2 border-t border-gray-100">
-                  {user ? (
-                    <>
-                      <Link
-                        href="/orders"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
-                      >
-                        <Package size={18} />
-                        <span className="text-sm">Orders</span>
-                      </Link>
-                      {user.role === 'admin' && (
-                        <Link
-                          href="/admin"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block pl-4 py-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-6 space-y-2">
+                  {navigation.map((item, idx) => (
+                    <motion.div
+                      key={item.name}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.1 + idx * 0.1 }}
+                      className="border-b border-gray-100"
+                    >
+                      {item.hasDropdown ? (
+                        <button
+                          onClick={() => {
+                            setIsMobileMenuOpen(false)
+                            if (item.name === 'Catalog') {
+                              setIsCatalogDrawerOpen(true)
+                            } else if (item.name === 'Featured') {
+                              setIsFeaturedDrawerOpen(true)
+                            }
+                          }}
+                          className="flex items-center justify-between w-full py-4 text-left group"
                         >
-                          Admin Dashboard
+                          <span className="text-lg font-semibold text-black uppercase tracking-wide group-hover:text-gray-600 transition-colors">
+                            {item.name}
+                          </span>
+                          <ChevronDown
+                            size={16}
+                            className="transform -rotate-90 text-gray-400 group-hover:text-gray-600"
+                          />
+                        </button>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center justify-between w-full py-4 text-left group"
+                        >
+                          <span className="text-lg font-semibold text-black uppercase tracking-wide group-hover:text-gray-600 transition-colors">
+                            {item.name}
+                          </span>
                         </Link>
                       )}
-                      <button
-                        onClick={() => {
-                          logout()
-                          setIsMobileMenuOpen(false)
-                        }}
-                        className="w-full text-left pl-4 py-2 text-sm text-red-600 hover:text-red-700 transition-colors"
-                      >
-                        Logout
-                      </button>
-                    </>
-                  ) : (
-                    <div className="space-y-3">
-                      <Link
-                        href="/login"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="block w-full bg-black text-white py-3 text-center font-medium tracking-wide hover:bg-gray-800 transition-colors"
-                      >
-                        LOGIN
-                      </Link>
-                      <Link
-                        href="/signup"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="block w-full border border-gray-300 text-black py-3 text-center font-medium tracking-wide hover:bg-gray-50 transition-colors"
-                      >
-                        SIGN UP
-                      </Link>
-                    </div>
-                  )}
+                    </motion.div>
+                  ))}
+
+                  {/* Additional Links */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="pt-4 space-y-2 border-t border-gray-100"
+                  >
+                    <Link
+                      href="/wishlist"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                    >
+                      <Heart size={18} />
+                      <span className="text-sm">Wishlist</span>
+                    </Link>
+                    <Link
+                      href="/search"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                    >
+                      <Search size={18} />
+                      <span className="text-sm">Search</span>
+                    </Link>
+                  </motion.div>
+
+                  {/* User Section */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="pt-4 space-y-2 border-t border-gray-100"
+                  >
+                    {user ? (
+                      <>
+                        <Link
+                          href="/orders"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                        >
+                          <Package size={18} />
+                          <span className="text-sm">Orders</span>
+                        </Link>
+                        {user.role === 'admin' && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block pl-4 py-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                          >
+                            Admin Dashboard
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => {
+                            logout()
+                            setIsMobileMenuOpen(false)
+                          }}
+                          className="w-full text-left pl-4 py-2 text-sm text-red-600 hover:text-red-700 transition-colors"
+                        >
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <div className="space-y-3">
+                        <Link
+                          href="/login"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block w-full bg-black text-white py-3 text-center font-medium tracking-wide hover:bg-gray-800 transition-colors"
+                        >
+                          LOGIN
+                        </Link>
+                        <Link
+                          href="/signup"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="block w-full border border-gray-300 text-black py-3 text-center font-medium tracking-wide hover:bg-gray-50 transition-colors"
+                        >
+                          SIGN UP
+                        </Link>
+                      </div>
+                    )}
+                  </motion.div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
       <CatalogDrawer isOpen={isCatalogDrawerOpen} onClose={() => setIsCatalogDrawerOpen(false)} />

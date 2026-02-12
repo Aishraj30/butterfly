@@ -1,6 +1,5 @@
 'use client'
 
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import {
@@ -204,113 +203,109 @@ export default function AdminCollectionsPage() {
   )
 
   return (
-    <div className="flex min-h-screen bg-[#FDFCF9]">
-      <AdminSidebar />
-
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-end mb-8">
-            <div>
-              <h1 className="text-4xl font-serif font-bold text-[#003300] mb-2">Collections Edit</h1>
-              <p className="text-gray-500">Curate and manage your luxury fashion collections</p>
-            </div>
-            <button
-              onClick={() => setShowForm(true)}
-              className="px-6 py-3 bg-[#003300] text-white rounded-full font-medium hover:shadow-xl transition-all flex items-center gap-2"
-            >
-              <Plus size={20} />
-              Create Collection
-            </button>
+    <main className="flex-1 p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-[#003300] mb-2">Collections Edit</h1>
+            <p className="text-gray-500">Curate and manage your luxury fashion collections</p>
           </div>
-
-          {/* Search Bar */}
-          <div className="relative mb-8">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search collections..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-[#D7C69D] outline-none transition-all"
-            />
-          </div>
-
-          {/* Collections Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {isLoading ? (
-              <div className="col-span-full flex justify-center py-20">
-                <Loader2 className="animate-spin text-[#D7C69D]" size={40} />
-              </div>
-            ) : filteredCollections.map((col) => (
-              <div
-                key={col._id}
-                className="group bg-white rounded-3xl p-6 border border-gray-50 shadow-sm hover:shadow-md transition-all relative overflow-hidden"
-              >
-                {/* Status Badge */}
-                <div className="absolute top-6 right-6 flex gap-2">
-                  {col.isFeatured && (
-                    <span className="px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
-                      <Plus size={10} /> Featured
-                    </span>
-                  )}
-                  <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${col.isActive ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'
-                    }`}>
-                    {col.isActive ? 'Active' : 'Hidden'}
-                  </span>
-                </div>
-
-                <div className="flex gap-6 items-center">
-                  <div className="w-24 h-24 rounded-2xl bg-gray-100 overflow-hidden relative border border-gray-50">
-                    {col.bannerImage ? (
-                      <Image src={col.bannerImage} alt={col.name} fill className="object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <ImageIcon size={32} />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-[#003300] mb-1">{col.name}</h3>
-                    <p className="text-xs text-gray-400 font-mono mb-2">/{col.slug}</p>
-                    <p className="text-sm text-gray-500 line-clamp-1 mb-3">{col.description || 'No description provided'}</p>
-                    <div className="flex items-center gap-4 text-xs font-semibold text-[#003300]">
-                      <span className="flex items-center gap-1">
-                        <LayoutGrid size={14} /> {col.products.length} Products
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="mt-6 pt-6 border-t border-gray-50 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all">
-                  <Link
-                    href={`/collections/${col.slug}`}
-                    target="_blank"
-                    className="text-xs font-bold text-gray-400 hover:text-[#003300] flex items-center gap-1"
-                  >
-                    View Live <ExternalLink size={12} />
-                  </Link>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(col)}
-                      className="p-2 hover:bg-[#F7E6CA] text-[#003300] rounded-xl transition-all"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(col._id)}
-                      className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <button
+            onClick={() => setShowForm(true)}
+            className="px-6 py-3 bg-[#003300] text-white rounded-full font-medium hover:shadow-xl transition-all flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Create Collection
+          </button>
         </div>
-      </main>
+
+        {/* Search Bar */}
+        <div className="relative mb-8">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search collections..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-[#D7C69D] outline-none transition-all"
+          />
+        </div>
+
+        {/* Collections Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {isLoading ? (
+            <div className="col-span-full flex justify-center py-20">
+              <Loader2 className="animate-spin text-[#D7C69D]" size={40} />
+            </div>
+          ) : filteredCollections.map((col) => (
+            <div
+              key={col._id}
+              className="group bg-white rounded-3xl p-6 border border-gray-50 shadow-sm hover:shadow-md transition-all relative overflow-hidden"
+            >
+              {/* Status Badge */}
+              <div className="absolute top-6 right-6 flex gap-2">
+                {col.isFeatured && (
+                  <span className="px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
+                    <Plus size={10} /> Featured
+                  </span>
+                )}
+                <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${col.isActive ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'
+                  }`}>
+                  {col.isActive ? 'Active' : 'Hidden'}
+                </span>
+              </div>
+
+              <div className="flex gap-6 items-center">
+                <div className="w-24 h-24 rounded-2xl bg-gray-100 overflow-hidden relative border border-gray-50">
+                  {col.bannerImage ? (
+                    <Image src={col.bannerImage} alt={col.name} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                      <ImageIcon size={32} />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#003300] mb-1">{col.name}</h3>
+                  <p className="text-xs text-gray-400 font-mono mb-2">/{col.slug}</p>
+                  <p className="text-sm text-gray-500 line-clamp-1 mb-3">{col.description || 'No description provided'}</p>
+                  <div className="flex items-center gap-4 text-xs font-semibold text-[#003300]">
+                    <span className="flex items-center gap-1">
+                      <LayoutGrid size={14} /> {col.products.length} Products
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="mt-6 pt-6 border-t border-gray-50 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all">
+                <Link
+                  href={`/collections/${col.slug}`}
+                  target="_blank"
+                  className="text-xs font-bold text-gray-400 hover:text-[#003300] flex items-center gap-1"
+                >
+                  View Live <ExternalLink size={12} />
+                </Link>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(col)}
+                    className="p-2 hover:bg-[#F7E6CA] text-[#003300] rounded-xl transition-all"
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(col._id)}
+                    className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition-all"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Slide-over Form Overlay */}
       {showForm && (
@@ -492,21 +487,22 @@ export default function AdminCollectionsPage() {
             </div>
           </div>
         </div>
-      )}
+      )
+      }
 
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #D7C69D;
-          border-radius: 10px;
-        }
-      `}</style>
-    </div>
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #D7C69D;
+        border-radius: 10px;
+      }
+    `}</style>
+    </main >
   )
 }

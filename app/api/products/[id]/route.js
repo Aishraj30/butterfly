@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
+import Inventory from "@/models/inventory";
 import { verifyToken } from "@/lib/jwt";
 
 const getUser = (req) => {
@@ -22,6 +23,14 @@ export async function GET(req, { params }) {
     );
   }
 
+  // Check inventory status
+  const inventoryItems = await Inventory.find({ productId: id });
+  const hasInventory = inventoryItems.length > 0;
+  const totalAvailableStock = inventoryItems.reduce((sum, item) => sum + ((item.totalStock || 0) - (item.reservedStock || 0)), 0);
+
+  // A product is in stock ONLY if it has an inventory record AND available stock > 0
+  const isActuallyInStock = hasInventory && totalAvailableStock > 0;
+
   // Transform MongoDB document to match frontend interface
   const transformedProduct = {
     ...product.toObject(),
@@ -31,6 +40,13 @@ export async function GET(req, { params }) {
     reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
     imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
     image: product.imageGradient || '', // Map imageGradient to image
+    inStock: isActuallyInStock, // Override with real inventory status
+    inventory: inventoryItems.map(item => ({
+      color: item.color,
+      size: item.size,
+      available: (item.totalStock - item.reservedStock) > 0,
+      availableStock: item.totalStock - item.reservedStock
+    }))
   };
 
   return NextResponse.json({ success: true, data: transformedProduct });

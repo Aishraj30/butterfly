@@ -18,7 +18,13 @@ body[data-radix-dropdown-menu-content] {
 
 html,
 body {
-  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
   width: 100%;
   margin: 0;
   padding: 0;

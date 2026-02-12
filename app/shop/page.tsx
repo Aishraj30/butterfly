@@ -12,12 +12,13 @@ import { filterAndSortProducts, FilterOptions } from '@/lib/products'
 const categories = ['All', 'Clothing', 'Shoes', 'Accessories']
 
 export default function ShopPage() {
+  const [productsState, setProductsState] = useState<any[]>([])
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [activeFilters, setActiveFilters] = useState<FilterState | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const allProducts = useMemo(() => getAllProducts(), [])
+  const allProducts = productsState
 
   const products = useMemo(() => {
     let options: FilterOptions = {
@@ -32,7 +33,7 @@ export default function ShopPage() {
         genders: activeFilters.genders,
         priceRange: [
           Number(activeFilters.priceRange.min) || 0,
-          Number(activeFilters.priceRange.max) || 10000
+          Number(activeFilters.priceRange.max) || 10000000
         ],
         sortBy: activeFilters.sortBy
       }
@@ -42,10 +43,22 @@ export default function ShopPage() {
   }, [selectedCategory, activeFilters, allProducts])
 
   useEffect(() => {
-    setLoading(true)
-    const timer = setTimeout(() => setLoading(false), 500)
-    return () => clearTimeout(timer)
-  }, [selectedCategory, activeFilters])
+    const fetchAllData = async () => {
+      setLoading(true)
+      try {
+        const res = await fetch('/api/products')
+        const data = await res.json()
+        if (data.success) {
+          setProductsState(data.data || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAllData()
+  }, [])
 
   return (
     <div>
@@ -186,7 +199,7 @@ export default function ShopPage() {
                             {product.name}
                           </h3>
                           <span className="text-xs font-bold text-black whitespace-nowrap">
-                            ₹{product.price.toLocaleString()}
+                            IDR {product.price.toLocaleString('id-ID')}
                           </span>
                         </div>
                         <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400">

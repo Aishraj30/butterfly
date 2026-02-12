@@ -146,7 +146,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
 
                     {/* Product Info Below Card */}
                     <Link href={`/product/${product.id}`}>
-                      <div className="px-0 mt-auto pt-4 pb-6">
+                      <div className="px-0 mt-auto pt-4 pb-4">
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="text-xs font-bold uppercase tracking-widest text-black group-hover:text-gray-600 transition-colors pr-4">
                             {product.name}

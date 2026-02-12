@@ -72,14 +72,25 @@ export default function InventoryPage() {
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1.5 py-0.5 px-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                            LIVE SYNC
+                        </Badge>
+                    </div>
                     <p className="text-muted-foreground">Manage stock levels, variants, and warehouse locations.</p>
                 </div>
-                <Link href="/admin/inventory/new">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" /> Add Item
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => mutate()} disabled={isLoading}>
+                        Refresh
                     </Button>
-                </Link>
+                    <Link href="/admin/inventory/new">
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" /> Add Item
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             <div className="flex items-center gap-4">
@@ -101,15 +112,15 @@ export default function InventoryPage() {
                 </Button>
             </div>
 
-            <div className="rounded-md border bg-white shadow-sm overflow-hidden">
+            <div className="rounded-md border bg-white shadow-md overflow-hidden">
                 <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-gray-50/50">
                         <TableRow>
-                            <TableHead>Product</TableHead>
-                            <TableHead>SKU</TableHead>
-                            <TableHead>Variant</TableHead>
-                            <TableHead>Stock (Total / Reserved)</TableHead>
-                            <TableHead>Location</TableHead>
+                            <TableHead className="w-[280px]">Product Details</TableHead>
+                            <TableHead>Inventory Status</TableHead>
+                            <TableHead>Logistics</TableHead>
+                            <TableHead>Supply Chain</TableHead>
+                            <TableHead>Financials</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -117,65 +128,152 @@ export default function InventoryPage() {
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">Loading inventory...</TableCell>
+                                <TableCell colSpan={7} className="h-32 text-center">
+                                    <div className="flex items-center justify-center gap-2 text-muted-foreground animate-pulse font-medium">
+                                        Fetching global inventory data...
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         ) : filteredInventory?.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">No inventory found.</TableCell>
+                                <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                                    No matching inventory records found.
+                                </TableCell>
                             </TableRow>
                         ) : (
-                            filteredInventory?.map((item) => (
-                                <TableRow key={item._id}>
-                                    <TableCell className="font-medium">{item.productId?.name || "Unknown Product"}</TableCell>
-                                    <TableCell className="font-mono text-xs">{item.sku}</TableCell>
-                                    <TableCell>
-                                        <div className="flex gap-2">
-                                            <span className="inline-block w-4 h-4 rounded-full border" style={{ backgroundColor: item.color }} title={item.color}></span>
-                                            <span className="text-sm">{item.size}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col">
-                                            <span className={item.totalStock <= item.lowStockThreshold ? "text-red-600 font-bold" : ""}>
-                                                {item.totalStock} Total
-                                            </span>
-                                            <span className="text-xs text-muted-foreground">{item.reservedStock} Reserved</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {item.warehouseLocation ? (
-                                            <div className="text-xs">
-                                                <div className="font-semibold">{item.warehouseLocation}</div>
-                                                <div className="text-muted-foreground">{item.aisle ? `Aisle: ${item.aisle}` : ""} {item.shelf ? `Shelf: ${item.shelf}` : ""}</div>
+                            filteredInventory?.map((item: any) => {
+                                const available = item.availableStock ?? (item.totalStock - (item.reservedStock || 0));
+                                const lastUpdated = item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : 'N/A';
+
+                                return (
+                                    <TableRow key={item._id} className="hover:bg-gray-50/50 transition-colors group">
+                                        {/* Product Details */}
+                                        <TableCell>
+                                            <div className="space-y-1.5">
+                                                <div className="font-bold text-gray-900 leading-tight">
+                                                    {item.productId?.name || "Unknown Product"}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="outline" className="text-[10px] font-mono py-0 tracking-tighter bg-gray-50">
+                                                        {item.sku}
+                                                    </Badge>
+                                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500">
+                                                        {item.color !== "N/A" && (
+                                                            <span
+                                                                className="w-2.5 h-2.5 rounded-full border border-gray-200"
+                                                                style={{ backgroundColor: item.color }}
+                                                            />
+                                                        )}
+                                                        {item.size !== "N/A" ? item.size : "One Size"}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        ) : <span className="text-muted-foreground italic text-xs">Unassigned</span>}
-                                    </TableCell>
-                                    <TableCell>{getStatusBadge(item.status)}</TableCell>
-                                    <TableCell className="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(item.sku)}>
-                                                    Copy SKU
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <Link href={`/admin/inventory/${item._id}`}>
-                                                    <DropdownMenuItem>View Details</DropdownMenuItem>
-                                                </Link>
-                                                <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(item._id)}>
-                                                    Delete Item
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                                        </TableCell>
+
+                                        {/* Inventory Status */}
+                                        <TableCell>
+                                            <div className="flex items-end gap-3 relative">
+                                                <div className="flex flex-col relative">
+                                                    {available <= item.lowStockThreshold && (
+                                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                                                    )}
+                                                    <span className={`text-3xl font-black tabular-nums tracking-tighter transition-all duration-500 ${available <= item.lowStockThreshold ? "text-red-600 scale-110" : item.reservedStock > 0 ? "text-amber-600" : "text-black"}`}>
+                                                        {available}
+                                                    </span>
+                                                    <span className="text-[9px] uppercase font-extrabold text-gray-400 tracking-widest leading-none">Available</span>
+                                                </div>
+                                                <div className="flex flex-col border-l border-gray-100 pl-3 pb-0.5 space-y-0.5">
+                                                    <div className="flex items-center gap-1.5 leading-none group/stat">
+                                                        <span className="text-[11px] font-bold text-gray-600 group-hover/stat:text-black transition-colors">{item.totalStock}</span>
+                                                        <span className="text-[9px] text-gray-400 uppercase font-bold">Total</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 leading-none group/stat">
+                                                        <span className={`text-[11px] font-bold transition-colors ${item.reservedStock > 0 ? "text-amber-600 animate-pulse" : "text-gray-400"}`}>{item.reservedStock || 0}</span>
+                                                        <span className="text-[9px] text-gray-400 uppercase font-bold text-amber-500/70">Reserved</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 leading-none group/stat">
+                                                        <span className="text-[11px] font-bold text-blue-600 group-hover/stat:text-blue-800 transition-colors">{item.soldCount || 0}</span>
+                                                        <span className="text-[9px] text-gray-400 uppercase font-bold text-blue-500/70">Sold</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+
+                                        {/* Logistics */}
+                                        <TableCell>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5">
+                                                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100 text-[10px] px-1.5 py-0 font-bold uppercase">
+                                                        {item.warehouseLocation || 'Stock Room'}
+                                                    </Badge>
+                                                </div>
+                                                {(item.aisle || item.shelf) && (
+                                                    <div className="text-[11px] font-medium text-gray-500 flex gap-2">
+                                                        {item.aisle && <span>Aisle: <span className="text-gray-900 font-bold">{item.aisle}</span></span>}
+                                                        {item.shelf && <span>Shelf: <span className="text-gray-900 font-bold">{item.shelf}</span></span>}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </TableCell>
+
+                                        {/* Supply Chain */}
+                                        <TableCell>
+                                            <div className="space-y-1">
+                                                <div className="text-[11px] font-bold text-gray-700 truncate max-w-[120px]" title={item.supplier}>
+                                                    {item.supplier || 'N/A'}
+                                                </div>
+                                                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                                    Batch: <span className="text-gray-600 bg-gray-50 px-1 py-0.5 rounded">{item.batchNumber || '—'}</span>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+
+                                        {/* Financials */}
+                                        <TableCell>
+                                            <div className="space-y-1">
+                                                <div className="text-[13px] font-black text-gray-900 tabular-nums">
+                                                    IDR {item.costPrice?.toLocaleString() || '0'}
+                                                </div>
+                                                <div className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Cost Price</div>
+                                            </div>
+                                        </TableCell>
+
+                                        {/* Status & Date */}
+                                        <TableCell>
+                                            <div className="space-y-1.5">
+                                                {getStatusBadge(item.status)}
+                                                <div className="text-[9px] text-gray-400 block font-medium group-hover:text-gray-500 transition-colors">
+                                                    Update: {lastUpdated}
+                                                </div>
+                                            </div>
+                                        </TableCell>
+
+                                        {/* Actions */}
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-white border border-transparent hover:border-gray-200">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-48 shadow-2xl border-gray-200">
+                                                    <DropdownMenuLabel className="text-[11px] uppercase tracking-widest font-black text-gray-400">Inventory Options</DropdownMenuLabel>
+                                                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(item.sku)} className="text-xs font-semibold py-2">
+                                                        Copy SKU to Clipboard
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <Link href={`/admin/inventory/${item._id}`}>
+                                                        <DropdownMenuItem className="text-xs font-semibold py-2">Edit Stock Details</DropdownMenuItem>
+                                                    </Link>
+                                                    <DropdownMenuItem className="text-red-600 text-xs font-bold py-2" onClick={() => handleDelete(item._id)}>
+                                                        Remove Record
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
                         )}
                     </TableBody>
                 </Table>

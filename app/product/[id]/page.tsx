@@ -55,6 +55,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
     const [product, setProduct] = useState<Product | null>(null);
+    const [inventory, setInventory] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [selectedSize, setSelectedSize] = useState('');
@@ -65,34 +66,90 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
     useEffect(() => {
         if (id) {
-            fetchProductDetails();
+            fetchProductData();
         }
     }, [id]);
 
-    const fetchProductDetails = async () => {
+    const fetchProductData = async () => {
         try {
             setLoading(true);
-            console.log('[Client] Fetching product with id:', id);
-            const response = await fetch(`/api/products/${id}`);
-            const data = await response.json();
+            const [productRes, inventoryRes] = await Promise.all([
+                fetch(`/api/products/${id}`),
+                fetch(`/api/inventory?productId=${id}`)
+            ]);
 
-            console.log('[Client] Response:', data);
+            const productData = await productRes.json();
+            const invData = await inventoryRes.json();
 
-            if (data.success && data.data) {
-                setProduct(data.data);
-                // Set default size
-                const availableSizes = data.data.sizes || data.data.size || [];
-                if (availableSizes && availableSizes.length > 0) {
-                    setSelectedSize(availableSizes[0]);
-                }
-            } else {
-                console.error('API Error:', data.message || data.error);
+            if (productData.success && productData.data) {
+                setProduct(productData.data);
+                setInventory(invData || []);
+
+                // Set initial size (first one that is in stock)
+                const sizes = productData.data.sizes || productData.data.size || [];
+                const inStockSize = sizes.find((s: string) => {
+                    const inv = invData.find((i: any) =>
+                        (i.size === s || i.size === 'N/A') &&
+                        (i.color === productData.data.color || i.color === 'N/A')
+                    );
+                    return inv ? (inv.totalStock - inv.reservedStock) > 0 : true;
+                });
+                setSelectedSize(inStockSize || sizes[0] || '');
             }
         } catch (error) {
-            console.error('Failed to fetch product:', error);
+            console.error('Failed to fetch data:', error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const isSizeAvailable = (size: string) => {
+        if (!inventory.length) return true; // Default to true if no inventory records exist yet
+
+        // Exact match for size and color
+        let inv = inventory.find(i =>
+            i.size === size && (i.color === product?.color || i.color === 'N/A')
+        );
+
+        // Fallback to No Variant match ONLY if no specific size records exist at all
+        if (!inv) {
+            const hasAnySpecificSizeRecord = inventory.some(i => i.size !== 'N/A');
+            if (!hasAnySpecificSizeRecord) {
+                inv = inventory.find(i => i.size === 'N/A' && i.color === 'N/A');
+            }
+        }
+
+        if (!inv) return false; // If we have inventory data but no record for this size, it's out of stock
+        return (inv.totalStock - inv.reservedStock) > 0;
+    };
+
+    const getStockInfo = (size: string) => {
+        if (!inventory.length) return null;
+
+        // Exact match for size and color
+        let inv = inventory.find(i =>
+            i.size === size && (i.color === product?.color || i.color === 'N/A')
+        );
+
+        // Fallback to No Variant match ONLY if no specific size records exist at all
+        if (!inv) {
+            const hasAnySpecificSizeRecord = inventory.some(i => i.size !== 'N/A');
+            if (!hasAnySpecificSizeRecord) {
+                inv = inventory.find(i => i.size === 'N/A' && i.color === 'N/A');
+            }
+        }
+
+        if (!inv) return null;
+
+        const availableStock = inv.totalStock - (inv.reservedStock || 0);
+        const lowStockThreshold = inv.lowStockThreshold || 5;
+        const isLowStock = availableStock > 0 && availableStock <= lowStockThreshold;
+
+        return {
+            available: availableStock,
+            threshold: lowStockThreshold,
+            isLow: isLowStock
+        };
     };
 
     const toggleWishlist = async () => {
@@ -411,10 +468,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         {/* Price Section */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                                <p className="text-3xl font-bold text-black">₹{product.salePrice || product.price}</p>
+                                <p className="text-3xl font-bold text-black">IDR {(product.salePrice || product.price).toLocaleString()}</p>
                                 {product.onSale && product.salePrice && (
                                     <>
-                                        <span className="text-gray-400 line-through text-lg">₹{product.price}</span>
+                                        <span className="text-gray-400 line-through text-lg">IDR {product.price.toLocaleString()}</span>
                                         <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
                                             {discountPercent}% OFF
                                         </span>
@@ -428,6 +485,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                     {product.inStock ? '✓ In Stock' : 'Out of Stock'}
                                 </span>
                             </div>
+
+                            {/* Low Stock Warning */}
+                            {selectedSize && (() => {
+                                const stockInfo = getStockInfo(selectedSize);
+                                if (stockInfo && stockInfo.isLow) {
+                                    return (
+                                        <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                                            <svg className="w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                            <span className="text-sm font-medium text-orange-800">
+                                                Only {stockInfo.available} {stockInfo.available === 1 ? 'item' : 'items'} left in stock!
+                                            </span>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
                         </div>
 
                         {/* Rating */}
@@ -463,22 +538,33 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             )}
                         </div>
 
-                        {/* Size Selector */}
                         <div>
-                            <h3 className="font-semibold text-black mb-3">Available Sizes</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {['s', 'm', 'l', 'xl', 'xxl', 'custom'].map((size) => (
-                                    <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
-                                        className={`min-w-[3rem] h-12 px-2 flex items-center justify-center border-2 text-sm font-medium transition-colors ${selectedSize === size
-                                            ? 'bg-black text-white border-black'
-                                            : 'border-gray-300 text-black hover:border-black'
-                                            }`}
-                                    >
-                                        {size.toUpperCase()}
-                                    </button>
-                                ))}
+                            <h3 className="font-semibold text-black mb-3 text-xs uppercase tracking-widest text-center md:text-left">Select Size</h3>
+                            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                                {(product.sizes || product.size || ['N/A']).map((size) => {
+                                    const available = isSizeAvailable(size);
+                                    return (
+                                        <button
+                                            key={size}
+                                            onClick={() => available && setSelectedSize(size)}
+                                            disabled={!available}
+                                            className={`relative min-w-[4rem] h-12 px-4 flex items-center justify-center border transition-all text-xs font-bold tracking-widest overflow-hidden group
+                                                ${selectedSize === size
+                                                    ? 'bg-black text-white border-black shadow-lg shadow-black/10'
+                                                    : available
+                                                        ? 'border-gray-200 text-gray-400 hover:border-black hover:text-black'
+                                                        : 'border-gray-100 text-gray-200 cursor-not-allowed bg-gray-50'
+                                                }`}
+                                        >
+                                            {size.toUpperCase()}
+                                            {!available && (
+                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                    <div className="w-[140%] h-[1.5px] bg-black/40 -rotate-45 transform"></div>
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
 

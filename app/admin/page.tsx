@@ -1,6 +1,5 @@
 'use client'
 
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { DashboardHeader } from '@/components/admin/DashboardHeader'
 import { MetricsCards } from '@/components/admin/MetricsCards'
 import { SalesRevenueChart } from '@/components/admin/SalesRevenueChart'
@@ -11,43 +10,30 @@ import { ThemeTest } from '@/components/admin/ThemeTest'
 
 export default function AdminDashboard() {
   return (
-    <div className="flex min-h-screen bg-[#F7E6CA]">
-      <AdminSidebar />
-
-      <main className="flex-1 lg:ml-0">
-        {/* Header */}
-        <DashboardHeader />
-
-        {/* Content */}
-        <div className="p-4 lg:p-6">
-          {/* Dashboard Title */}
-          <div className="mb-4 lg:mb-6">
-            <h1 className="text-2xl font-bold text-[#005500]">
-              Dashboard
-            </h1>
-          </div>
-
-          {/* Metrics Cards */}
-          <div className="mb-6 lg:mb-8">
-            <MetricsCards />
-          </div>
-
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
-            <SalesRevenueChart />
-            <CustomerStatisticsChart />
-          </div>
-
-          {/* Bottom Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-            <DistributionMap />
-            <TopProductsTable />
-          </div>
+    <>
+      <DashboardHeader />
+      <div className="p-4 lg:p-6">
+        <div className="mb-4 lg:mb-6">
+          <h1 className="text-2xl font-bold text-[#005500]">
+            Dashboard
+          </h1>
         </div>
 
-        {/* Theme Test Component - Remove in production */}
-        <ThemeTest />
-      </main>
-    </div>
+        <div className="mb-6 lg:mb-8">
+          <MetricsCards />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+          <SalesRevenueChart />
+          <CustomerStatisticsChart />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+          <DistributionMap />
+          <TopProductsTable />
+        </div>
+      </div>
+      <ThemeTest />
+    </>
   )
 }

@@ -39,6 +39,11 @@ const inventorySchema = new mongoose.Schema(
             min: 0
         },
 
+        availableStock: {
+            type: Number,
+            default: 0
+        },
+
         lowStockThreshold: {
             type: Number,
             default: 5
@@ -94,9 +99,10 @@ const inventorySchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Virtual field: available stock
-inventorySchema.virtual("availableStock").get(function () {
-    return this.totalStock - this.reservedStock;
+// Pre-save hook to keep availableStock in sync
+inventorySchema.pre("save", function (next) {
+    this.availableStock = this.totalStock - this.reservedStock;
+    next();
 });
 
 // Index for fast search
@@ -104,11 +110,6 @@ inventorySchema.index({ productId: 1, color: 1, size: 1 }, { unique: true });
 
 // --- Instance Methods ---
 
-/**
- * Check if requested quantity is available
- * @param {number} quantity 
- * @returns {boolean}
- */
 inventorySchema.methods.canFulfill = function (quantity) {
     return this.availableStock >= quantity;
 };
@@ -118,11 +119,16 @@ inventorySchema.methods.canFulfill = function (quantity) {
  * @param {number} quantity 
  */
 inventorySchema.methods.reserve = async function (quantity) {
-    if (!this.canFulfill(quantity)) {
-        throw new Error("Insufficient stock available for reservation.");
+    const availableBefore = this.totalStock - this.reservedStock;
+    if (availableBefore < quantity) {
+        throw new Error(`Insufficient stock. Total: ${this.totalStock}, Reserved: ${this.reservedStock}, Requested: ${quantity}`);
     }
+
     this.reservedStock += quantity;
-    if (this.availableStock === 0) {
+
+    // Check available after reservation
+    const availableAfter = this.totalStock - this.reservedStock;
+    if (availableAfter <= 0) {
         this.status = 'out_of_stock';
     }
     return this.save();

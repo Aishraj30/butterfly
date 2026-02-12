@@ -19,20 +19,22 @@ interface Collection {
 
 function CatalogContent() {
     const [collections, setCollections] = useState<Collection[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const searchParams = useSearchParams();
     const collectionParam = searchParams.get('collection');
 
-    const allProducts = useMemo(() => getAllProducts(), []);
+    const allProducts = products;
 
     const filteredProducts = useMemo(() => {
-        if (!collectionParam) return [];
+        if (!collectionParam && !activeFilters) return products;
 
-        let options: FilterOptions = {
-            categories: [decodeURIComponent(collectionParam)],
-        };
+        let options: FilterOptions = {};
+        if (collectionParam) {
+            options.categories = [decodeURIComponent(collectionParam)];
+        }
 
         if (activeFilters) {
             options = {
@@ -42,32 +44,45 @@ function CatalogContent() {
                 genders: activeFilters.genders,
                 priceRange: [
                     Number(activeFilters.priceRange.min) || 0,
-                    Number(activeFilters.priceRange.max) || 10000
+                    Number(activeFilters.priceRange.max) || 10000000 // High enough for IDR
                 ],
                 sortBy: activeFilters.sortBy
             }
         }
 
         return filterAndSortProducts(allProducts, options);
-    }, [collectionParam, activeFilters, allProducts]);
+    }, [collectionParam, activeFilters, allProducts, products]);
 
     useEffect(() => {
-        fetchCollections();
+        const loadPageData = async () => {
+            setIsLoading(true);
+            await Promise.all([fetchCollections(), fetchProducts()]);
+            setIsLoading(false);
+        };
+        loadPageData();
     }, []);
 
     const fetchCollections = async () => {
         try {
-            setIsLoading(true);
             const collectionsRes = await fetch('/api/collections');
             const collectionsData = await collectionsRes.json();
-
             if (collectionsData.success) {
                 setCollections(collectionsData.collections || []);
             }
         } catch (error) {
             console.error('Failed to fetch collections:', error);
-        } finally {
-            setIsLoading(false);
+        }
+    };
+
+    const fetchProducts = async () => {
+        try {
+            const res = await fetch('/api/products');
+            const data = await res.json();
+            if (data.success) {
+                setProducts(data.data || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch products:', error);
         }
     };
 
@@ -188,7 +203,7 @@ function CatalogContent() {
                                                     {product.name}
                                                 </h3>
                                                 <span className="text-xs font-bold text-black whitespace-nowrap">
-                                                    ₹{product.price.toLocaleString()}
+                                                    IDR {product.price.toLocaleString('id-ID')}
                                                 </span>
                                             </div>
                                             <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400">
