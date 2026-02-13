@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Product } from '@/lib/products'
 import { Category } from '@/lib/categories'
 import { Brand } from '@/lib/brands'
+import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
 
 interface Collection {
     id: number
@@ -41,6 +42,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     )
     const [uploadingImage, setUploadingImage] = useState(false)
     const [imagePreview, setImagePreview] = useState('')
+    const [compressionInfo, setCompressionInfo] = useState<string>('')
 
     useEffect(() => {
         // Fetch collections, categories (styles), and brands
@@ -81,11 +83,32 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
         const file = e.target.files?.[0]
         if (!file) return
 
+        // Validate file type
+        if (!isValidImageFile(file)) {
+            alert('Please select a valid image file (JPEG, PNG, or WebP)')
+            return
+        }
+
         setUploadingImage(true)
+        setCompressionInfo('')
 
         try {
+            // Compress the image before upload
+            const compressedFile = await compressImage(file, {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1920,
+                quality: 0.8,
+                useWebWorker: true
+            })
+
+            // Show compression info
+            const originalSize = formatFileSize(file.size)
+            const compressedSize = formatFileSize(compressedFile.size)
+            const compressionRatio = ((file.size - compressedFile.size) / file.size * 100).toFixed(1)
+            setCompressionInfo(`Original: ${originalSize} → Compressed: ${compressedSize} (${compressionRatio}% reduction)`)
+
             const formData = new FormData()
-            formData.append('file', file)
+            formData.append('file', compressedFile)
 
             const response = await fetch('/api/upload', {
                 method: 'POST',
@@ -294,7 +317,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 htmlFor="image-upload"
                                 className="px-4 py-2 border border-border text-foreground hover:bg-secondary rounded-sm transition-colors cursor-pointer disabled:opacity-50"
                             >
-                                {uploadingImage ? 'Uploading...' : 'Choose Image'}
+                                {uploadingImage ? 'Processing...' : 'Choose Image'}
                             </label>
                             {(imagePreview || formData.imageUrl) && (
                                 <button
@@ -302,6 +325,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                     onClick={() => {
                                         setFormData(prev => ({ ...prev, image: '', imageUrl: '' }))
                                         setImagePreview('')
+                                        setCompressionInfo('')
                                     }}
                                     className="px-4 py-2 border border-red-500 text-red-500 hover:bg-red-50 rounded-sm transition-colors"
                                 >
@@ -309,6 +333,13 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 </button>
                             )}
                         </div>
+
+                        {/* Compression Info */}
+                        {compressionInfo && (
+                            <div className="text-sm text-green-600 bg-green-50 p-2 rounded-sm">
+                                {compressionInfo}
+                            </div>
+                        )}
 
                         {(imagePreview || formData.imageUrl) && (
                             <div className="mt-4">

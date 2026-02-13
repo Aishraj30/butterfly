@@ -219,14 +219,14 @@ export function Header() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="SEARCH"
-                        className="w-full py-4 px-4 border-b-2 border-gray-400 focus:outline-none text-2xl text-black bg-transparent"
+                        className="w-full py-4 px-4 border-b-2 border-gray-400 focus:outline-none text-lg text-black bg-transparent"
                         autoFocus
                       />
                       <button
                         onClick={() => setIsSearchOpen(false)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-600 hover:text-black"
                       >
-                        <X size={24} />
+                        <X size={18} />
                       </button>
 
                       {/* Search Suggestions Dropdown */}
