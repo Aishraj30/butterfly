@@ -19,7 +19,7 @@ export default function CategoryPage() {
     const filteredProducts = useMemo(() => {
         const decodedCategoryName = decodeURIComponent(categoryName.toLowerCase())
 
-        // Base category filtering
+        // Base category filtering - more flexible matching
         let options: FilterOptions = {
             categories: [decodedCategoryName],
         }
@@ -38,7 +38,17 @@ export default function CategoryPage() {
             }
         }
 
-        return filterAndSortProducts(allProducts, options)
+        const filtered = filterAndSortProducts(allProducts, options)
+        
+        // Additional fallback: if no products found with exact match, try partial matching
+        if (filtered.length === 0 && !activeFilters) {
+            return allProducts.filter(product => 
+                product.category.toLowerCase().includes(decodedCategoryName) ||
+                decodedCategoryName.includes(product.category.toLowerCase())
+            )
+        }
+        
+        return filtered
     }, [categoryName, activeFilters, allProducts])
 
     useEffect(() => {

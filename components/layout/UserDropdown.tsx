@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   DropdownMenu,
@@ -18,16 +19,19 @@ import Link from 'next/link'
 
 export function UserDropdown() {
   const { user, logout } = useAuth()
+  const pathname = usePathname()
   
-  // Check if we're on the homepage
-  const isHomePage = typeof window !== 'undefined' && window.location.pathname === '/'
+  // Check if we're on the homepage or product detail page
+  const isHomePage = pathname === '/'
+  const isProductPage = pathname.startsWith('/product/')
+  const shouldUseWhite = isHomePage || isProductPage
 
   return (
     <div className="relative">
       <DropdownMenu>
         {/* Trigger */}
         <DropdownMenuTrigger asChild>
-          <button className={`hover:opacity-70 transition-opacity flex items-center gap-1 hover:cursor-pointer outline-none ${isHomePage ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>
+          <button className={`hover:opacity-70 transition-opacity flex items-center gap-1 hover:cursor-pointer outline-none ${shouldUseWhite ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>
             <User size={20} strokeWidth={1.5} />
           </button>
         </DropdownMenuTrigger>

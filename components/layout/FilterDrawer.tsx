@@ -108,14 +108,14 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
             {/* Backdrop */}
             <div
                 onClick={onClose}
-                className={`fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[1000] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             />
 
             {/* Right Side Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed inset-y-0 right-0 z-[101] w-full max-w-[420px]
+                className={`fixed inset-y-0 right-0 z-[1001] w-full max-w-[420px]
                     bg-black/60 backdrop-blur-2xl 
                     border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.3)]
                     font-sans text-white
