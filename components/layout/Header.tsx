@@ -3,29 +3,25 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import {
-  User,
-  ShoppingCart,
-  ChevronDown,
-  Heart,
-  Search,
-  LogOut,
-  Menu,
-  X,
-  ShoppingBag,
-  Package
+import { 
+  Star, 
+  Minus, 
+  Plus, 
+  ShoppingCart, 
+  Heart, 
+  ChevronLeft, 
+  ChevronRight, 
+  Search, 
+  ChevronDown, 
+  Menu, 
+  X, 
+  ShoppingBag, 
+  Package 
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { CartDrawer } from './CartDrawer'
 import { CatalogDrawer } from './CatalogDrawer'
+import { UserDropdown } from './UserDropdown'
 import { FeaturedDrawer } from './FeaturedDrawer'
 import { useCart } from '@/hooks/useCart'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -118,7 +114,7 @@ export function Header() {
 
   return (
     <header className={`w-full z-[999] transition-all duration-300 ${headerBg} ${isProductPage ? 'py-2' : 'py-4'} ${!isProductPage ? 'sticky top-0' : ''}`}>
-      <nav className="max-w-[1400px] mx-auto px-6 py-0.5 grid grid-cols-3 items-center">
+      <nav className="max-w-[1400px] mx-auto pl-2 pr-3.5 md:px-6 py-0.5 grid grid-cols-3 items-center">
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
           {navigation.slice(0, 2).map((item) => (
@@ -171,7 +167,7 @@ export function Header() {
         </div>
 
         {/* Center Logo */}
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center pl-4 md:pl-0">
           <Link href="/" className="flex-shrink-0">
             <span className={`font-sans text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-[0.1em] md:tracking-[0.2em] whitespace-nowrap transition-all ${logoColor} ${!isHome || isCatalog ? '' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]'}`}>
               BUTTERFLY
@@ -288,58 +284,7 @@ export function Header() {
             </div>
 
             {/* User Icon */}
-            <div className="relative">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="hover:opacity-70 transition-opacity flex items-center gap-1 hover:cursor-pointer">
-                    <User size={20} strokeWidth={1.5} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-56"
-                  sideOffset={4}
-                  alignOffset={0}
-                  avoidCollisions={true}
-                >
-                  {user ? (
-                    <>
-                      <div className="px-2 py-1.5 text-sm font-medium border-b mb-1">
-                        Hi, {user.name}
-                      </div>
-                      <DropdownMenuItem asChild>
-                        <Link href="/profile" className="cursor-pointer w-full">Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/orders" className="cursor-pointer w-full">Orders</Link>
-                      </DropdownMenuItem>
-                      {user.role === 'admin' && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <Link href="/admin" className="cursor-pointer w-full text-blue-600 font-medium">Admin Dashboard</Link>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Logout
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/login" className="cursor-pointer w-full">Login</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/signup" className="cursor-pointer w-full">Sign Up</Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <UserDropdown />
 
             {/* Shopping Bag */}
             <button
@@ -368,7 +313,7 @@ export function Header() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md cursor-pointer md:hidden"
+              className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px] cursor-pointer md:hidden"
             />
 
             {/* Mobile Menu Panel */}
@@ -377,18 +322,18 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 z-[101] h-screen w-full max-w-[320px] bg-white shadow-2xl md:hidden overflow-hidden flex flex-col"
+              className="fixed top-0 left-0 z-[101] h-full w-full max-w-[320px] bg-black/40 backdrop-blur-2xl border-r border-white/20 shadow-[20px_0_50px_rgba(0,0,0,0.1)] font-sans text-white md:hidden overflow-hidden flex flex-col"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b px-6 py-6">
-                <h2 className="text-xl font-bold uppercase tracking-[0.2em] text-black">
+              <div className="flex items-center justify-between border-b border-white/20 px-6 py-6">
+                <h2 className="text-xl uppercase tracking-[0.2em] text-white">
                   Menu
                 </h2>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="group rounded-full p-2 transition-colors hover:bg-gray-100 cursor-pointer bg-gray-100"
+                  className="group rounded-full p-2 transition-colors hover:bg-white/20 cursor-pointer bg-white/10"
                 >
-                  <X size={24} className="text-black" />
+                  <X size={24} className="text-white" />
                 </button>
               </div>
 
@@ -401,7 +346,7 @@ export function Header() {
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.1 + idx * 0.1 }}
-                      className="border-b border-gray-100"
+                      className="border-b border-white/10"
                     >
                       {item.hasDropdown ? (
                         <button
@@ -415,12 +360,12 @@ export function Header() {
                           }}
                           className="flex items-center justify-between w-full py-4 text-left group"
                         >
-                          <span className="text-lg font-semibold text-black uppercase tracking-wide group-hover:text-gray-600 transition-colors">
+                          <span className="text-lg uppercase tracking-wide group-hover:text-gray-200 transition-colors">
                             {item.name}
                           </span>
                           <ChevronDown
                             size={16}
-                            className="transform -rotate-90 text-gray-400 group-hover:text-gray-600"
+                            className="transform -rotate-90 text-white/60 group-hover:text-gray-200"
                           />
                         </button>
                       ) : (
@@ -429,7 +374,7 @@ export function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="flex items-center justify-between w-full py-4 text-left group"
                         >
-                          <span className="text-lg font-semibold text-black uppercase tracking-wide group-hover:text-gray-600 transition-colors">
+                          <span className="text-lg uppercase tracking-wide group-hover:text-gray-200 transition-colors">
                             {item.name}
                           </span>
                         </Link>
@@ -442,12 +387,12 @@ export function Header() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="pt-4 space-y-2 border-t border-gray-100"
+                    className="pt-4 space-y-2 border-t border-white/10"
                   >
                     <Link
                       href="/wishlist"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                      className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
                     >
                       <Heart size={18} />
                       <span className="text-sm">Wishlist</span>
@@ -455,7 +400,7 @@ export function Header() {
                     <Link
                       href="/search"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                      className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
                     >
                       <Search size={18} />
                       <span className="text-sm">Search</span>
@@ -467,14 +412,14 @@ export function Header() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="pt-4 space-y-2 border-t border-gray-100"
+                    className="pt-4 space-y-2 border-t border-white/10"
                   >
                     {user ? (
                       <>
                         <Link
                           href="/orders"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 py-3 text-gray-600 hover:text-black transition-colors"
+                          className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
                         >
                           <Package size={18} />
                           <span className="text-sm">Orders</span>
@@ -483,7 +428,7 @@ export function Header() {
                           <Link
                             href="/admin"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="block pl-4 py-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+                            className="block pl-4 py-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
                           >
                             Admin Dashboard
                           </Link>
@@ -493,28 +438,28 @@ export function Header() {
                             logout()
                             setIsMobileMenuOpen(false)
                           }}
-                          className="w-full text-left pl-4 py-2 text-sm text-red-600 hover:text-red-700 transition-colors"
+                          className="w-full text-left pl-4 py-2 text-sm text-red-400 hover:text-red-300 transition-colors"
                         >
                           Logout
                         </button>
                       </>
                     ) : (
-                      <div className="space-y-3">
+                      <>
                         <Link
                           href="/login"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="block w-full bg-black text-white py-3 text-center font-medium tracking-wide hover:bg-gray-800 transition-colors"
+                          className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
                         >
-                          LOGIN
+                          <span className="text-sm">Login</span>
                         </Link>
                         <Link
                           href="/signup"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="block w-full border border-gray-300 text-black py-3 text-center font-medium tracking-wide hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
                         >
-                          SIGN UP
+                          <span className="text-sm">Sign Up</span>
                         </Link>
-                      </div>
+                      </>
                     )}
                   </motion.div>
                 </div>
