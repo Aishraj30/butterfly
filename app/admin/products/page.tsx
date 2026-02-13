@@ -196,7 +196,11 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-sm bg-[#F7E6CA]/50 ${product.image}`}></div>
+                          <div className={`w-10 h-10 rounded-sm overflow-hidden border border-[#D7C69D]/20 flex-shrink-0 bg-[#F7E6CA]/50 ${!product.imageUrl ? product.image : ''}`}>
+                            {product.imageUrl && (
+                              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                            )}
+                          </div>
                           <p className="font-medium text-[#005500]">
                             {product.name}
                           </p>

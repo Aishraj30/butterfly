@@ -6,6 +6,7 @@ import { Product } from '@/lib/products'
 import { Category } from '@/lib/categories'
 import { Brand } from '@/lib/brands'
 import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Collection {
     id: number
@@ -37,6 +38,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             inStock: true,
             image: '', // Will store image URL
             imageUrl: '', // Additional field for uploaded images
+            images: [], // Array for multiple images
             size: ['S', 'M', 'L'], // Default sizes
         }
     )
@@ -79,6 +81,8 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
         }
     }
 
+    const { token } = useAuth()
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
@@ -112,6 +116,9 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
 
             const response = await fetch('/api/upload', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: formData
             })
 
@@ -121,7 +128,8 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 setFormData(prev => ({
                     ...prev,
                     image: data.url,
-                    imageUrl: data.url
+                    imageUrl: data.url,
+                    images: [data.url]
                 }))
                 setImagePreview(data.url)
             } else {
@@ -135,6 +143,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
         }
     }
 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
@@ -147,6 +156,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(formData),
             })

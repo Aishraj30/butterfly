@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
+import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
 
 interface Product {
   _id: string
@@ -63,6 +64,10 @@ export default function AdminCollectionsPage() {
   const [productSearch, setProductSearch] = useState('')
   const [showProductSelector, setShowProductSelector] = useState(false)
 
+  // Image Upload State
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [compressionInfo, setCompressionInfo] = useState('')
+
   useEffect(() => {
     if (token) {
       fetchCollections()
@@ -107,6 +112,60 @@ export default function AdminCollectionsPage() {
   const handleNameChange = (name: string) => {
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
     setFormData({ ...formData, name, slug })
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!isValidImageFile(file)) {
+      alert('Please select a valid image file (JPEG, PNG, or WebP)')
+      return
+    }
+
+    setUploadingImage(true)
+    setCompressionInfo('')
+
+    try {
+      const compressedFile = await compressImage(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        quality: 0.8,
+        useWebWorker: true
+      })
+
+      const originalSize = formatFileSize(file.size)
+      const compressedSize = formatFileSize(compressedFile.size)
+      const compressionRatio = ((file.size - compressedFile.size) / file.size * 100).toFixed(1)
+      setCompressionInfo(`Original: ${originalSize} → Compressed: ${compressedSize} (${compressionRatio}% reduction)`)
+
+      const formDataUpload = new FormData()
+      formDataUpload.append('file', compressedFile)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formDataUpload
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setFormData(prev => ({
+          ...prev,
+          bannerImage: data.url
+        }))
+      } else {
+        alert(data.error || 'Failed to upload image')
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Failed to upload image')
+    } finally {
+      setUploadingImage(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -360,21 +419,58 @@ export default function AdminCollectionsPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-[#003300] uppercase tracking-wider">Banner Image URL</label>
-                <div className="flex gap-4">
+              <div className="space-y-4">
+                <label className="text-xs font-bold text-[#003300] uppercase tracking-wider">Banner Image</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                    className="hidden"
+                    id="banner-upload"
+                  />
+                  <label
+                    htmlFor="banner-upload"
+                    className="px-4 py-2 border border-[#003300] text-[#003300] hover:bg-gray-50 rounded-xl transition-colors cursor-pointer disabled:opacity-50 text-sm font-bold"
+                  >
+                    {uploadingImage ? 'Uploading...' : 'Choose Image'}
+                  </label>
+                  {formData.bannerImage && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({ ...formData, bannerImage: '' })
+                        setCompressionInfo('')
+                      }}
+                      className="px-4 py-2 border border-red-500 text-red-500 hover:bg-red-50 rounded-xl transition-colors text-sm font-bold"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                {compressionInfo && (
+                  <div className="text-[10px] text-green-600 font-bold bg-green-50 p-2 rounded-lg">
+                    {compressionInfo}
+                  </div>
+                )}
+
+                {formData.bannerImage && (
+                  <div className="relative w-full h-40 rounded-2xl bg-gray-100 overflow-hidden border border-gray-50">
+                    <Image src={formData.bannerImage} alt="Banner Preview" fill className="object-cover" />
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-400 font-bold uppercase">Or enter URL manually</label>
                   <input
                     type="text"
                     value={formData.bannerImage}
                     onChange={(e) => setFormData({ ...formData, bannerImage: e.target.value })}
-                    className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-none focus:ring-2 focus:ring-[#D7C69D] outline-none"
+                    className="w-full px-4 py-2 bg-gray-50 rounded-lg border-none focus:ring-2 focus:ring-[#D7C69D] outline-none text-xs"
                     placeholder="https://..."
                   />
-                  {formData.bannerImage && (
-                    <div className="w-12 h-12 rounded-lg bg-gray-100 relative overflow-hidden flex-shrink-0">
-                      <Image src={formData.bannerImage} alt="Preview" fill className="object-cover" />
-                    </div>
-                  )}
                 </div>
               </div>
 

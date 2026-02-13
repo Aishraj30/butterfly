@@ -8,7 +8,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'butter-fly-bucket.s3.eu-north-1.amazonaws.com',
+        hostname: 'butter-fly-bucket-ecom.s3.ap-south-1.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
         port: '',
         pathname: '/**',
       },

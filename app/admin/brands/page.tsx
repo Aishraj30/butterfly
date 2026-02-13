@@ -4,6 +4,8 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { useState, useEffect } from 'react'
 import { Search, Plus, Edit, Trash2 } from 'lucide-react'
 import { Brand } from '@/lib/brands'
+import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
+import Image from 'next/image'
 
 export default function AdminBrandsPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -16,6 +18,8 @@ export default function AdminBrandsPage() {
     description: '',
     logo: '',
   })
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [compressionInfo, setCompressionInfo] = useState('')
 
   useEffect(() => {
     fetchBrands()
@@ -36,6 +40,57 @@ export default function AdminBrandsPage() {
       console.error('Failed to fetch brands:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!isValidImageFile(file)) {
+      alert('Please select a valid image file (JPEG, PNG, or WebP)')
+      return
+    }
+
+    setUploadingImage(true)
+    setCompressionInfo('')
+
+    try {
+      const compressedFile = await compressImage(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 800, // Logos don't need to be huge
+        quality: 0.8,
+        useWebWorker: true
+      })
+
+      const originalSize = formatFileSize(file.size)
+      const compressedSize = formatFileSize(compressedFile.size)
+      const compressionRatio = ((file.size - compressedFile.size) / file.size * 100).toFixed(1)
+      setCompressionInfo(`Original: ${originalSize} → Compressed: ${compressedSize} (${compressionRatio}% reduction)`)
+
+      const formDataUpload = new FormData()
+      formDataUpload.append('file', compressedFile)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setFormData(prev => ({
+          ...prev,
+          logo: data.url
+        }))
+      } else {
+        alert(data.error || 'Failed to upload image')
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Failed to upload image')
+    } finally {
+      setUploadingImage(false)
     }
   }
 
@@ -167,17 +222,63 @@ export default function AdminBrandsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Logo URL (Optional)
+                    Brand Logo
                   </label>
-                  <input
-                    type="text"
-                    value={formData.logo}
-                    onChange={(e) =>
-                      setFormData({ ...formData, logo: e.target.value })
-                    }
-                    placeholder="https://example.com/logo.png"
-                    className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                  />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                        className="hidden"
+                        id="logo-upload"
+                      />
+                      <label
+                        htmlFor="logo-upload"
+                        className="px-4 py-2 border border-border text-foreground hover:bg-secondary rounded-sm transition-colors cursor-pointer disabled:opacity-50 text-sm font-medium"
+                      >
+                        {uploadingImage ? 'Uploading...' : 'Choose Logo'}
+                      </label>
+                      {formData.logo && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, logo: '' })
+                            setCompressionInfo('')
+                          }}
+                          className="px-4 py-2 border border-destructive/50 text-destructive hover:bg-destructive/10 rounded-sm transition-colors text-sm font-medium"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {compressionInfo && (
+                      <div className="text-xs text-green-600 bg-green-50 p-2 rounded-sm inline-block">
+                        {compressionInfo}
+                      </div>
+                    )}
+
+                    {formData.logo && (
+                      <div className="relative w-20 h-20 rounded-lg bg-gray-100 overflow-hidden border border-border">
+                        <img src={formData.logo} alt="Logo Preview" className="w-full h-full object-contain" />
+                      </div>
+                    )}
+
+                    <div className="space-y-1">
+                      <label className="block text-xs text-foreground/40 font-medium uppercase">Or enter URL manually</label>
+                      <input
+                        type="text"
+                        value={formData.logo}
+                        onChange={(e) =>
+                          setFormData({ ...formData, logo: e.target.value })
+                        }
+                        placeholder="https://example.com/logo.png"
+                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="flex gap-4">
                   <button
