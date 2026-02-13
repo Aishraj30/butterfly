@@ -4,24 +4,68 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { CatalogBanner } from '@/components/catalog/CatalogBanner'
 import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer'
-import { filterAndSortProducts, FilterOptions, getAllProducts, Product } from '@/lib/products'
+import { filterAndSortProducts, FilterOptions, Product } from '@/lib/products'
 import { Sliders } from 'lucide-react'
 
 export default function CategoryPage() {
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [activeFilters, setActiveFilters] = useState<FilterState | null>(null)
     const [loading, setLoading] = useState(true)
+    const [products, setProducts] = useState<Product[]>([])
     const params = useParams()
     const categoryName = params.category as string
 
-    const allProducts = useMemo(() => getAllProducts(), [])
+    // Fetch products from API
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setLoading(true)
+                const response = await fetch('/api/products')
+                const data = await response.json()
+                if (data.success) {
+                    setProducts(data.products)
+                }
+            } catch (error) {
+                console.error('Failed to fetch products:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchProducts()
+    }, [])
 
     const filteredProducts = useMemo(() => {
         const decodedCategoryName = decodeURIComponent(categoryName.toLowerCase())
+        
+        // Debug: Log the category name being searched
+        console.log('Searching for category:', decodedCategoryName)
+        console.log('Available categories:', products.map((p: Product) => p.category.toLowerCase()))
 
-        // Base category filtering - more flexible matching
+        // Define category mappings for broader matching
+        const categoryMappings: { [key: string]: string[] } = {
+            'clothing': ['evening wear', 'cocktail', 'blouse', 'coat', 'jacket', 'blazer'],
+            'dresses': ['evening wear', 'cocktail'],
+            'outerwear': ['jacket', 'blazer', 'coat'],
+            'tops': ['blouse'],
+            'jackets': ['jacket', 'blazer'],
+            'formal': ['blazer', 'evening wear', 'cocktail'],
+            'accessories': ['jewelry', 'watch'],
+            'evening': ['evening wear', 'cocktail'],
+            'cocktail': ['cocktail'],
+            'jacket': ['jacket', 'blazer'],
+            'blazer': ['blazer', 'jacket'],
+            'coat': ['coat'],
+            'blouse': ['blouse']
+        }
+
+        // Get all related categories/subcategories
+        const relatedCategories = categoryMappings[decodedCategoryName] || [decodedCategoryName]
+        console.log('Related categories:', relatedCategories)
+
+        // Try exact match first with related categories
         let options: FilterOptions = {
-            categories: [decodedCategoryName],
+            categories: [decodedCategoryName, ...relatedCategories],
         }
 
         if (activeFilters) {
@@ -38,18 +82,22 @@ export default function CategoryPage() {
             }
         }
 
-        const filtered = filterAndSortProducts(allProducts, options)
+        const filtered = filterAndSortProducts(products, options)
+        console.log('Exact match results:', filtered.length)
         
-        // Additional fallback: if no products found with exact match, try partial matching
+        // Additional fallback: if no products found, try partial matching
         if (filtered.length === 0 && !activeFilters) {
-            return allProducts.filter(product => 
+            const fallbackResults = products.filter((product: Product) => 
                 product.category.toLowerCase().includes(decodedCategoryName) ||
-                decodedCategoryName.includes(product.category.toLowerCase())
+                decodedCategoryName.includes(product.category.toLowerCase()) ||
+                relatedCategories.some(cat => product.category.toLowerCase().includes(cat) || cat.includes(product.category.toLowerCase()))
             )
+            console.log('Fallback match results:', fallbackResults.length)
+            return fallbackResults
         }
         
         return filtered
-    }, [categoryName, activeFilters, allProducts])
+    }, [categoryName, activeFilters, products])
 
     useEffect(() => {
         setLoading(true)
@@ -155,11 +203,17 @@ export default function CategoryPage() {
                                 className="group block"
                             >
                                 <div className="relative overflow-hidden aspect-[3/4] bg-[#F9F9F9] mb-6">
-                                    <img
-                                        src={product.image || product.imageUrl}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                                    />
+                                    {product.image || product.imageUrl ? (
+                                        <img
+                                            src={product.image || product.imageUrl}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                            <span className="text-gray-400 text-sm">No Image</span>
+                                        </div>
+                                    )}
                                     {product.onSale && (
                                         <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest">
                                             Sale

@@ -164,7 +164,13 @@ export function filterAndSortProducts(
 
   // Category filter
   if (filters.categories && filters.categories.length > 0) {
-    filtered = filtered.filter((p) => filters.categories!.includes(p.category))
+    filtered = filtered.filter((p) => 
+      filters.categories!.some(cat => 
+        p.category.toLowerCase() === cat.toLowerCase() ||
+        p.category.toLowerCase().includes(cat.toLowerCase()) ||
+        cat.toLowerCase().includes(p.category.toLowerCase())
+      )
+    )
   }
 
   // Gender filter
