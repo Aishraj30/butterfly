@@ -39,116 +39,179 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-10 sm:pt-36 sm:pb-12 bg-white">
-      <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <div className="flex flex-col gap-2">
-            <div className="text-xs font-medium tracking-[0.2em] text-gray-500 uppercase">Account</div>
-            <h1 className="font-birds text-4xl font-normal tracking-wide text-black sm:text-6xl capitalize">My Orders</h1>
-            <p className="max-w-2xl mx-auto text-sm text-gray-600 sm:text-base mt-2">
-              Track orders, view invoices, and manage returns.
-            </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
+              <p className="text-sm text-gray-600 mt-1">Track orders, view invoices, and manage returns</p>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-          {/* Sidebar / Navigation Card */}
-          <div className="lg:col-span-4">
-            <Card className="border border-gray-100 shadow-sm rounded-xl overflow-hidden">
-              <CardContent className="p-0">
-                <div className="p-6 bg-gray-50 flex items-center gap-4">
-                  <div className="relative h-16 w-16 overflow-hidden rounded-full border border-gray-200">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block lg:col-span-2">
+            <Card className="sticky top-8">
+              <CardContent className="p-4">
+                {/* Profile Summary */}
+                <div className="text-center mb-6">
+                  <div className="h-20 w-20 rounded-full overflow-hidden border-4 border-white shadow-lg mx-auto mb-4">
                     <Image
-                      src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=000&color=fff`}
+                      src={
+                        user.avatar ||
+                        `https://ui-avatars.com/api/?name=${user.name}&background=000&color=fff`
+                      }
                       alt={user.name}
-                      fill
+                      width={80}
+                      height={80}
                       className="object-cover"
                     />
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Welcome</div>
-                    <div className="truncate font-semibold text-lg text-black">{user.name}</div>
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
+                  <p className="text-sm text-gray-600">{user.email}</p>
                 </div>
 
-                <div className="p-4 space-y-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-between h-12 bg-black text-white hover:bg-gray-800 hover:text-white"
+                <Separator className="mb-6" />
+
+                {/* Navigation Menu */}
+                <nav className="space-y-1">
+                  <Link
+                    href="/orders"
+                    className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-100 text-gray-900"
                   >
-                    <span className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                       <Package className="h-4 w-4" />
-                      My Orders
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-white/70" />
-                  </Button>
+                      <span className="text-sm font-medium">Orders</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </Link>
+                  
+                  <Link
+                    href="/wishlist"
+                    className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Heart className="h-4 w-4" />
+                      <span className="text-sm font-medium">Wishlist</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </Link>
+                  
+                  <Link
+                    href="/addresses"
+                    className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-4 w-4" />
+                      <span className="text-sm font-medium">Addresses</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </Link>
+                  
+                  <Separator className="my-4" />
+                  
+                  <Link
+                    href="/profile"
+                    className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <User className="h-4 w-4" />
+                      <span className="text-sm font-medium">Profile</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </Link>
+                  
+                  <Link
+                    href="/settings"
+                    className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Settings className="h-4 w-4" />
+                      <span className="text-sm font-medium">Settings</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </Link>
+                </nav>
 
-                  <Button variant="ghost" className="w-full justify-between h-12 text-gray-600 hover:text-black hover:bg-gray-50" asChild>
-                    <Link href="/wishlist">
-                      <span className="flex items-center gap-3">
-                        <Heart className="h-4 w-4" />
-                        Wishlist
-                      </span>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </Link>
-                  </Button>
+                <Separator className="my-6" />
 
-                  <Button variant="ghost" className="w-full justify-between h-12 text-gray-600 hover:text-black hover:bg-gray-50" asChild>
-                    <Link href="/addresses">
-                      <span className="flex items-center gap-3">
-                        <MapPin className="h-4 w-4" />
-                        Addresses
-                      </span>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </Link>
-                  </Button>
-
-                  <Button variant="ghost" className="w-full justify-between h-12 text-gray-600 hover:text-black hover:bg-gray-50 mt-2" asChild>
-                    <Link href="/profile">
-                      <span className="flex items-center gap-3">
-                        <User className="h-4 w-4" />
-                        Profile Settings
-                      </span>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </Link>
-                  </Button>
-                </div>
-
-                <div className="p-4 border-t border-gray-100">
-                  <Button variant="outline" onClick={handleLogout} className="w-full border-gray-200 hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-colors">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </Button>
-                </div>
+                {/* Logout Button */}
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
               </CardContent>
             </Card>
           </div>
 
-          <div className="space-y-6 lg:col-span-8">
-            <Card className="border border-gray-100 shadow-sm rounded-xl">
-              <CardHeader className="pb-4 border-b border-gray-50">
-                <CardTitle className="text-xl font-semibold text-black">Order History</CardTitle>
-                <CardDescription>Your recent purchases will appear here.</CardDescription>
+          {/* Main Content Area */}
+          <div className="lg:col-span-10">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-gray-900">Order History</CardTitle>
+                <CardDescription className="mt-1">View and track your recent orders</CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-8 text-center">
-                  <div className="flex flex-col items-center justify-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                      <Package className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-black">No orders yet</h3>
-                      <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">
-                        When you place an order, it will show up here with tracking and invoice options.
-                      </p>
-                    </div>
-                    <Button asChild className="bg-black text-white hover:bg-gray-900 mt-2 px-8">
-                      <Link href="/catalog">Start Shopping</Link>
-                    </Button>
-                  </div>
+              <CardContent className="p-8">
+                <div className="text-center py-12">
+                  <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+                  <p className="text-gray-600 mb-6">You haven't placed any orders yet. Start shopping to see your order history here.</p>
+                  <Button asChild>
+                    <Link href="/" className="flex items-center gap-2">
+                      <Package className="h-4 w-4" />
+                      Start Shopping
+                    </Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Mobile Navigation */}
+            <div className="mt-8 sm:hidden">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button variant="outline" asChild className="h-12">
+                      <Link href="/profile" className="flex items-center justify-center gap-2">
+                        <User className="h-4 w-4" />
+                        Profile
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild className="h-12">
+                      <Link href="/wishlist" className="flex items-center justify-center gap-2">
+                        <Heart className="h-4 w-4" />
+                        Wishlist
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild className="h-12">
+                      <Link href="/addresses" className="flex items-center justify-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Addresses
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild className="h-12">
+                      <Link href="/settings" className="flex items-center justify-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Settings
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

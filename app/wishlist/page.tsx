@@ -50,166 +50,215 @@ export default function WishlistPage() {
     }
 
     return (
-        <div className="min-h-screen pt-32 pb-10 sm:pt-36 sm:pb-12 bg-white">
-            <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
-                <div className="mb-10 text-center">
-                    <div className="flex flex-col gap-2">
-                        <div className="text-xs font-medium tracking-[0.2em] text-gray-500 uppercase">Account</div>
-                        <h1 className="font-birds text-4xl font-normal tracking-wide text-black sm:text-6xl capitalize">My Wishlist</h1>
-                        <p className="max-w-2xl mx-auto text-sm text-gray-600 sm:text-base mt-2">
-                            Save your favorite items for later.
-                        </p>
+        <div className="min-h-screen bg-gray-50">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">My Wishlist</h1>
+                            <p className="text-sm text-gray-600 mt-1">Save your favorite items for later</p>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-                    {/* Sidebar / Navigation Card */}
-                    <div className="lg:col-span-4">
-                        <Card className="border border-gray-100 shadow-sm rounded-xl overflow-hidden">
-                            <CardContent className="p-0">
-                                <div className="p-6 bg-gray-50 flex items-center gap-4">
-                                    <div className="relative h-16 w-16 overflow-hidden rounded-full border border-gray-200">
+            {/* Main Content */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Desktop Sidebar */}
+                    <div className="hidden lg:block lg:col-span-2">
+                        <Card className="sticky top-8">
+                            <CardContent className="p-4">
+                                {/* Profile Summary */}
+                                <div className="text-center mb-6">
+                                    <div className="h-20 w-20 rounded-full overflow-hidden border-4 border-white shadow-lg mx-auto mb-4">
                                         <Image
                                             src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=000&color=fff`}
                                             alt={user.name}
-                                            fill
+                                            width={80}
+                                            height={80}
                                             className="object-cover"
                                         />
                                     </div>
-                                    <div className="min-w-0">
-                                        <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Welcome</div>
-                                        <div className="truncate font-semibold text-lg text-black">{user.name}</div>
-                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900">{user.name}</h3>
+                                    <p className="text-sm text-gray-600">{user.email}</p>
                                 </div>
 
-                                <div className="p-4 space-y-1">
-                                    <Button variant="ghost" className="w-full justify-between h-12 text-gray-600 hover:text-black hover:bg-gray-50" asChild>
-                                        <Link href="/orders">
-                                            <span className="flex items-center gap-3">
-                                                <Package className="h-4 w-4" />
-                                                My Orders
-                                            </span>
-                                            <ChevronRight className="h-4 w-4 text-gray-400" />
-                                        </Link>
-                                    </Button>
+                                <Separator className="mb-6" />
 
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full justify-between h-12 bg-black text-white hover:bg-gray-800 hover:text-white"
+                                {/* Navigation Menu */}
+                                <nav className="space-y-1">
+                                    <Link
+                                        href="/orders"
+                                        className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                                     >
-                                        <span className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <Package className="h-4 w-4" />
+                                            <span className="text-sm font-medium">Orders</span>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                                    </Link>
+                                    
+                                    <Link
+                                        href="/wishlist"
+                                        className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-100 text-gray-900"
+                                    >
+                                        <div className="flex items-center gap-3">
                                             <Heart className="h-4 w-4" />
-                                            Wishlist
-                                        </span>
-                                        <ChevronRight className="h-4 w-4 text-white/70" />
-                                    </Button>
+                                            <span className="text-sm font-medium">Wishlist</span>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                                    </Link>
+                                    
+                                    <Link
+                                        href="/addresses"
+                                        className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <MapPin className="h-4 w-4" />
+                                            <span className="text-sm font-medium">Addresses</span>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                                    </Link>
+                                    
+                                    <Separator className="my-4" />
+                                    
+                                    <Link
+                                        href="/profile"
+                                        className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <User className="h-4 w-4" />
+                                            <span className="text-sm font-medium">Profile</span>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                                    </Link>
+                                    
+                                    <Link
+                                        href="/settings"
+                                        className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <LogOut className="h-4 w-4" />
+                                            <span className="text-sm font-medium">Settings</span>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                                    </Link>
+                                </nav>
 
-                                    <Button variant="ghost" className="w-full justify-between h-12 text-gray-600 hover:text-black hover:bg-gray-50" asChild>
-                                        <Link href="/addresses">
-                                            <span className="flex items-center gap-3">
-                                                <MapPin className="h-4 w-4" />
-                                                Addresses
-                                            </span>
-                                            <ChevronRight className="h-4 w-4 text-gray-400" />
-                                        </Link>
-                                    </Button>
+                                <Separator className="my-6" />
 
-                                    <Button variant="ghost" className="w-full justify-between h-12 text-gray-600 hover:text-black hover:bg-gray-50 mt-2" asChild>
-                                        <Link href="/profile">
-                                            <span className="flex items-center gap-3">
-                                                <User className="h-4 w-4" />
-                                                Profile Settings
-                                            </span>
-                                            <ChevronRight className="h-4 w-4 text-gray-400" />
-                                        </Link>
-                                    </Button>
-                                </div>
-
-                                <div className="p-4 border-t border-gray-100">
-                                    <Button variant="outline" onClick={handleLogout} className="w-full border-gray-200 hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-colors">
-                                        <LogOut className="h-4 w-4 mr-2" />
-                                        Sign Out
-                                    </Button>
-                                </div>
+                                {/* Logout Button */}
+                                <Button
+                                    variant="outline"
+                                    onClick={handleLogout}
+                                    className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+                                >
+                                    <LogOut className="h-4 w-4 mr-2" />
+                                    Sign Out
+                                </Button>
                             </CardContent>
                         </Card>
                     </div>
 
-                    <div className="space-y-6 lg:col-span-8">
-                        <Card className="border border-gray-100 shadow-sm rounded-xl">
-                            <CardHeader className="pb-4 border-b border-gray-50">
-                                <CardTitle className="text-xl font-semibold text-black">Saved Items</CardTitle>
-                                <CardDescription>Items you've liked and saved for later.</CardDescription>
+                    {/* Main Content Area */}
+                    <div className="lg:col-span-10">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-xl font-semibold text-gray-900">Wishlist Items</CardTitle>
+                                <CardDescription className="mt-1">Manage your favorite products</CardDescription>
                             </CardHeader>
-                            <CardContent className="p-6">
+                            <CardContent className="p-8">
                                 {loading ? (
-                                    <div className="flex justify-center py-20">
-                                        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                                    <div className="flex items-center justify-center py-12">
+                                        <Loader2 className="h-8 w-8 animate-spin" />
                                     </div>
-                                ) : wishlistItems.length > 0 ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        {wishlistItems.map((wishlistItem) => (
-                                            <div key={wishlistItem._id} className="group relative border border-gray-100 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                                                <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
-                                                    <Image
-                                                        src={wishlistItem.product.images?.[0] || wishlistItem.product.image || '/uploads/product-1769084011566.jpeg'}
-                                                        alt={wishlistItem.product.name}
-                                                        fill
-                                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                                    />
-
-                                                    {/* Remove button */}
+                                ) : wishlistItems.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <Heart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                                        <h3 className="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h3>
+                                        <p className="text-gray-600 mb-6">Start adding items to your wishlist to see them here.</p>
+                                        <Button asChild>
+                                            <Link href="/" className="flex items-center gap-2">
+                                                <ShoppingBag className="h-4 w-4" />
+                                                Start Shopping
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {wishlistItems.map((item) => (
+                                            <div key={item._id} className="group border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                                                <div className="relative aspect-[3/4] bg-gray-100">
+                                                    {item.product.images?.[0] && (
+                                                        <Image
+                                                            src={item.product.images[0]}
+                                                            alt={item.product.name}
+                                                            fill
+                                                            className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                    )}
                                                     <button
-                                                        onClick={() => removeFromWishlistHandler(wishlistItem._id)}
-                                                        className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-500"
-                                                        title="Remove from wishlist"
+                                                        onClick={() => removeFromWishlistHandler(item._id)}
+                                                        className="absolute top-2 right-2 p-2 bg-white/90 rounded-full shadow-md hover:bg-red-50 hover:text-red-600 transition-colors"
                                                     >
-                                                        <X size={14} />
+                                                        <X className="h-4 w-4" />
                                                     </button>
                                                 </div>
-
                                                 <div className="p-4">
-                                                    <h3 className="font-medium text-sm text-black uppercase tracking-wide truncate">
-                                                        {wishlistItem.product.name}
-                                                    </h3>
-                                                    <div className="flex justify-between items-center mt-2 mb-4">
-                                                        <p className="text-base font-semibold text-black">
-                                                            ₹{wishlistItem.product.salePrice || wishlistItem.product.price}
-                                                        </p>
-                                                        <span className="text-xs text-gray-500 capitalize">
-                                                            {wishlistItem.product.category}
-                                                        </span>
-                                                    </div>
-
-                                                    <Button
-                                                        className="w-full bg-black text-white hover:bg-gray-800 text-xs uppercase tracking-widest h-9"
-                                                    >
-                                                        <ShoppingBag size={12} className="mr-2" /> Add to Cart
+                                                    <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">{item.product.name}</h3>
+                                                    <p className="text-lg font-bold text-black">IDR {item.product.price.toLocaleString()}</p>
+                                                    <Button asChild className="w-full mt-4">
+                                                        <Link href={`/product/${item.product._id}`} className="flex items-center justify-center gap-2">
+                                                            <ShoppingBag className="h-4 w-4" />
+                                                            View Product
+                                                        </Link>
                                                     </Button>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                ) : (
-                                    <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-8 text-center py-16">
-                                        <div className="flex flex-col items-center justify-center gap-4">
-                                            <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                                                <Heart className="h-8 w-8 text-gray-400" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-medium text-black">Your wishlist is empty</h3>
-                                                <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">
-                                                    Save items you love here to check them out later.
-                                                </p>
-                                            </div>
-                                            <Button asChild className="bg-black text-white hover:bg-gray-900 mt-2 px-8">
-                                                <Link href="/catalog">Browse Collection</Link>
-                                            </Button>
-                                        </div>
-                                    </div>
                                 )}
                             </CardContent>
                         </Card>
+
+                        {/* Mobile Navigation */}
+                        <div className="mt-8 sm:hidden">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Button variant="outline" asChild className="h-12">
+                                            <Link href="/profile" className="flex items-center justify-center gap-2">
+                                                <User className="h-4 w-4" />
+                                                Profile
+                                            </Link>
+                                        </Button>
+                                        <Button variant="outline" asChild className="h-12">
+                                            <Link href="/orders" className="flex items-center justify-center gap-2">
+                                                <Package className="h-4 w-4" />
+                                                Orders
+                                            </Link>
+                                        </Button>
+                                        <Button variant="outline" asChild className="h-12">
+                                            <Link href="/addresses" className="flex items-center justify-center gap-2">
+                                                <MapPin className="h-4 w-4" />
+                                                Addresses
+                                            </Link>
+                                        </Button>
+                                        <Button variant="outline" asChild className="h-12">
+                                            <Link href="/settings" className="flex items-center justify-center gap-2">
+                                                <LogOut className="h-4 w-4" />
+                                                Settings
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </div>
             </div>
