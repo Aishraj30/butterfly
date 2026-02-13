@@ -1,9 +1,36 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ShoppingBag } from 'lucide-react'
+
+// UI Loading state for Suspense fallback
+function SearchLoading() {
+  return (
+    <main className="min-h-screen bg-white w-full">
+      <div className="max-w-[1400px] mx-auto px-5 py-12">
+        <div className="mb-12">
+          <h1 className="text-4xl font-serif text-black capitalize tracking-tight mb-2">
+            Searching...
+          </h1>
+          <p className="text-gray-500 text-sm uppercase tracking-[0.2em]">
+            Loading results...
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+            <div key={i} className="space-y-4 animate-pulse">
+              <div className="aspect-[3/4] bg-gray-100 rounded-sm" />
+              <div className="h-4 bg-gray-100" />
+              <div className="h-4 bg-gray-100 w-2/3" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  )
+}
 
 interface Product {
   _id: string
@@ -18,7 +45,7 @@ interface Product {
   description?: string
 }
 
-export default function SearchResultsPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const query = searchParams.get('q') || ''
   const [products, setProducts] = useState<Product[]>([])
@@ -170,5 +197,13 @@ export default function SearchResultsPage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function SearchResultsPage() {
+  return (
+    <Suspense fallback={<SearchLoading />}>
+      <SearchContent />
+    </Suspense>
   )
 }
