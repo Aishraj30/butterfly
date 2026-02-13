@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { Star, Minus, Plus, ShoppingCart, Heart, ChevronLeft } from 'lucide-react';
+import { Star, Minus, Plus, ShoppingCart, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,6 +64,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const [cartError, setCartError] = useState<string | null>(null);
     const [showWishlistPrompt, setShowWishlistPrompt] = useState(false);
     const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
 
     useEffect(() => {
         if (id) {
@@ -81,6 +83,44 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             }
         } catch (error) {
             console.error('Failed to fetch recommended products:', error);
+        }
+    };
+
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(0);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe && selectedImageIndex < allImages.length - 1) {
+            setSelectedImageIndex(prev => prev + 1);
+        }
+        if (isRightSwipe && selectedImageIndex > 0) {
+            setSelectedImageIndex(prev => prev - 1);
+        }
+    };
+
+    const nextImage = () => {
+        if (selectedImageIndex < allImages.length - 1) {
+            setSelectedImageIndex(prev => prev + 1);
+        }
+    };
+
+    const prevImage = () => {
+        if (selectedImageIndex > 0) {
+            setSelectedImageIndex(prev => prev - 1);
         }
     };
 
@@ -286,7 +326,61 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Left: Images Column */}
                     <div className="lg:w-1/2">
-                        <div className="space-y-0">
+                        {/* Mobile Carousel - Only visible on mobile */}
+                        <div className="lg:hidden">
+                            <div 
+                                className="relative aspect-[3/4] bg-gray-100 overflow-hidden"
+                                onTouchStart={onTouchStart}
+                                onTouchMove={onTouchMove}
+                                onTouchEnd={onTouchEnd}
+                            >
+                                {allImages[selectedImageIndex] ? (
+                                    <img
+                                        src={allImages[selectedImageIndex]}
+                                        alt={`${product.name} ${selectedImageIndex + 1}`}
+                                        className="w-full h-full object-cover object-top"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
+                                )}
+                                
+                                {/* Badge on first image */}
+                                {selectedImageIndex === 0 && (product.isNew || product.onSale) && (
+                                    <div className="absolute top-4 left-4 z-10">
+                                        {product.isNew && (
+                                            <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2">
+                                                NEW
+                                            </div>
+                                        )}
+                                        {product.onSale && (
+                                            <div className="bg-red-600 text-white text-xs font-bold px-3 py-1">
+                                                SALE
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Image Indicators */}
+                                {allImages.length > 1 && (
+                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                                        {allImages.map((_, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedImageIndex(index)}
+                                                className={`w-2 h-2 rounded-full transition-all ${
+                                                    index === selectedImageIndex 
+                                                        ? 'bg-white w-6' 
+                                                        : 'bg-white/50'
+                                                }`}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Desktop Images - Only visible on desktop */}
+                        <div className="hidden lg:block space-y-0">
                             {allImages.map((image, index) => (
                                 <div key={index} className="relative">
                                     <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
@@ -539,7 +633,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 {/* Recommended Products Section */}
                 {recommendedProducts.length > 0 && (
                     <div className="mt-16 mb-16 pt-12 border-t border-gray-200">
-                        <h2 className="text-2xl font-serif text-black mb-8 text-center">RECOMMENDATIONS</h2>
+                        <h2 className="font-sans text-2xl text-black mb-8 text-center">RECOMMENDATIONS</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             {recommendedProducts.map((recProduct) => (
                                 <Link 
@@ -560,10 +654,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                             )}
                                         </div>
                                         <div className="space-y-1">
-                                            <h3 className="text-sm font-medium text-gray-900 group-hover:text-black transition-colors line-clamp-2">
+                                            <h3 className="font-sans text-sm font-medium text-gray-900 group-hover:text-black transition-colors line-clamp-2">
                                                 {recProduct.name}
                                             </h3>
-                                            <p className="text-sm font-bold text-black">
+                                            <p className="font-sans text-sm font-bold text-black">
                                                 IDR {(recProduct.salePrice || recProduct.price).toLocaleString()}
                                             </p>
                                         </div>
