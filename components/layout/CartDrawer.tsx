@@ -31,27 +31,42 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         const originalBodyLeft = bodyElement.style.left
         const originalBodyWidth = bodyElement.style.width
         const originalBodyHeight = bodyElement.style.height
+        const originalBodyMarginRight = bodyElement.style.marginRight
+        
+        // Calculate scrollbar width to prevent layout shift
+        const getScrollbarWidth = () => {
+            // Create a temporary element to measure scrollbar width
+            const temp = document.createElement('div')
+            temp.style.cssText = 'position: absolute; top: -9999px; width: 100px; height: 100px; overflow: scroll; visibility: hidden;'
+            document.body.appendChild(temp)
+            const scrollbarWidth = temp.offsetWidth - temp.clientWidth
+            document.body.removeChild(temp)
+            return scrollbarWidth
+        }
         
         if (isOpen) {
             // Save current scroll position
             const scrollY = window.scrollY
             const scrollX = window.scrollX
+            const scrollbarWidth = getScrollbarWidth()
             
-            // Apply comprehensive lock styles
+            // Apply comprehensive lock styles with scrollbar compensation
             htmlElement.style.overflow = 'hidden'
             bodyElement.style.position = 'fixed'
             bodyElement.style.top = `-${scrollY}px`
             bodyElement.style.left = `-${scrollX}px`
-            bodyElement.style.width = '100vw'
+            bodyElement.style.width = `calc(100vw - ${scrollbarWidth}px)`
             bodyElement.style.height = '100vh'
             bodyElement.style.overflow = 'hidden'
             bodyElement.style.touchAction = 'none'
             bodyElement.style.webkitUserSelect = 'none'
             bodyElement.style.userSelect = 'none'
+            bodyElement.style.marginRight = `${scrollbarWidth}px`
             
             // Store scroll positions for restoration
             ;(bodyElement as any).storedScrollY = scrollY
             ;(bodyElement as any).storedScrollX = scrollX
+            ;(bodyElement as any).scrollbarWidth = scrollbarWidth
             ;(bodyElement as any).originalStyles = {
                 htmlOverflow: originalHtmlOverflow,
                 bodyOverflow: originalBodyOverflow,
@@ -59,7 +74,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 bodyTop: originalBodyTop,
                 bodyLeft: originalBodyLeft,
                 bodyWidth: originalBodyWidth,
-                bodyHeight: originalBodyHeight
+                bodyHeight: originalBodyHeight,
+                bodyMarginRight: originalBodyMarginRight
             }
         } else {
             // Restore scroll position and styles
@@ -78,6 +94,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             bodyElement.style.touchAction = ''
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
+            bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
             
             // Restore scroll position
             window.scrollTo(storedScrollX, storedScrollY)
@@ -85,6 +102,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             // Clean up stored data
             delete (bodyElement as any).storedScrollY
             delete (bodyElement as any).storedScrollX
+            delete (bodyElement as any).scrollbarWidth
             delete (bodyElement as any).originalStyles
         }
         
@@ -101,8 +119,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             bodyElement.style.touchAction = ''
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
+            bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
             delete (bodyElement as any).storedScrollY
             delete (bodyElement as any).storedScrollX
+            delete (bodyElement as any).scrollbarWidth
             delete (bodyElement as any).originalStyles
         }
     }, [isOpen])

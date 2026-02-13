@@ -105,18 +105,19 @@ export function Header() {
   const isHome = pathname === '/'
   const isCatalog = pathname === '/catalog'
   const isAdmin = pathname.startsWith('/admin')
+  const isProductPage = pathname.startsWith('/product/')
 
   if (isAuthPage || isAdmin) {
     return null
   }
 
-  // Header style - transparent on home, white on other pages
-  const headerBg = isHome && !isCatalog ? 'bg-transparent' : 'bg-white shadow-sm'
-  const textColor = isHome && !isCatalog ? 'text-white' : 'text-black'
-  const logoColor = isHome && !isCatalog ? 'text-white' : 'text-black'
+  // Header style - transparent on home, black gradient on product pages, white on other pages
+  const headerBg = isHome && !isCatalog ? 'bg-transparent' : isProductPage ? 'bg-gradient-to-b from-black/40 to-transparent' : 'bg-white shadow-sm'
+  const textColor = isHome && !isCatalog ? 'text-white' : isProductPage ? 'text-white' : 'text-black'
+  const logoColor = isHome && !isCatalog ? 'text-white' : isProductPage ? 'text-white' : 'text-black'
 
   return (
-    <header className={`sticky top-0 w-full z-[999] transition-all duration-300 ${headerBg} py-4`}>
+    <header className={`w-full z-[999] transition-all duration-300 ${headerBg} ${isProductPage ? 'py-2' : 'py-4'} ${!isProductPage ? 'sticky top-0' : ''}`}>
       <nav className="max-w-[1400px] mx-auto px-6 py-0.5 grid grid-cols-3 items-center">
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
@@ -132,7 +133,7 @@ export function Header() {
                   setIsFeaturedDrawerOpen(true)
                 }
               } : undefined}
-              className={`text-sm font-semibold transition-all flex items-center gap-1 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'}`}
+              className={`text-sm font-semibold transition-all flex items-center gap-1 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : isProductPage ? 'text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]' : 'text-gray-600'}`}
             >
               {item.name}
               {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
