@@ -17,7 +17,7 @@ interface BulkProduct {
     gender: string
     color: string
     sizes: string[]
-    imageUrl: string
+    images: string[]
 }
 
 export default function BulkProductAddPage() {
@@ -43,7 +43,7 @@ export default function BulkProductAddPage() {
             gender: 'Unisex',
             color: '',
             sizes: ['S', 'M', 'L'],
-            imageUrl: ''
+            images: []
         }
     ])
 
@@ -77,7 +77,7 @@ export default function BulkProductAddPage() {
                 gender: 'Unisex',
                 color: '',
                 sizes: ['S', 'M', 'L'],
-                imageUrl: ''
+                images: []
             }
         ])
     }
@@ -107,7 +107,7 @@ export default function BulkProductAddPage() {
         try {
             const compressedFile = await compressImage(file, {
                 maxSizeMB: 1,
-                maxWidthOrHeight: 1920,
+                maxWidthOrHeight: 1200,
                 quality: 0.8,
                 useWebWorker: true
             })
@@ -126,7 +126,9 @@ export default function BulkProductAddPage() {
             const data = await response.json()
 
             if (data.success) {
-                updateProduct(tempId, 'imageUrl', data.url)
+                setProducts(prev => prev.map(p =>
+                    p.tempId === tempId ? { ...p, images: [...(p.images || []), data.url] } : p
+                ))
             } else {
                 alert(data.error || 'Upload failed')
             }
@@ -136,6 +138,12 @@ export default function BulkProductAddPage() {
         } finally {
             setUploadingRows(prev => prev.filter(id => id !== tempId))
         }
+    }
+
+    const removeRowImage = (tempId: string, index: number) => {
+        setProducts(prev => prev.map(p =>
+            p.tempId === tempId ? { ...p, images: (p.images || []).filter((_, i) => i !== index) } : p
+        ))
     }
 
     const handleBulkSubmit = async () => {
@@ -243,7 +251,7 @@ export default function BulkProductAddPage() {
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Style</th>
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[100px]">Gender</th>
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[100px]">Color</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[200px]">Product Image</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[300px]">Product Gallery (Primary + others)</th>
                                     <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-gray-500 w-20">Action</th>
                                 </tr>
                             </thead>
@@ -322,35 +330,41 @@ export default function BulkProductAddPage() {
                                             />
                                         </td>
                                         <td className="px-2 py-2">
-                                            <div className="flex items-center gap-2">
-                                                <div className="relative w-10 h-10 flex-shrink-0 bg-gray-100 rounded-sm border border-gray-200 overflow-hidden">
-                                                    {product.imageUrl ? (
-                                                        <img src={product.imageUrl} alt="preview" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                            <ImageIcon size={16} />
-                                                        </div>
-                                                    )}
-                                                    {uploadingRows.includes(product.tempId) && (
-                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                                            <Loader2 className="w-4 h-4 text-white animate-spin" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1">
+                                            <div className="flex flex-wrap gap-2 items-center">
+                                                {(product.images || []).map((url, idx) => (
+                                                    <div key={idx} className="relative group w-10 h-10 bg-gray-100 rounded-sm border border-gray-200 overflow-hidden">
+                                                        <img src={url} alt="preview" className="w-full h-full object-cover" />
+                                                        <button
+                                                            onClick={() => removeRowImage(product.tempId, idx)}
+                                                            className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                        {idx === 0 && <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[6px] text-white text-center font-bold">MAIN</div>}
+                                                    </div>
+                                                ))}
+
+                                                <div className="relative w-10 h-10 flex-shrink-0">
                                                     <input
                                                         type="file"
                                                         accept="image/*"
                                                         id={`file-${product.tempId}`}
                                                         className="hidden"
                                                         onChange={(e) => handleRowImageUpload(product.tempId, e)}
+                                                        disabled={uploadingRows.includes(product.tempId) || (product.images || []).length >= 5}
                                                     />
                                                     <label
                                                         htmlFor={`file-${product.tempId}`}
-                                                        className="flex items-center gap-1.5 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-[10px] font-bold uppercase tracking-tight rounded-sm cursor-pointer transition-colors"
+                                                        className={`w-full h-full flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-sm hover:bg-gray-50 cursor-pointer transition-colors ${(product.images || []).length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                     >
-                                                        <Upload size={12} />
-                                                        {product.imageUrl ? 'Change' : 'Upload'}
+                                                        {uploadingRows.includes(product.tempId) ? (
+                                                            <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                                                        ) : (
+                                                            <>
+                                                                <Plus size={14} className="text-gray-400" />
+                                                                <span className="text-[8px] text-gray-400 font-bold">ADD</span>
+                                                            </>
+                                                        )}
                                                     </label>
                                                 </div>
                                             </div>
