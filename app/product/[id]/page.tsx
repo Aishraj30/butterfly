@@ -321,7 +321,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
     return (
         <main className="w-full bg-white min-h-screen">
-            <div className="max-w-[1400px] mx-auto px-6">
+            <div className="max-w-[1400px] mx-auto px-6 pt-12">
                 {/* Product Detail - Unified Scroll Layout */}
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Left: Images Column */}
