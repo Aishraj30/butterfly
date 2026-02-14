@@ -7,6 +7,7 @@ import { Category } from '@/lib/categories'
 import { Brand } from '@/lib/brands'
 import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
 import { useAuth } from '@/contexts/AuthContext'
+import { Plus, Trash2, Loader2, Upload } from 'lucide-react'
 
 interface Collection {
     id: number
@@ -84,63 +85,69 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const { token } = useAuth()
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        // Validate file type
-        if (!isValidImageFile(file)) {
-            alert('Please select a valid image file (JPEG, PNG, or WebP)')
-            return
-        }
+        const files = e.target.files
+        if (!files || files.length === 0) return
 
         setUploadingImage(true)
         setCompressionInfo('')
 
         try {
-            // Compress the image before upload
-            const compressedFile = await compressImage(file, {
-                maxSizeMB: 1,
-                maxWidthOrHeight: 1920,
-                quality: 0.8,
-                useWebWorker: true
-            })
+            const newImages: string[] = []
+            for (const file of Array.from(files)) {
+                if (!isValidImageFile(file)) {
+                    alert(`${file.name} is not a valid image file. Skipping.`)
+                    continue
+                }
 
-            // Show compression info
-            const originalSize = formatFileSize(file.size)
-            const compressedSize = formatFileSize(compressedFile.size)
-            const compressionRatio = ((file.size - compressedFile.size) / file.size * 100).toFixed(1)
-            setCompressionInfo(`Original: ${originalSize} → Compressed: ${compressedSize} (${compressionRatio}% reduction)`)
+                // Compress the image before upload
+                const compressedFile = await compressImage(file, {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1200, // Reduced slightly for gallery efficiency
+                    quality: 0.8,
+                    useWebWorker: true
+                })
 
-            const formData = new FormData()
-            formData.append('file', compressedFile)
+                const uploadFormData = new FormData()
+                uploadFormData.append('file', compressedFile)
 
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            })
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: uploadFormData
+                })
 
-            const data = await response.json()
+                const data = await response.json()
+                if (data.success) {
+                    newImages.push(data.url)
+                }
+            }
 
-            if (data.success) {
+            if (newImages.length > 0) {
                 setFormData(prev => ({
                     ...prev,
-                    image: data.url,
-                    imageUrl: data.url,
-                    images: [data.url]
+                    images: [...(prev.images || []), ...newImages],
+                    imageUrl: (prev.images || []).length === 0 ? newImages[0] : prev.imageUrl // Set primary if first
                 }))
-                setImagePreview(data.url)
-            } else {
-                alert(data.error || 'Failed to upload image')
             }
         } catch (error) {
-            console.error('Error uploading image:', error)
-            alert('Failed to upload image')
+            console.error('Error uploading images:', error)
+            alert('Failed to upload some images')
         } finally {
             setUploadingImage(false)
         }
+    }
+
+    const removeImage = (index: number) => {
+        setFormData(prev => {
+            const updatedImages = (prev.images || []).filter((_, i) => i !== index)
+            return {
+                ...prev,
+                images: updatedImages,
+                imageUrl: updatedImages[0] || ''
+            }
+        })
     }
 
 
@@ -312,12 +319,38 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-medium text-foreground">Product Image</label>
+                    <label className="text-sm font-medium text-foreground">Product Gallery (Add 4-5 images)</label>
                     <div className="space-y-4">
+                        <div className="flex flex-wrap gap-4 mb-4">
+                            {(formData.images || []).map((url, index) => (
+                                <div key={index} className="relative group w-32 h-32 border border-border rounded-sm overflow-hidden bg-secondary">
+                                    <img src={url} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeImage(index)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                    {index === 0 && (
+                                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] py-0.5 text-center font-bold">
+                                            MAIN
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            {uploadingImage && (
+                                <div className="w-32 h-32 border border-dashed border-primary rounded-sm flex items-center justify-center animate-pulse">
+                                    <Loader2 className="animate-spin text-primary" size={24} />
+                                </div>
+                            )}
+                        </div>
+
                         <div className="flex items-center gap-4">
                             <input
                                 type="file"
                                 accept="image/*"
+                                multiple
                                 onChange={handleImageUpload}
                                 disabled={uploadingImage}
                                 className="hidden"
@@ -325,41 +358,13 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                             />
                             <label
                                 htmlFor="image-upload"
-                                className="px-4 py-2 border border-border text-foreground hover:bg-secondary rounded-sm transition-colors cursor-pointer disabled:opacity-50"
+                                className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-medium rounded-sm cursor-pointer hover:bg-primary/90 transition-all shadow-sm"
                             >
-                                {uploadingImage ? 'Processing...' : 'Choose Image'}
+                                <Plus size={18} />
+                                Add Photos
                             </label>
-                            {(imagePreview || formData.imageUrl) && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setFormData(prev => ({ ...prev, image: '', imageUrl: '' }))
-                                        setImagePreview('')
-                                        setCompressionInfo('')
-                                    }}
-                                    className="px-4 py-2 border border-red-500 text-red-500 hover:bg-red-50 rounded-sm transition-colors"
-                                >
-                                    Remove Image
-                                </button>
-                            )}
+                            <p className="text-xs text-foreground/50">Primary photo will be the first one.</p>
                         </div>
-
-                        {/* Compression Info */}
-                        {compressionInfo && (
-                            <div className="text-sm text-green-600 bg-green-50 p-2 rounded-sm">
-                                {compressionInfo}
-                            </div>
-                        )}
-
-                        {(imagePreview || formData.imageUrl) && (
-                            <div className="mt-4">
-                                <img
-                                    src={imagePreview || formData.imageUrl}
-                                    alt="Product preview"
-                                    className="w-32 h-32 object-cover rounded-sm border border-border"
-                                />
-                            </div>
-                        )}
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-foreground">Or use CSS Gradient (fallback)</label>
