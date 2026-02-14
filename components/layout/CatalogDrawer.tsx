@@ -51,20 +51,27 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
     const [categories, setCategories] = useState<CategoryData>({})
     const [isLoading, setIsLoading] = useState(true)
     const [expandedCategories, setExpandedCategories] = useState<string[]>([])
+    const [error, setError] = useState<string | null>(null)
 
     // Fetch logic
     useEffect(() => {
         // Only fetch if we haven't already
         if (Object.keys(categories).length === 0) {
             setIsLoading(true)
+            setError(null)
             fetch('/api/products')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.products) {
                         organizeProductsByCategory(data.products)
+                    } else {
+                        setError(data.message || 'Failed to load categories')
                     }
                 })
-                .catch(error => console.error('Failed to fetch products:', error))
+                .catch(err => {
+                    console.error('Failed to fetch products:', err)
+                    setError('Unable to fetch categories. Please check your connection.')
+                })
                 .finally(() => setIsLoading(false))
         }
     }, [])
@@ -85,8 +92,8 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
     }
 
     const toggleCategory = (category: string) => {
-        setExpandedCategories(prev => 
-            prev.includes(category) 
+        setExpandedCategories(prev =>
+            prev.includes(category)
                 ? prev.filter(c => c !== category)
                 : [...prev, category]
         )
@@ -96,7 +103,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
     useEffect(() => {
         const htmlElement = document.documentElement
         const bodyElement = document.body
-        
+
         // Store original styles
         const originalHtmlOverflow = htmlElement.style.overflow
         const originalBodyOverflow = bodyElement.style.overflow
@@ -106,7 +113,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
         const originalBodyWidth = bodyElement.style.width
         const originalBodyHeight = bodyElement.style.height
         const originalBodyMarginRight = bodyElement.style.marginRight
-        
+
         // Calculate scrollbar width to prevent layout shift
         const getScrollbarWidth = () => {
             // Create a temporary element to measure scrollbar width
@@ -117,13 +124,13 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             document.body.removeChild(temp)
             return scrollbarWidth
         }
-        
+
         if (isOpen) {
             // Save current scroll position
             const scrollY = window.scrollY
             const scrollX = window.scrollX
             const scrollbarWidth = getScrollbarWidth()
-            
+
             // Apply comprehensive lock styles with scrollbar compensation
             htmlElement.style.overflow = 'hidden'
             bodyElement.style.position = 'fixed'
@@ -136,27 +143,27 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             bodyElement.style.webkitUserSelect = 'none'
             bodyElement.style.userSelect = 'none'
             bodyElement.style.marginRight = `${scrollbarWidth}px`
-            
-            // Store scroll positions for restoration
-            ;(bodyElement as any).storedScrollY = scrollY
-            ;(bodyElement as any).storedScrollX = scrollX
-            ;(bodyElement as any).scrollbarWidth = scrollbarWidth
-            ;(bodyElement as any).originalStyles = {
-                htmlOverflow: originalHtmlOverflow,
-                bodyOverflow: originalBodyOverflow,
-                bodyPosition: originalBodyPosition,
-                bodyTop: originalBodyTop,
-                bodyLeft: originalBodyLeft,
-                bodyWidth: originalBodyWidth,
-                bodyHeight: originalBodyHeight,
-                bodyMarginRight: originalBodyMarginRight
-            }
+
+                // Store scroll positions for restoration
+                ; (bodyElement as any).storedScrollY = scrollY
+                ; (bodyElement as any).storedScrollX = scrollX
+                ; (bodyElement as any).scrollbarWidth = scrollbarWidth
+                ; (bodyElement as any).originalStyles = {
+                    htmlOverflow: originalHtmlOverflow,
+                    bodyOverflow: originalBodyOverflow,
+                    bodyPosition: originalBodyPosition,
+                    bodyTop: originalBodyTop,
+                    bodyLeft: originalBodyLeft,
+                    bodyWidth: originalBodyWidth,
+                    bodyHeight: originalBodyHeight,
+                    bodyMarginRight: originalBodyMarginRight
+                }
         } else {
             // Restore scroll position and styles
             const storedScrollY = (bodyElement as any).storedScrollY || 0
             const storedScrollX = (bodyElement as any).storedScrollX || 0
             const storedStyles = (bodyElement as any).originalStyles || {}
-            
+
             // Restore styles first
             htmlElement.style.overflow = storedStyles.htmlOverflow || ''
             bodyElement.style.position = storedStyles.bodyPosition || ''
@@ -169,17 +176,17 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
             bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
-            
+
             // Restore scroll position
             window.scrollTo(storedScrollX, storedScrollY)
-            
+
             // Clean up stored data
             delete (bodyElement as any).storedScrollY
             delete (bodyElement as any).storedScrollX
             delete (bodyElement as any).scrollbarWidth
             delete (bodyElement as any).originalStyles
         }
-        
+
         return () => {
             // Ensure cleanup on unmount
             const storedStyles = (bodyElement as any).originalStyles || {}
@@ -268,7 +275,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             document.addEventListener('touchend', preventAllScroll, { passive: false, capture: true })
             document.addEventListener('keydown', preventKeyScroll, { capture: true })
             document.addEventListener('scroll', preventAllScroll, { capture: true })
-            
+
             // Also block on window level
             window.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
             window.addEventListener('scroll', preventAllScroll, { capture: true })
@@ -284,7 +291,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             document.removeEventListener('touchend', preventAllScroll, { capture: true })
             document.removeEventListener('keydown', preventKeyScroll, { capture: true })
             document.removeEventListener('scroll', preventAllScroll, { capture: true })
-            
+
             window.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
             window.removeEventListener('scroll', preventAllScroll, { capture: true })
         }
@@ -296,7 +303,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
         const activeClass = isOpen && !isLoading ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         return `${baseClass} ${activeClass}`
     }
-    
+
     const getDelayStyle = (index: number) => ({ transitionDelay: `${150 + (index * 50)}ms` })
 
     return (
@@ -353,11 +360,11 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                         '--webkit-scrollbar-thumb:hover'?: string;
                         msOverflowStyle?: string;
                     }}>
-                        
+
                         {/* New Arrivals */}
-                        <Link 
-                            href="/new-arrival" 
-                            onClick={onClose} 
+                        <Link
+                            href="/new-arrival"
+                            onClick={onClose}
                             className="flex items-center justify-between py-3 group"
                         >
                             <span className="text-xs font-normal uppercase tracking-[0.2em] text-white group-hover:text-white/90 transition-colors">
@@ -367,9 +374,9 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                         </Link>
 
                         {/* Sale */}
-                        <Link 
-                            href="/sale" 
-                            onClick={onClose} 
+                        <Link
+                            href="/sale"
+                            onClick={onClose}
                             className="flex items-center justify-between py-3 border-b border-white/10 group"
                         >
                             <span className="text-xs font-normal uppercase tracking-[0.2em] text-red-400 group-hover:text-red-300 transition-colors">
@@ -381,18 +388,28 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                         {/* Categories List */}
                         {isLoading ? (
                             <CategorySkeleton />
+                        ) : error ? (
+                            <div className="py-8 text-center space-y-4">
+                                <p className="text-xs text-white/50 uppercase tracking-widest">{error}</p>
+                                <button
+                                    onClick={() => window.location.reload()}
+                                    className="text-[10px] text-white underline underline-offset-4 uppercase tracking-widest"
+                                >
+                                    Try Refreshing
+                                </button>
+                            </div>
                         ) : (
                             <div className="space-y-1">
                                 {Object.entries(categories).map(([category, subCategories], index) => {
                                     const isExpanded = expandedCategories.includes(category)
                                     const subCategoryCount = Object.keys(subCategories).length
-                                    
+
                                     return (
                                         <div key={category} className="border-b border-white/10">
                                             {/* Category Header */}
                                             <button
                                                 onClick={() => toggleCategory(category)}
-                                                        className="w-full flex items-center justify-between py-4 text-left group"
+                                                className="w-full flex items-center justify-between py-4 text-left group"
                                             >
                                                 <span className="text-xs font-light uppercase tracking-[0.2em] text-white">
                                                     {category}
@@ -407,9 +424,8 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                             </button>
 
                                             {/* Subcategories Dropdown */}
-                                            <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] ${
-                                                isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                                            }`}>
+                                            <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                                                }`}>
                                                 <div className="pb-4 space-y-2">
                                                     {/* View All Link */}
                                                     <Link
@@ -420,7 +436,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                                         <span>View All {category}</span>
                                                         <ArrowRight className="w-3 h-3" />
                                                     </Link>
-                                                    
+
                                                     {/* Subcategory Links */}
                                                     {Object.keys(subCategories).map((subCategory) => (
                                                         <Link

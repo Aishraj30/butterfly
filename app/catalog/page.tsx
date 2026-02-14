@@ -79,7 +79,7 @@ function CatalogContent() {
             const res = await fetch('/api/products');
             const data = await res.json();
             if (data.success) {
-                setProducts(data.data || []);
+                setProducts(data.products || []);
             }
         } catch (error) {
             console.error('Failed to fetch products:', error);

@@ -163,7 +163,7 @@ export class AuthController {
         { status: 200 }
       );
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error detail:", error);
 
       if (error instanceof z.ZodError) {
         return NextResponse.json(
@@ -172,8 +172,13 @@ export class AuthController {
         );
       }
 
+      // Return detailed error message in 500 to help debugging
       return NextResponse.json(
-        { error: error.message || "Internal server error" },
+        {
+          error: "Internal server error during login",
+          message: error.message,
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        },
         { status: 500 }
       );
     }
