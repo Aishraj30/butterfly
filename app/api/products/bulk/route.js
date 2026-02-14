@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
+import Collection from "@/models/Collection";
 import { verifyToken } from "@/lib/jwt";
 
 // 🔒 helper: admin check
@@ -48,6 +49,25 @@ export async function POST(req) {
         }));
 
         const createdProducts = await Product.insertMany(productsToCreate);
+
+        // Group products by category to optimize updates
+        const categoryMap = {};
+        createdProducts.forEach(p => {
+            if (p.category) {
+                if (!categoryMap[p.category]) categoryMap[p.category] = [];
+                categoryMap[p.category].push(p._id);
+            }
+        });
+
+        // Update collections
+        await Promise.all(
+            Object.entries(categoryMap).map(([categoryName, pIds]) =>
+                Collection.findOneAndUpdate(
+                    { name: categoryName },
+                    { $addToSet: { products: { $each: pIds } } }
+                )
+            )
+        );
 
         return NextResponse.json(
             {

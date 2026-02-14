@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
+import Collection from "@/models/Collection";
 import Inventory from "@/models/inventory";
 import { verifyToken } from "@/lib/jwt";
 
@@ -31,6 +32,14 @@ export async function POST(req) {
 
     const body = await req.json();
     const product = await Product.create(body);
+
+    // Link product to collection if category is provided
+    if (body.category) {
+      await Collection.findOneAndUpdate(
+        { name: body.category },
+        { $addToSet: { products: product._id } }
+      );
+    }
 
     // Transform MongoDB document to match frontend interface
     const transformedProduct = {
