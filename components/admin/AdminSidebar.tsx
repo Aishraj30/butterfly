@@ -26,6 +26,7 @@ const menuItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Messages', href: '/admin/messages', icon: MessageSquare, badge: '150' },
   { label: 'Products', href: '/admin/products', icon: Package },
+  { label: 'Bulk Upload', href: '/admin/products/bulk', icon: Clipboard },
   { label: 'Inventory', href: '/admin/inventory', icon: Clipboard },
   { label: 'Collections', href: '/admin/collections', icon: Layers },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },

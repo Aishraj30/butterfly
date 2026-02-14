@@ -45,12 +45,20 @@ export async function POST(req) {
 
 // GET ALL COLLECTIONS
 export async function GET(req) {
-  await connectDB();
+  try {
+    await connectDB();
 
-  const user = getUser(req);
-  const filter = user && user.role === "admin" ? {} : { isActive: true };
+    const user = getUser(req);
+    const filter = user && user.role === "admin" ? {} : { isActive: true };
 
-  const collections = await Collection.find(filter).populate("products").sort({ createdAt: -1 });
+    const collections = await Collection.find(filter).populate("products").sort({ createdAt: -1 });
 
-  return NextResponse.json({ success: true, collections });
+    return NextResponse.json({ success: true, collections });
+  } catch (error) {
+    console.error('[API Collections] GET error:', error);
+    return NextResponse.json({
+      success: false,
+      message: error.message || "Failed to fetch collections"
+    }, { status: 500 });
+  }
 }

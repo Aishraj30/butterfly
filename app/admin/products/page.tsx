@@ -88,13 +88,22 @@ export default function AdminProductsPage() {
                 Manage your product inventory and details
               </p>
             </div>
-            <Link
-              href="/admin/products/new"
-              className="flex items-center gap-2 px-4 py-2 bg-[#005500] text-white font-medium rounded-sm hover:bg-[#005500]/90 transition-colors"
-            >
-              <Plus size={18} />
-              New Product
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href="/admin/products/bulk"
+                className="flex items-center gap-2 px-4 py-2 border border-[#005500] text-[#005500] font-medium rounded-sm hover:bg-[#005500]/10 transition-colors"
+              >
+                <Plus size={18} />
+                Bulk Add
+              </Link>
+              <Link
+                href="/admin/products/new"
+                className="flex items-center gap-2 px-4 py-2 bg-[#005500] text-white font-medium rounded-sm hover:bg-[#005500]/90 transition-colors"
+              >
+                <Plus size={18} />
+                New Product
+              </Link>
+            </div>
           </div>
         </div>
       </div>
