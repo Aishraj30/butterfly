@@ -78,9 +78,23 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
     const organizeProductsByCategory = (products: Product[]) => {
         const organized: CategoryData = {}
+        
+        // Debug: Log all product categories to see what we're working with
+        console.log('All product categories:', products.map(p => p.category))
+        console.log('All product brands:', products.map(p => p.brand))
+        
+        // Define collection names to exclude
+        const collectionNames = ['Butterfly Couture', 'Ethereal Collection', 'Classic Collection', 'Modern Collection', 'Vintage Collection']
+        
         products.forEach(product => {
             const category = product.category || 'Uncategorized'
             const subCategory = product.subCategory || 'General'
+            
+            // Skip if the category is a collection name
+            if (collectionNames.includes(category)) {
+                console.log('Skipping collection:', category)
+                return // Skip this product
+            }
 
             if (!organized[category]) organized[category] = {}
             if (!organized[category][subCategory]) {
@@ -88,6 +102,8 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             }
             organized[category][subCategory].push(product)
         })
+        
+        console.log('Final organized categories:', Object.keys(organized))
         setCategories(organized)
     }
 
