@@ -29,29 +29,37 @@ function CatalogContent() {
     const allProducts = products;
 
     const filteredProducts = useMemo(() => {
-        if (!collectionParam && !activeFilters) return products;
+        const categoryParam = searchParams.get('category');
+        const subCategoryParam = searchParams.get('subCategory');
+        const collectionParam = searchParams.get('collection');
 
-        let options: FilterOptions = {};
+        if (!categoryParam && !subCategoryParam && !collectionParam && !activeFilters) return products;
+
+        const options: FilterOptions = {};
+
+        if (categoryParam) {
+            options.categories = [decodeURIComponent(categoryParam)];
+        }
+        if (subCategoryParam) {
+            options.subCategories = [decodeURIComponent(subCategoryParam)];
+        }
         if (collectionParam) {
-            options.categories = [decodeURIComponent(collectionParam)];
+            options.collectionNames = [decodeURIComponent(collectionParam)];
         }
 
         if (activeFilters) {
-            options = {
-                ...options,
-                sizes: activeFilters.sizes,
-                colors: activeFilters.colors,
-                genders: activeFilters.genders,
-                priceRange: [
-                    Number(activeFilters.priceRange.min) || 0,
-                    Number(activeFilters.priceRange.max) || 10000000 // High enough for IDR
-                ],
-                sortBy: activeFilters.sortBy
-            }
+            options.sizes = activeFilters.sizes;
+            options.colors = activeFilters.colors;
+            options.genders = activeFilters.genders;
+            options.priceRange = [
+                Number(activeFilters.priceRange.min) || 0,
+                Number(activeFilters.priceRange.max) || 10000000
+            ];
+            options.sortBy = activeFilters.sortBy;
         }
 
-        return filterAndSortProducts(allProducts, options);
-    }, [collectionParam, activeFilters, allProducts, products]);
+        return filterAndSortProducts(products, options);
+    }, [searchParams, activeFilters, products]);
 
     useEffect(() => {
         const loadPageData = async () => {

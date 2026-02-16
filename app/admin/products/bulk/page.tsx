@@ -13,6 +13,7 @@ interface BulkProduct {
     brand: string
     price: number
     category: string
+    collectionName: string
     subCategory: string
     gender: string
     color: string
@@ -39,6 +40,7 @@ export default function BulkProductAddPage() {
             brand: '',
             price: 0,
             category: '',
+            collectionName: '',
             subCategory: '',
             gender: 'Unisex',
             color: '',
@@ -73,6 +75,7 @@ export default function BulkProductAddPage() {
                 brand: '',
                 price: 0,
                 category: '',
+                collectionName: '',
                 subCategory: '',
                 gender: 'Unisex',
                 color: '',
@@ -148,9 +151,9 @@ export default function BulkProductAddPage() {
 
     const handleBulkSubmit = async () => {
         // Validation
-        const invalidProducts = products.filter(p => !p.name || !p.category || !p.price)
+        const invalidProducts = products.filter(p => !p.name || !p.price)
         if (invalidProducts.length > 0) {
-            alert('Please fill at least Name, Category, and Price for all rows')
+            alert('Please fill at least Name and Price for all rows')
             return
         }
 
@@ -247,8 +250,9 @@ export default function BulkProductAddPage() {
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[200px]">Product Name*</th>
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Brand</th>
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[120px]">Price (₹)*</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Collection*</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Style</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Main Category</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Collection</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Style (Sub-Cat)</th>
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[100px]">Gender</th>
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[100px]">Color</th>
                                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[300px]">Product Gallery (Primary + others)</th>
@@ -290,24 +294,44 @@ export default function BulkProductAddPage() {
                                             />
                                         </td>
                                         <td className="px-2 py-2">
-                                            <select
+                                            <input
+                                                list={`category-list-${product.tempId}`}
                                                 value={product.category}
                                                 onChange={(e) => updateProduct(product.tempId, 'category', e.target.value)}
                                                 className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
+                                                placeholder="Category"
+                                            />
+                                            <datalist id={`category-list-${product.tempId}`}>
+                                                {categories.map(c => <option key={c.id || c._id} value={c.name} />)}
+                                            </datalist>
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <select
+                                                value={product.collectionName}
+                                                onChange={(e) => updateProduct(product.tempId, 'collectionName', e.target.value)}
+                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
                                             >
-                                                <option value="">Select Collection</option>
+                                                <option value="">Collection</option>
                                                 {collections.map(c => <option key={c.id || c._id} value={c.name}>{c.name}</option>)}
                                             </select>
                                         </td>
                                         <td className="px-2 py-2">
-                                            <select
+                                            <input
+                                                list={`subcategory-list-${product.tempId}`}
+                                                type="text"
                                                 value={product.subCategory}
                                                 onChange={(e) => updateProduct(product.tempId, 'subCategory', e.target.value)}
                                                 className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                            >
-                                                <option value="">Select Style</option>
-                                                {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                                            </select>
+                                                placeholder="Sub-cat"
+                                            />
+                                            <datalist id={`subcategory-list-${product.tempId}`}>
+                                                {categories
+                                                    .find(c => c.name === product.category)
+                                                    ?.subCategories?.map((sub: string) => (
+                                                        <option key={sub} value={sub} />
+                                                    ))
+                                                }
+                                            </datalist>
                                         </td>
                                         <td className="px-2 py-2">
                                             <select

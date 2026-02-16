@@ -32,6 +32,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             name: '',
             price: 0,
             category: '',
+            collectionName: '',
             subCategory: '',
             gender: 'Unisex',
             brand: '',
@@ -214,39 +215,58 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Main Category</label>
+                    <input
+                        list="categories-list"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        placeholder="Select or type new category"
+                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                    />
+                    <datalist id="categories-list">
+                        {styleCategories.map((cat) => (
+                            <option key={cat.id || cat._id} value={cat.name} />
+                        ))}
+                    </datalist>
+                </div>
+
+                <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Collection</label>
                     <select
-                        name="category"
-                        required
-                        value={formData.category}
+                        name="collectionName"
+                        value={formData.collectionName}
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                     >
                         <option value="">Select Collection</option>
-                        {collections?.map((collection) => (
-                            <option key={collection.id} value={collection.name}>
-                                {collection.name}
+                        {collections?.map((col) => (
+                            <option key={col.id} value={col.name}>
+                                {col.name}
                             </option>
                         ))}
                     </select>
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Sub-Category (Style)</label>
-                    <select
+                    <label className="text-sm font-medium text-foreground">Sub-Category</label>
+                    <input
+                        list="subcategories-list"
+                        type="text"
                         name="subCategory"
-                        required
                         value={formData.subCategory}
                         onChange={handleChange}
+                        placeholder="e.g. Mini Dress, Silk Top"
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                    >
-                        <option value="">Select Style</option>
-                        {styleCategories.map((category) => (
-                            <option key={category.id} value={category.name}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
+                    />
+                    <datalist id="subcategories-list">
+                        {styleCategories
+                            .find(cat => cat.name === formData.category)
+                            ?.subCategories?.map((sub: string) => (
+                                <option key={sub} value={sub} />
+                            ))
+                        }
+                    </datalist>
                 </div>
 
                 <div className="space-y-2">

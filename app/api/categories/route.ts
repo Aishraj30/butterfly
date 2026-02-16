@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllCategories, addCategory } from '@/lib/categories'
+import connectDB from '@/lib/db'
+import Category from '@/models/Category'
 
 export async function GET(request: NextRequest) {
   try {
-    const categories = getAllCategories()
+    await connectDB()
+    const categories = await Category.find({ isActive: true }).sort({ name: 1 })
+
     return NextResponse.json({
       success: true,
       data: categories,
@@ -20,13 +23,28 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    await connectDB()
     const body = await request.json()
-    const category = addCategory(body)
-    return NextResponse.json({ success: true, data: category })
-  } catch (error) {
+
+    // Check if category already exists
+    const existingCategory = await Category.findOne({ name: { $regex: new RegExp(`^${body.name}$`, 'i') } })
+
+    if (existingCategory) {
+      // If allowed to update, maybe add subcategories here?
+      // For now, let's just return the existing one or validation error
+      return NextResponse.json(
+        { success: true, data: existingCategory, message: 'Category already exists' },
+        { status: 200 }
+      )
+    }
+
+    const category = await Category.create(body)
+
+    return NextResponse.json({ success: true, data: category }, { status: 201 })
+  } catch (error: any) {
     console.error('[API] Create category error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to create category' },
+      { success: false, error: error.message || 'Failed to create category' },
       { status: 500 }
     )
   }

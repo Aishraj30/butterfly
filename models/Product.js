@@ -19,13 +19,15 @@ const productSchema = new mongoose.Schema(
     },
 
     category: {
-      type: String,
-      required: true, // e.g. "Clothing"
+      type: String, // e.g. "Clothing"
+    },
+
+    collectionName: {
+      type: String, // e.g. "Summer 2026"
     },
 
     subCategory: {
-      type: String,
-      required: true, // e.g. "Jacket"
+      type: String, // e.g. "Jacket"
     },
 
     gender: {

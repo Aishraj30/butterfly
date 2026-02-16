@@ -11,20 +11,15 @@ interface CatalogDrawerProps {
     onClose: () => void
 }
 
-interface Product {
+interface Collection {
     _id: string
     name: string
-    category: string
-    subCategory: string
-    gender: string
-    brand: string
-    price: number
+    slug: string
+    image?: string
 }
 
 interface CategoryData {
-    [category: string]: {
-        [subCategory: string]: Product[]
-    }
+    [category: string]: Set<string>
 }
 
 // --- Components ---
@@ -49,47 +44,44 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
     // State
     const [categories, setCategories] = useState<CategoryData>({})
+    const [collections, setCollections] = useState<Collection[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [expandedCategories, setExpandedCategories] = useState<string[]>([])
     const [error, setError] = useState<string | null>(null)
 
     // Fetch logic
     useEffect(() => {
-        // Only fetch if we haven't already
-        if (Object.keys(categories).length === 0) {
+        if (isOpen && (Object.keys(categories).length === 0 || collections.length === 0)) {
             setIsLoading(true)
             setError(null)
-            fetch('/api/products')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.products) {
-                        organizeProductsByCategory(data.products)
-                    } else {
-                        setError(data.message || 'Failed to load categories')
+
+            Promise.all([
+                fetch('/api/products').then(res => res.json()),
+                fetch('/api/collections').then(res => res.json())
+            ])
+                .then(([productsData, collectionsData]) => {
+                    if (productsData.success && productsData.products) {
+                        const catMap: CategoryData = {}
+                        productsData.products.forEach((p: any) => {
+                            if (p.category) {
+                                if (!catMap[p.category]) catMap[p.category] = new Set()
+                                if (p.subCategory) catMap[p.category].add(p.subCategory)
+                            }
+                        })
+                        setCategories(catMap)
+                    }
+
+                    if (collectionsData.success) {
+                        setCollections(collectionsData.collections || collectionsData.data || [])
                     }
                 })
                 .catch(err => {
-                    console.error('Failed to fetch products:', err)
-                    setError('Unable to fetch categories. Please check your connection.')
+                    console.error('Failed to fetch catalog data:', err)
+                    setError('Unable to load catalog.')
                 })
                 .finally(() => setIsLoading(false))
         }
-    }, [])
-
-    const organizeProductsByCategory = (products: Product[]) => {
-        const organized: CategoryData = {}
-        products.forEach(product => {
-            const category = product.category || 'Uncategorized'
-            const subCategory = product.subCategory || 'General'
-
-            if (!organized[category]) organized[category] = {}
-            if (!organized[category][subCategory]) {
-                organized[category][subCategory] = []
-            }
-            organized[category][subCategory].push(product)
-        })
-        setCategories(organized)
-    }
+    }, [isOpen])
 
     const toggleCategory = (category: string) => {
         setExpandedCategories(prev =>
@@ -391,22 +383,42 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                         ) : error ? (
                             <div className="py-8 text-center space-y-4">
                                 <p className="text-xs text-white/50 uppercase tracking-widest">{error}</p>
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="text-[10px] text-white underline underline-offset-4 uppercase tracking-widest"
-                                >
-                                    Try Refreshing
-                                </button>
                             </div>
                         ) : (
                             <div className="space-y-1">
-                                {Object.entries(categories).map(([category, subCategories], index) => {
+                                {/* Featured Collections Section */}
+                                {collections.length > 0 && (
+                                    <div className="pt-4 border-t border-white/10 mt-4 mb-6">
+                                        <h3 className="text-[10px] tracking-[0.4em] uppercase text-white/40 font-bold mb-4">
+                                            Featured Collections
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {collections.map((col) => (
+                                                <Link
+                                                    key={col._id}
+                                                    href={`/collection/${col.slug || col._id}`}
+                                                    onClick={onClose}
+                                                    className="block group"
+                                                >
+                                                    <span className="text-xs uppercase tracking-[0.2em] text-white/80 group-hover:text-white transition-colors">
+                                                        {col.name}
+                                                    </span>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <h3 className="text-[10px] tracking-[0.4em] uppercase text-white/40 font-bold mb-4">
+                                    Browse by Category
+                                </h3>
+
+                                {Object.entries(categories).map(([category, subCategoriesSet]) => {
                                     const isExpanded = expandedCategories.includes(category)
-                                    const subCategoryCount = Object.keys(subCategories).length
+                                    const subCategories = Array.from(subCategoriesSet)
 
                                     return (
                                         <div key={category} className="border-b border-white/10">
-                                            {/* Category Header */}
                                             <button
                                                 onClick={() => toggleCategory(category)}
                                                 className="w-full flex items-center justify-between py-4 text-left group"
@@ -414,38 +426,28 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                                 <span className="text-xs font-light uppercase tracking-[0.2em] text-white">
                                                     {category}
                                                 </span>
-                                                <div className="flex items-center gap-3">
-                                                    {isExpanded ? (
-                                                        <ChevronUp className="w-4 h-4 text-white/60 transition-transform duration-300" />
-                                                    ) : (
-                                                        <ChevronDown className="w-4 h-4 text-white/60 transition-transform duration-300" />
-                                                    )}
-                                                </div>
+                                                {subCategories.length > 0 && (
+                                                    <ChevronDown className={`w-4 h-4 text-white/60 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                                                )}
                                             </button>
 
-                                            {/* Subcategories Dropdown */}
-                                            <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                                                }`}>
+                                            <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
                                                 <div className="pb-4 space-y-2">
-                                                    {/* View All Link */}
                                                     <Link
-                                                        href={`/catalog/${encodeURIComponent(category)}`}
+                                                        href={`/catalog?category=${encodeURIComponent(category)}`}
                                                         onClick={onClose}
-                                                        className="flex items-center justify-between py-2 px-4 text-xs uppercase tracking-[0.15em] text-white/60 hover:text-white hover:bg-white/5 rounded transition-colors"
+                                                        className="block py-2 px-4 text-xs uppercase tracking-[0.15em] text-white/60 hover:text-white"
                                                     >
-                                                        <span>View All {category}</span>
-                                                        <ArrowRight className="w-3 h-3" />
+                                                        View All {category}
                                                     </Link>
-
-                                                    {/* Subcategory Links */}
-                                                    {Object.keys(subCategories).map((subCategory) => (
+                                                    {subCategories.map((subCat) => (
                                                         <Link
-                                                            key={subCategory}
-                                                            href={`/catalog/${encodeURIComponent(category)}/${encodeURIComponent(subCategory)}`}
+                                                            key={subCat}
+                                                            href={`/catalog?category=${encodeURIComponent(category)}&subCategory=${encodeURIComponent(subCat)}`}
                                                             onClick={onClose}
-                                                            className="block py-2 px-4 text-xs uppercase tracking-[0.15em] text-white/50 hover:text-white hover:bg-white/5 rounded transition-colors"
+                                                            className="block py-2 px-4 text-xs uppercase tracking-[0.15em] text-white/40 hover:text-white"
                                                         >
-                                                            {subCategory}
+                                                            {subCat}
                                                         </Link>
                                                     ))}
                                                 </div>

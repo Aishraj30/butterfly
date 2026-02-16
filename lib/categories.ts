@@ -4,6 +4,7 @@ export interface Category {
   name: string
   description?: string
   createdAt: Date
+  subCategories?: string[]
   updatedAt: Date
 }
 

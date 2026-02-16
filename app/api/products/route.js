@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
 import Collection from "@/models/Collection";
+import Category from "@/models/Category";
 import Inventory from "@/models/inventory";
 import { verifyToken } from "@/lib/jwt";
 
@@ -33,11 +34,24 @@ export async function POST(req) {
     const body = await req.json();
     const product = await Product.create(body);
 
-    // Link product to collection if category is provided
-    if (body.category) {
+    // Link product to collection if collectionName is provided
+    if (body.collectionName) {
       await Collection.findOneAndUpdate(
-        { name: body.category },
+        { name: body.collectionName },
         { $addToSet: { products: product._id } }
+      );
+    }
+
+    // Update Category and SubCategory
+    if (body.category) {
+      const update = { $setOnInsert: { name: body.category, isActive: true } };
+      if (body.subCategory) {
+        update.$addToSet = { subCategories: body.subCategory };
+      }
+      await Category.findOneAndUpdate(
+        { name: body.category },
+        update,
+        { upsert: true, new: true }
       );
     }
 
