@@ -93,7 +93,7 @@ export function HeroBanner({
   return (
     <section
       ref={sectionRef}
-      className={`relative w-full overflow-hidden ${isFirst ? 'h-[110vh] -mt-32 pt-32' : 'h-screen'}`}
+      className={`relative w-full overflow-hidden h-screen`}
     >
       {/* Background Image */}
       <div ref={imageRef} className="absolute inset-0 z-0 bg-gray-50">

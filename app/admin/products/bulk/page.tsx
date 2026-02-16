@@ -16,9 +16,21 @@ interface BulkProduct {
     collectionName: string
     subCategory: string
     gender: string
-    color: string
+    colors: string // Comma separated for input simplicity
     sizes: string[]
     images: string[]
+    stock: number
+    description: string
+    fabricComposition: string
+    fit: string
+    closure: string
+    sleeveType: string
+    washCare: string
+    countryOfManufacture: string
+    modelSize: string
+    modelHeight: string
+    shippingTime: string
+    imageGradient: string
 }
 
 export default function BulkProductAddPage() {
@@ -37,15 +49,27 @@ export default function BulkProductAddPage() {
         {
             tempId: Math.random().toString(36).substr(2, 9),
             name: '',
-            brand: '',
+            brand: 'Butterfly Couture',
             price: 0,
             category: '',
             collectionName: '',
             subCategory: '',
-            gender: 'Unisex',
-            color: '',
-            sizes: ['S', 'M', 'L'],
-            images: []
+            gender: 'Female',
+            colors: '',
+            sizes: ['XS', 'S', 'M'],
+            images: [],
+            stock: 20,
+            description: '',
+            fabricComposition: '',
+            fit: '',
+            closure: '',
+            sleeveType: '',
+            washCare: '',
+            countryOfManufacture: 'India',
+            modelSize: '',
+            modelHeight: '',
+            shippingTime: '',
+            imageGradient: '',
         }
     ])
 
@@ -72,15 +96,27 @@ export default function BulkProductAddPage() {
             {
                 tempId: Math.random().toString(36).substr(2, 9),
                 name: '',
-                brand: '',
+                brand: 'Butterfly Couture',
                 price: 0,
                 category: '',
                 collectionName: '',
                 subCategory: '',
-                gender: 'Unisex',
-                color: '',
-                sizes: ['S', 'M', 'L'],
-                images: []
+                gender: 'Female',
+                colors: '',
+                sizes: ['XS', 'S', 'M'],
+                images: [],
+                stock: 0,
+                description: '',
+                fabricComposition: '',
+                fit: '',
+                closure: '',
+                sleeveType: '',
+                washCare: '',
+                countryOfManufacture: '',
+                modelSize: '',
+                modelHeight: '',
+                shippingTime: '',
+                imageGradient: '',
             }
         ])
     }
@@ -150,22 +186,24 @@ export default function BulkProductAddPage() {
     }
 
     const handleBulkSubmit = async () => {
-        // Validation
-        const invalidProducts = products.filter(p => !p.name || !p.price)
-        if (invalidProducts.length > 0) {
-            alert('Please fill at least Name and Price for all rows')
-            return
-        }
+        // Validation check removed to allow flexible entry, but optional warning could be added
+        // const invalidProducts = products.filter(p => !p.name)
 
         setIsSubmitting(true)
         try {
+            // Transform data for API: split string fields to arrays if needed
+            const productsToSubmit = products.map(p => ({
+                ...p,
+                colors: p.colors.split(',').map(s => s.trim()).filter(Boolean),
+            }))
+
             const response = await fetch('/api/products/bulk', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ products })
+                body: JSON.stringify({ products: productsToSubmit })
             })
 
             const data = await response.json()
@@ -206,7 +244,7 @@ export default function BulkProductAddPage() {
                             </Link>
                             <div>
                                 <h1 className="text-2xl font-serif font-bold text-gray-900">Bulk Product Upload</h1>
-                                <p className="text-sm text-gray-500">Add multiple products quickly using the table below</p>
+                                <p className="text-sm text-gray-500">Add multiple products quickly - All fields optional</p>
                             </div>
                         </div>
                         <div className="flex gap-3">
@@ -246,176 +284,109 @@ export default function BulkProductAddPage() {
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-200">
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 w-10">#</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[200px]">Product Name*</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Brand</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[120px]">Price (₹)*</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Main Category</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Collection</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[150px]">Style (Sub-Cat)</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[100px]">Gender</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[100px]">Color</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-500 min-w-[300px]">Product Gallery (Primary + others)</th>
-                                    <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-gray-500 w-20">Action</th>
+                                    <th className="px-4 py-3 text-left w-10">#</th>
+                                    <th className="px-4 py-3 text-left min-w-[200px]">Product Name*</th>
+                                    <th className="px-4 py-3 text-left min-w-[150px]">Brand</th>
+                                    <th className="px-4 py-3 text-left min-w-[120px]">Price (₹)</th>
+                                    <th className="px-4 py-3 text-left min-w-[100px]">Stock</th>
+                                    <th className="px-4 py-3 text-left min-w-[150px]">Category</th>
+                                    <th className="px-4 py-3 text-left min-w-[150px]">Sub-Cat</th>
+                                    <th className="px-4 py-3 text-left min-w-[150px]">Collection</th>
+                                    <th className="px-4 py-3 text-left min-w-[100px]">Gender</th>
+                                    <th className="px-4 py-3 text-left min-w-[150px]">Colors (comma sep)</th>
+                                    <th className="px-4 py-3 text-left min-w-[200px]">Description</th>
+                                    <th className="px-4 py-3 text-left min-w-[200px]">Fabric</th>
+                                    <th className="px-4 py-3 text-left min-w-[100px]">Fit</th>
+                                    <th className="px-4 py-3 text-left min-w-[100px]">Closure</th>
+                                    <th className="px-4 py-3 text-left min-w-[100px]">Sleeve</th>
+                                    <th className="px-4 py-3 text-left min-w-[150px]">Wash Care</th>
+                                    <th className="px-4 py-3 text-left min-w-[150px]">Country</th>
+                                    <th className="px-4 py-3 text-left min-w-[120px]">Shipping Time</th>
+                                    <th className="px-4 py-3 text-left min-w-[200px]">Image Gradient</th>
+                                    <th className="px-4 py-3 text-left min-w-[300px]">Images</th>
+                                    <th className="px-4 py-3 text-center w-20">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {products.map((product, index) => (
                                     <tr key={product.tempId} className="border-b border-gray-100 hover:bg-gray-50/50">
-                                        <td className="px-4 py-3 text-sm text-gray-400 font-medium">
-                                            {index + 1}
+                                        <td className="px-4 py-3 text-sm text-gray-400 font-medium">{index + 1}</td>
+                                        <td className="px-2 py-2">
+                                            <input type="text" value={product.name} onChange={(e) => updateProduct(product.tempId, 'name', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Name" />
                                         </td>
                                         <td className="px-2 py-2">
-                                            <input
-                                                type="text"
-                                                value={product.name}
-                                                onChange={(e) => updateProduct(product.tempId, 'name', e.target.value)}
-                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                                placeholder="e.g. Silk Gown"
-                                            />
+                                            <input type="text" value={product.brand} onChange={(e) => updateProduct(product.tempId, 'brand', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Brand" />
                                         </td>
                                         <td className="px-2 py-2">
-                                            <select
-                                                value={product.brand}
-                                                onChange={(e) => updateProduct(product.tempId, 'brand', e.target.value)}
-                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                            >
-                                                <option value="">Select Brand</option>
-                                                {brands.map(b => <option key={b.id} value={b.name}>{b.name}</option>)}
-                                            </select>
+                                            <input type="number" value={product.price} onChange={(e) => updateProduct(product.tempId, 'price', parseFloat(e.target.value))} className="w-full px-2 py-1 border rounded-sm" placeholder="Price" />
                                         </td>
                                         <td className="px-2 py-2">
-                                            <input
-                                                type="number"
-                                                value={product.price || ''}
-                                                onChange={(e) => updateProduct(product.tempId, 'price', parseFloat(e.target.value) || 0)}
-                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                                placeholder="0"
-                                            />
+                                            <input type="number" value={product.stock} onChange={(e) => updateProduct(product.tempId, 'stock', parseFloat(e.target.value))} className="w-full px-2 py-1 border rounded-sm" placeholder="Qty" />
                                         </td>
                                         <td className="px-2 py-2">
-                                            <input
-                                                list={`category-list-${product.tempId}`}
-                                                value={product.category}
-                                                onChange={(e) => updateProduct(product.tempId, 'category', e.target.value)}
-                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                                placeholder="Category"
-                                            />
-                                            <datalist id={`category-list-${product.tempId}`}>
-                                                {categories.map(c => <option key={c.id || c._id} value={c.name} />)}
+                                            <input list={`cat-${product.tempId}`} value={product.category} onChange={(e) => updateProduct(product.tempId, 'category', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Category" />
+                                            <datalist id={`cat-${product.tempId}`}>{categories.map(c => <option key={c.id} value={c.name} />)}</datalist>
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <input list={`sub-${product.tempId}`} value={product.subCategory} onChange={(e) => updateProduct(product.tempId, 'subCategory', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Sub-Cat" />
+                                            <datalist id={`sub-${product.tempId}`}>
+                                                {categories.find(c => c.name === product.category)?.subCategories?.map((s: string) => <option key={s} value={s} />)}
                                             </datalist>
                                         </td>
                                         <td className="px-2 py-2">
-                                            <select
-                                                value={product.collectionName}
-                                                onChange={(e) => updateProduct(product.tempId, 'collectionName', e.target.value)}
-                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                            >
-                                                <option value="">Collection</option>
-                                                {collections.map(c => <option key={c.id || c._id} value={c.name}>{c.name}</option>)}
-                                            </select>
+                                            <input list={`col-${product.tempId}`} value={product.collectionName} onChange={(e) => updateProduct(product.tempId, 'collectionName', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Collection" />
+                                            <datalist id={`col-${product.tempId}`}>{collections.map(c => <option key={c.id} value={c.name} />)}</datalist>
                                         </td>
                                         <td className="px-2 py-2">
-                                            <input
-                                                list={`subcategory-list-${product.tempId}`}
-                                                type="text"
-                                                value={product.subCategory}
-                                                onChange={(e) => updateProduct(product.tempId, 'subCategory', e.target.value)}
-                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                                placeholder="Sub-cat"
-                                            />
-                                            <datalist id={`subcategory-list-${product.tempId}`}>
-                                                {categories
-                                                    .find(c => c.name === product.category)
-                                                    ?.subCategories?.map((sub: string) => (
-                                                        <option key={sub} value={sub} />
-                                                    ))
-                                                }
-                                            </datalist>
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <select
-                                                value={product.gender}
-                                                onChange={(e) => updateProduct(product.tempId, 'gender', e.target.value)}
-                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                            >
-                                                <option value="Male">Male</option>
+                                            <select value={product.gender} onChange={(e) => updateProduct(product.tempId, 'gender', e.target.value)} className="w-full px-2 py-1 border rounded-sm">
                                                 <option value="Female">Female</option>
+                                                <option value="Male">Male</option>
                                                 <option value="Unisex">Unisex</option>
                                             </select>
                                         </td>
                                         <td className="px-2 py-2">
-                                            <input
-                                                type="text"
-                                                value={product.color}
-                                                onChange={(e) => updateProduct(product.tempId, 'color', e.target.value)}
-                                                className="w-full px-3 py-2 border border-transparent focus:border-gray-300 focus:bg-white bg-transparent rounded-sm text-sm"
-                                                placeholder="Color"
-                                            />
+                                            <input type="text" value={product.colors} onChange={(e) => updateProduct(product.tempId, 'colors', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Red, Blue..." />
                                         </td>
-                                        <td className="px-2 py-2">
-                                            <div className="flex flex-wrap gap-2 items-center">
-                                                {(product.images || []).map((url, idx) => (
-                                                    <div key={idx} className="relative group w-10 h-10 bg-gray-100 rounded-sm border border-gray-200 overflow-hidden">
-                                                        <img src={url} alt="preview" className="w-full h-full object-cover" />
-                                                        <button
-                                                            onClick={() => removeRowImage(product.tempId, idx)}
-                                                            className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                                                        >
-                                                            <Trash2 size={12} />
-                                                        </button>
-                                                        {idx === 0 && <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[6px] text-white text-center font-bold">MAIN</div>}
-                                                    </div>
-                                                ))}
 
-                                                <div className="relative w-10 h-10 flex-shrink-0">
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        id={`file-${product.tempId}`}
-                                                        className="hidden"
-                                                        onChange={(e) => handleRowImageUpload(product.tempId, e)}
-                                                        disabled={uploadingRows.includes(product.tempId) || (product.images || []).length >= 5}
-                                                    />
-                                                    <label
-                                                        htmlFor={`file-${product.tempId}`}
-                                                        className={`w-full h-full flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-sm hover:bg-gray-50 cursor-pointer transition-colors ${(product.images || []).length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                    >
-                                                        {uploadingRows.includes(product.tempId) ? (
-                                                            <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                                                        ) : (
-                                                            <>
-                                                                <Plus size={14} className="text-gray-400" />
-                                                                <span className="text-[8px] text-gray-400 font-bold">ADD</span>
-                                                            </>
-                                                        )}
-                                                    </label>
-                                                </div>
+                                        {/* New Spec fields */}
+                                        <td className="px-2 py-2"><input value={product.description} onChange={(e) => updateProduct(product.tempId, 'description', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Desc" /></td>
+                                        <td className="px-2 py-2"><input value={product.fabricComposition} onChange={(e) => updateProduct(product.tempId, 'fabricComposition', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Fabric" /></td>
+                                        <td className="px-2 py-2"><input value={product.fit} onChange={(e) => updateProduct(product.tempId, 'fit', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Fit" /></td>
+                                        <td className="px-2 py-2"><input value={product.closure} onChange={(e) => updateProduct(product.tempId, 'closure', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Closure" /></td>
+                                        <td className="px-2 py-2"><input value={product.sleeveType} onChange={(e) => updateProduct(product.tempId, 'sleeveType', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Sleeve" /></td>
+                                        <td className="px-2 py-2"><input value={product.washCare} onChange={(e) => updateProduct(product.tempId, 'washCare', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Wash" /></td>
+                                        <td className="px-2 py-2"><input value={product.countryOfManufacture} onChange={(e) => updateProduct(product.tempId, 'countryOfManufacture', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="India" /></td>
+                                        <td className="px-2 py-2"><input value={product.shippingTime} onChange={(e) => updateProduct(product.tempId, 'shippingTime', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Time" /></td>
+                                        <td className="px-2 py-2"><input value={product.imageGradient} onChange={(e) => updateProduct(product.tempId, 'imageGradient', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="CSS Gradient" /></td>
+
+                                        <td className="px-2 py-2">
+                                            {/* Images logic same as before, condensed */}
+                                            <div className="flex flex-wrap gap-2">
+                                                {product.images.map((url, idx) => (
+                                                    <div key={idx} className="w-8 h-8 relative"><img src={url} className="w-full h-full object-cover" /></div>
+                                                ))}
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    id={`file-${product.tempId}`}
+                                                    className="hidden"
+                                                    onChange={(e) => handleRowImageUpload(product.tempId, e)}
+                                                    disabled={uploadingRows.includes(product.tempId) || (product.images || []).length >= 5}
+                                                />
+                                                <label htmlFor={`file-${product.tempId}`} className="cursor-pointer text-xs border p-1 rounded-sm">+</label>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-center">
-                                            <button
-                                                onClick={() => removeRow(product.tempId)}
-                                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-sm transition-all"
-                                                disabled={products.length === 1}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                            <button onClick={() => removeRow(product.tempId)} className="text-red-500"><Trash2 size={16} /></button>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                    <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-                        <span className="text-xs text-gray-500 font-medium italic">* Indicates required fields</span>
-                        <button
-                            onClick={addRow}
-                            className="flex items-center gap-2 text-sm font-semibold text-black hover:bg-gray-100 px-4 py-2 rounded-sm transition-all"
-                        >
-                            <Plus size={16} />
-                            Add another product row
-                        </button>
+                    {/* Footer Actions */}
+                    <div className="p-4 bg-gray-50 flex gap-4">
+                        <button onClick={addRow} className="flex items-center gap-2 text-sm font-semibold"><Plus size={16} /> Add Row</button>
                     </div>
                 </div>
             </div>
@@ -427,20 +398,11 @@ export default function BulkProductAddPage() {
                     disabled={isSubmitting}
                     className="flex items-center gap-3 px-12 py-3 bg-black text-white rounded-sm text-base font-bold hover:bg-gray-800 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 shadow-lg"
                 >
-                    {isSubmitting ? (
-                        <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            Uploading Products...
-                        </>
-                    ) : (
-                        <>
-                            <Save size={20} />
-                            SAVE ALL {products.length} PRODUCTS
-                        </>
-                    )}
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save size={20} />}
+                    <span className="ml-2">SAVE ALL PRODUCTS</span>
                 </button>
             </div>
-            <div className="h-24"></div> {/* Spacer for sticky bar */}
+            <div className="h-24"></div>
         </div>
     )
 }

@@ -7,7 +7,22 @@ import { Category } from '@/lib/categories'
 import { Brand } from '@/lib/brands'
 import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
 import { useAuth } from '@/contexts/AuthContext'
-import { Plus, Trash2, Loader2, Upload } from 'lucide-react'
+import { Plus, Trash2, Loader2, Upload, Check, ChevronsUpDown } from 'lucide-react'
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface Collection {
     id: number
@@ -20,6 +35,100 @@ interface ProductFormProps {
     initialData?: Product
     isEdit?: boolean
 }
+
+// -----------------------------------------------------------------------------
+// Helper Component: Creatable Select (Combobox with "Add New")
+// -----------------------------------------------------------------------------
+function CreatableSelect({
+    value,
+    onChange,
+    options,
+    placeholder
+}: {
+    value: string
+    onChange: (val: string) => void
+    options: string[]
+    placeholder?: string
+}) {
+    const [open, setOpen] = useState(false)
+    const [searchValue, setSearchValue] = useState("")
+
+    // Reset search value when closed or value changes? Usually resetting on open is cleaner.
+    useEffect(() => {
+        if (open) setSearchValue("")
+    }, [open])
+
+    const filteredOptions = options.filter(opt =>
+        opt.toLowerCase().includes(searchValue.toLowerCase())
+    )
+
+    const showCreate = searchValue && !options.some(opt => opt.toLowerCase() === searchValue.toLowerCase())
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between font-normal bg-background px-3 py-2 h-auto text-left"
+                >
+                    {value ? value : <span className="text-muted-foreground">{placeholder || "Select..."}</span>}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command shouldFilter={false}>
+                    <CommandInput
+                        placeholder={`Search or create...`}
+                        value={searchValue}
+                        onValueChange={setSearchValue}
+                    />
+                    <CommandList>
+                        {filteredOptions.length === 0 && !showCreate && (
+                            <CommandEmpty>No result found.</CommandEmpty>
+                        )}
+                        <CommandGroup>
+                            {filteredOptions.map((opt) => (
+                                <CommandItem
+                                    key={opt}
+                                    value={opt}
+                                    onSelect={(currentValue) => {
+                                        // onChange(currentValue === value ? "" : currentValue)
+                                        onChange(opt)
+                                        setOpen(false)
+                                    }}
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            value === opt ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                    {opt}
+                                </CommandItem>
+                            ))}
+                            {showCreate && (
+                                <CommandItem
+                                    value={searchValue}
+                                    onSelect={() => {
+                                        onChange(searchValue)
+                                        setOpen(false)
+                                    }}
+                                    className="text-blue-600 font-medium"
+                                >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Create "{searchValue}"
+                                </CommandItem>
+                            )}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    )
+}
+
 
 export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     const router = useRouter()
@@ -35,18 +144,33 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             collectionName: '',
             subCategory: '',
             gender: 'Unisex',
-            brand: '',
-            color: '',
+            brand: 'Butterfly Couture',
+            colors: [],
             inStock: true,
+            stock: 0,
             image: '', // Will store image URL
             imageUrl: '', // Additional field for uploaded images
             images: [], // Array for multiple images
             size: ['S', 'M', 'L'], // Default sizes
+            description: '',
+            fabricComposition: '',
+            fit: '',
+            closure: '',
+            sleeveType: '',
+            washCare: '',
+            countryOfManufacture: 'India',
+            modelSize: '',
+            modelHeight: '',
+            shippingTime: '',
+            imageGradient: '',
         }
     )
     const [uploadingImage, setUploadingImage] = useState(false)
     const [imagePreview, setImagePreview] = useState('')
     const [compressionInfo, setCompressionInfo] = useState<string>('')
+
+    const [colorInput, setColorInput] = useState('')
+
 
     useEffect(() => {
         // Fetch collections, categories (styles), and brands
@@ -76,11 +200,28 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
         if (type === 'checkbox') {
             const checked = (e.target as HTMLInputElement).checked
             setFormData(prev => ({ ...prev, [name]: checked }))
-        } else if (name === 'price') {
+        } else if (name === 'price' || name === 'stock') {
             setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }))
         } else {
             setFormData(prev => ({ ...prev, [name]: value }))
         }
+    }
+
+    const handleColorAdd = () => {
+        if (colorInput.trim()) {
+            setFormData(prev => ({
+                ...prev,
+                colors: [...(prev.colors || []), colorInput.trim()]
+            }))
+            setColorInput('')
+        }
+    }
+
+    const removeColor = (idx: number) => {
+        setFormData(prev => ({
+            ...prev,
+            colors: (prev.colors || []).filter((_, i) => i !== idx)
+        }))
     }
 
     const { token } = useAuth()
@@ -186,17 +327,29 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl bg-background p-6 rounded-sm border border-border">
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl bg-background p-6 rounded-sm border border-border">
+            <h2 className="text-xl font-bold mb-4">Product Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {/* Basic Info */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Product Name</label>
                     <input
                         type="text"
                         name="name"
-                        required
                         value={formData.name}
                         onChange={handleChange}
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Brand</label>
+                    <CreatableSelect
+                        value={formData.brand || ""}
+                        onChange={(val) => setFormData(prev => ({ ...prev, brand: val }))}
+                        options={brands.map(b => b.name)}
+                        placeholder="Select or type brand"
                     />
                 </div>
 
@@ -205,7 +358,6 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     <input
                         type="number"
                         name="price"
-                        required
                         min="0"
                         step="1"
                         value={formData.price}
@@ -215,58 +367,49 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Main Category</label>
+                    <label className="text-sm font-medium text-foreground">Stock Quantity</label>
                     <input
-                        list="categories-list"
-                        name="category"
-                        value={formData.category}
+                        type="number"
+                        name="stock"
+                        min="0"
+                        step="1"
+                        value={formData.stock}
                         onChange={handleChange}
-                        placeholder="Select or type new category"
                         className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                     />
-                    <datalist id="categories-list">
-                        {styleCategories.map((cat) => (
-                            <option key={cat.id || cat._id} value={cat.name} />
-                        ))}
-                    </datalist>
+                </div>
+
+                {/* Categorization */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Main Category</label>
+                    <CreatableSelect
+                        value={formData.category || ""}
+                        onChange={(val) => setFormData(prev => ({ ...prev, category: val }))}
+                        options={styleCategories.map(c => c.name)}
+                        placeholder="Select or type category"
+                    />
                 </div>
 
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Collection</label>
-                    <select
-                        name="collectionName"
-                        value={formData.collectionName}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                    >
-                        <option value="">Select Collection</option>
-                        {collections?.map((col) => (
-                            <option key={col.id} value={col.name}>
-                                {col.name}
-                            </option>
-                        ))}
-                    </select>
+                    <CreatableSelect
+                        value={formData.collectionName || ""}
+                        onChange={(val) => setFormData(prev => ({ ...prev, collectionName: val }))}
+                        options={collections.map(c => c.name)}
+                        placeholder="Select or type collection"
+                    />
                 </div>
 
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Sub-Category</label>
-                    <input
-                        list="subcategories-list"
-                        type="text"
-                        name="subCategory"
-                        value={formData.subCategory}
-                        onChange={handleChange}
-                        placeholder="e.g. Mini Dress, Silk Top"
-                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                    />
-                    <datalist id="subcategories-list">
-                        {styleCategories
-                            .find(cat => cat.name === formData.category)
-                            ?.subCategories?.map((sub: string) => (
-                                <option key={sub} value={sub} />
-                            ))
+                    <CreatableSelect
+                        value={formData.subCategory || ""}
+                        onChange={(val) => setFormData(prev => ({ ...prev, subCategory: val }))}
+                        options={
+                            (styleCategories.find(c => c.name === formData.category)?.subCategories || []) as string[]
                         }
-                    </datalist>
+                        placeholder="Select or type sub-category"
+                    />
                 </div>
 
                 <div className="space-y-2">
@@ -283,39 +426,33 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     </select>
                 </div>
 
+                {/* Colors & Sizes */}
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Brand</label>
-                    <select
-                        name="brand"
-                        value={formData.brand || ''}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                    >
-                        <option value="">Select Brand</option>
-                        {brands.map((brand) => (
-                            <option key={brand.id} value={brand.name}>
-                                {brand.name}
-                            </option>
+                    <label className="text-sm font-medium text-foreground">Colors</label>
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={colorInput}
+                            onChange={(e) => setColorInput(e.target.value)}
+                            placeholder="Add color..."
+                            className="flex-1 px-3 py-2 border border-border rounded-sm focus:outline-none bg-background text-foreground"
+                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleColorAdd())}
+                        />
+                        <button type="button" onClick={handleColorAdd} className="px-3 py-2 bg-secondary rounded-sm hover:bg-secondary/80">Add</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        {(formData.colors || []).map((c, i) => (
+                            <span key={i} className="px-2 py-1 bg-gray-100 text-xs rounded-full flex items-center gap-1">
+                                {c} <button type="button" onClick={() => removeColor(i)}><Trash2 size={12} /></button>
+                            </span>
                         ))}
-                    </select>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Color</label>
-                    <input
-                        type="text"
-                        name="color"
-                        required
-                        value={formData.color}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                    />
+                    </div>
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
                     <label className="text-sm font-medium text-foreground">Sizes</label>
                     <div className="flex flex-wrap gap-2">
-                        {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                        {['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', 'Free Size'].map((size) => (
                             <button
                                 key={size}
                                 type="button"
@@ -338,6 +475,122 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     <p className="text-xs text-foreground/60">Click to select available sizes</p>
                 </div>
 
+                {/* Detailed Spec Fields */}
+                <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-medium text-foreground">Description</label>
+                    <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Fabric Composition</label>
+                    <input
+                        type="text"
+                        name="fabricComposition"
+                        value={formData.fabricComposition}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Fit</label>
+                    <input
+                        type="text"
+                        name="fit"
+                        value={formData.fit}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Closure</label>
+                    <input
+                        type="text"
+                        name="closure"
+                        value={formData.closure}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Sleeve Type</label>
+                    <input
+                        type="text"
+                        name="sleeveType"
+                        value={formData.sleeveType}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Wash Care</label>
+                    <input
+                        type="text"
+                        name="washCare"
+                        value={formData.washCare}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Country of Manufacture</label>
+                    <input
+                        type="text"
+                        name="countryOfManufacture"
+                        value={formData.countryOfManufacture}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Model Size</label>
+                    <input
+                        type="text"
+                        name="modelSize"
+                        value={formData.modelSize}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Model Height</label>
+                    <input
+                        type="text"
+                        name="modelHeight"
+                        value={formData.modelHeight}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">Shipping Time</label>
+                    <input
+                        type="text"
+                        name="shippingTime"
+                        value={formData.shippingTime}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-medium text-foreground">Image Gradient (CSS)</label>
+                    <input
+                        type="text"
+                        name="imageGradient"
+                        value={formData.imageGradient}
+                        onChange={handleChange}
+                        placeholder="e.g. linear-gradient(45deg, #000, #444)"
+                        className="w-full px-3 py-2 border border-border rounded-sm"
+                    />
+                </div>
+
+
+                {/* Images */}
                 <div className="space-y-2 md:col-span-2">
                     <label className="text-sm font-medium text-foreground">Product Gallery (Add 4-5 images)</label>
                     <div className="space-y-4">
@@ -381,22 +634,10 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                 className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-medium rounded-sm cursor-pointer hover:bg-primary/90 transition-all shadow-sm"
                             >
                                 <Plus size={18} />
+                                <Upload size={18} />
                                 Add Photos
                             </label>
                             <p className="text-xs text-foreground/50">Primary photo will be the first one.</p>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Or use CSS Gradient (fallback)</label>
-                            <input
-                                type="text"
-                                name="image"
-                                value={formData.image}
-                                onChange={handleChange}
-                                placeholder="e.g. bg-gradient-to-br from-blue-100 to-purple-100"
-                                className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                            />
-                            <p className="text-xs text-foreground/60">Enter a Tailwind CSS background gradient class as fallback.</p>
                         </div>
                     </div>
                 </div>
@@ -412,51 +653,9 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     />
                     <label htmlFor="inStock" className="text-sm font-medium text-foreground cursor-pointer">In Stock</label>
                 </div>
-
-                <div className="flex items-center gap-2 md:col-span-2">
-                    <input
-                        type="checkbox"
-                        name="onSale"
-                        id="onSale"
-                        checked={formData.onSale || false}
-                        onChange={handleChange}
-                        className="rounded border-border text-primary focus:ring-primary"
-                    />
-                    <label htmlFor="onSale" className="text-sm font-medium text-foreground cursor-pointer">On Sale</label>
-                </div>
-
-                <div className="flex items-center gap-2 md:col-span-2">
-                    <input
-                        type="checkbox"
-                        name="isNew"
-                        id="isNew"
-                        checked={formData.isNew || false}
-                        onChange={handleChange}
-                        className="rounded border-border text-primary focus:ring-primary"
-                    />
-                    <label htmlFor="isNew" className="text-sm font-medium text-foreground cursor-pointer">New Arrivals</label>
-                </div>
-
-                {formData.onSale && (
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">Sale Price (₹)</label>
-                        <input
-                            type="number"
-                            name="salePrice"
-                            min="0"
-                            step="1"
-                            value={formData.salePrice || ''}
-                            onChange={(e) => {
-                                const value = e.target.value ? parseFloat(e.target.value) : undefined
-                                setFormData(prev => ({ ...prev, salePrice: value }))
-                            }}
-                            className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                        />
-                    </div>
-                )}
             </div>
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-border">
+            <div className="flex justify-end gap-4 pt-4 border-t border-border mt-6">
                 <button
                     type="button"
                     onClick={() => router.back()}

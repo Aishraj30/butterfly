@@ -11,12 +11,7 @@ interface CatalogDrawerProps {
     onClose: () => void
 }
 
-interface Collection {
-    _id: string
-    name: string
-    slug: string
-    image?: string
-}
+
 
 interface CategoryData {
     [category: string]: Set<string>
@@ -44,22 +39,21 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
     // State
     const [categories, setCategories] = useState<CategoryData>({})
-    const [collections, setCollections] = useState<Collection[]>([])
+
     const [isLoading, setIsLoading] = useState(true)
     const [expandedCategories, setExpandedCategories] = useState<string[]>([])
     const [error, setError] = useState<string | null>(null)
 
     // Fetch logic
     useEffect(() => {
-        if (isOpen && (Object.keys(categories).length === 0 || collections.length === 0)) {
+        if (isOpen && Object.keys(categories).length === 0) {
             setIsLoading(true)
             setError(null)
 
             Promise.all([
-                fetch('/api/products').then(res => res.json()),
-                fetch('/api/collections').then(res => res.json())
+                fetch('/api/products').then(res => res.json())
             ])
-                .then(([productsData, collectionsData]) => {
+                .then(([productsData]) => {
                     if (productsData.success && productsData.products) {
                         const catMap: CategoryData = {}
                         productsData.products.forEach((p: any) => {
@@ -71,9 +65,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                         setCategories(catMap)
                     }
 
-                    if (collectionsData.success) {
-                        setCollections(collectionsData.collections || collectionsData.data || [])
-                    }
+                    // Collections removed from here
                 })
                 .catch(err => {
                     console.error('Failed to fetch catalog data:', err)
@@ -199,13 +191,13 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                 const drawerElement = drawerRef.current
                 // Check if the event target is inside the drawer
                 const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
-                
+
                 // If scrolling inside drawer, allow it but prevent it from bubbling to body
                 if (isInsideDrawer) {
                     e.stopPropagation()
                     return
                 }
-                
+
                 // If scrolling outside drawer, prevent it entirely
                 e.preventDefault()
                 e.stopPropagation()
@@ -217,12 +209,12 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             if (isOpen) {
                 const drawerElement = drawerRef.current
                 const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
-                
+
                 if (isInsideDrawer) {
                     // Allow touch scrolling inside drawer
                     return
                 }
-                
+
                 // Prevent touch scrolling outside drawer
                 e.preventDefault()
                 e.stopPropagation()
@@ -234,11 +226,11 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             // Prevent wheel events on document and window
             document.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
             window.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
-            
+
             // Prevent touch events
             document.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
             window.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
-            
+
             // Prevent scroll events
             document.addEventListener('scroll', preventBackgroundScroll, { capture: true })
             window.addEventListener('scroll', preventBackgroundScroll, { capture: true })
@@ -352,27 +344,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                         ) : (
                             <div className="space-y-1">
                                 {/* Featured Collections Section */}
-                                {collections.length > 0 && (
-                                    <div className="pt-4 border-t border-white/10 mt-4 mb-6">
-                                        <h3 className="text-[10px] tracking-[0.4em] uppercase text-white/40 font-bold mb-4">
-                                            Featured Collections
-                                        </h3>
-                                        <div className="space-y-3">
-                                            {collections.map((col) => (
-                                                <Link
-                                                    key={col._id}
-                                                    href={`/collection/${col.slug || col._id}`}
-                                                    onClick={onClose}
-                                                    className="block group"
-                                                >
-                                                    <span className="text-xs uppercase tracking-[0.2em] text-white/80 group-hover:text-white transition-colors">
-                                                        {col.name}
-                                                    </span>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+
 
                                 <h3 className="text-[10px] tracking-[0.4em] uppercase text-white/40 font-bold mb-4">
                                     Browse by Category

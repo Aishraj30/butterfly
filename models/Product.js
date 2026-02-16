@@ -4,18 +4,16 @@ const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
       trim: true,
     },
 
     brand: {
       type: String,
-      required: true,
+      default: "Butterfly Couture",
     },
 
     price: {
       type: Number,
-      required: true,
     },
 
     category: {
@@ -33,7 +31,6 @@ const productSchema = new mongoose.Schema(
     gender: {
       type: String,
       enum: ["Male", "Female", "Unisex"],
-      required: true,
     },
 
     colors: [
@@ -62,7 +59,6 @@ const productSchema = new mongoose.Schema(
     images: [
       {
         type: String, // image URLs
-        required: true,
       },
     ],
 

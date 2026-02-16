@@ -78,9 +78,14 @@ export class ProductController {
 
             // Link product to collection if collectionName is provided
             if (body.collectionName) {
+                const slug = body.collectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
                 await Collection.findOneAndUpdate(
                     { name: body.collectionName },
-                    { $addToSet: { products: product._id } }
+                    {
+                        $addToSet: { products: product._id },
+                        $setOnInsert: { slug: slug, isActive: true }
+                    },
+                    { upsert: true, new: true }
                 );
             }
 
@@ -186,6 +191,32 @@ export class ProductController {
             return NextResponse.json(
                 { message: "Product not found" },
                 { status: 404 }
+            );
+        }
+
+        // Upsert Collection if provided
+        if (body.collectionName) {
+            const slug = body.collectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            await Collection.findOneAndUpdate(
+                { name: body.collectionName },
+                {
+                    $addToSet: { products: product._id },
+                    $setOnInsert: { slug: slug, isActive: true }
+                },
+                { upsert: true, new: true }
+            );
+        }
+
+        // Upsert Category/SubCategory if provided
+        if (body.category) {
+            const update = { $setOnInsert: { name: body.category, isActive: true } };
+            if (body.subCategory) {
+                update.$addToSet = { subCategories: body.subCategory };
+            }
+            await Category.findOneAndUpdate(
+                { name: body.category },
+                update,
+                { upsert: true, new: true }
             );
         }
 
