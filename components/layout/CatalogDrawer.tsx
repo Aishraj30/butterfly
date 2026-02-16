@@ -91,7 +91,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
         )
     }
 
-    // Body Scroll Lock - ultra robust version to completely prevent background scrolling
+    // Body Scroll Lock - simplified version that doesn't interfere with homepage components
     useEffect(() => {
         const htmlElement = document.documentElement
         const bodyElement = document.body
@@ -123,17 +123,9 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             const scrollX = window.scrollX
             const scrollbarWidth = getScrollbarWidth()
 
-            // Apply comprehensive lock styles with scrollbar compensation
+            // Apply gentle lock styles - only prevent body scroll, don't interfere with other components
             htmlElement.style.overflow = 'hidden'
-            bodyElement.style.position = 'fixed'
-            bodyElement.style.top = `-${scrollY}px`
-            bodyElement.style.left = `-${scrollX}px`
-            bodyElement.style.width = `calc(100vw - ${scrollbarWidth}px)`
-            bodyElement.style.height = '100vh'
             bodyElement.style.overflow = 'hidden'
-            bodyElement.style.touchAction = 'none'
-            bodyElement.style.webkitUserSelect = 'none'
-            bodyElement.style.userSelect = 'none'
             bodyElement.style.marginRight = `${scrollbarWidth}px`
 
                 // Store scroll positions for restoration
@@ -158,12 +150,12 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
             // Restore styles first
             htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.position = storedStyles.bodyPosition || ''
             bodyElement.style.top = storedStyles.bodyTop || ''
             bodyElement.style.left = storedStyles.bodyLeft || ''
             bodyElement.style.width = storedStyles.bodyWidth || ''
             bodyElement.style.height = storedStyles.bodyHeight || ''
-            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.touchAction = ''
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
@@ -183,12 +175,12 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             // Ensure cleanup on unmount
             const storedStyles = (bodyElement as any).originalStyles || {}
             htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.position = storedStyles.bodyPosition || ''
             bodyElement.style.top = storedStyles.bodyTop || ''
             bodyElement.style.left = storedStyles.bodyLeft || ''
             bodyElement.style.width = storedStyles.bodyWidth || ''
             bodyElement.style.height = storedStyles.bodyHeight || ''
-            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.touchAction = ''
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
@@ -200,92 +192,65 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
         }
     }, [isOpen])
 
-    // Prevent any background scrolling with comprehensive event blocking
+    // Prevent background scrolling when drawer is open
     useEffect(() => {
-        const preventAllScroll = (e: Event) => {
+        const preventBackgroundScroll = (e: Event) => {
             if (isOpen) {
                 const drawerElement = drawerRef.current
-                // Always prevent default and stop propagation for background elements
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
+                // Check if the event target is inside the drawer
+                const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
+                
+                // If scrolling inside drawer, allow it but prevent it from bubbling to body
+                if (isInsideDrawer) {
                     e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
+                    return
                 }
-                // For drawer elements, just stop propagation to prevent body scroll
-                if (drawerElement && drawerElement.contains(e.target as Node)) {
-                    e.stopPropagation()
-                }
-            }
-        }
-
-        const preventWheel = (e: Event) => {
-            if (isOpen) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-                // Allow wheel scrolling in drawer but prevent bubbling
+                
+                // If scrolling outside drawer, prevent it entirely
+                e.preventDefault()
                 e.stopPropagation()
+                return false
             }
         }
 
-        const preventTouch = (e: TouchEvent) => {
+        const preventTouchMove = (e: TouchEvent) => {
             if (isOpen) {
                 const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
+                const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
+                
+                if (isInsideDrawer) {
+                    // Allow touch scrolling inside drawer
+                    return
                 }
-            }
-        }
-
-        const preventKeyScroll = (e: KeyboardEvent) => {
-            if (isOpen && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
+                
+                // Prevent touch scrolling outside drawer
+                e.preventDefault()
+                e.stopPropagation()
+                return false
             }
         }
 
         if (isOpen) {
-            // Block all possible scroll events with capture phase
-            document.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('mousewheel', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('DOMMouseScroll', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('touchmove', preventTouch, { passive: false, capture: true })
-            document.addEventListener('touchstart', preventAllScroll, { passive: false, capture: true })
-            document.addEventListener('touchend', preventAllScroll, { passive: false, capture: true })
-            document.addEventListener('keydown', preventKeyScroll, { capture: true })
-            document.addEventListener('scroll', preventAllScroll, { capture: true })
-
-            // Also block on window level
-            window.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
-            window.addEventListener('scroll', preventAllScroll, { capture: true })
+            // Prevent wheel events on document and window
+            document.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
+            window.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
+            
+            // Prevent touch events
+            document.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
+            window.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
+            
+            // Prevent scroll events
+            document.addEventListener('scroll', preventBackgroundScroll, { capture: true })
+            window.addEventListener('scroll', preventBackgroundScroll, { capture: true })
         }
 
         return () => {
-            // Clean up all event listeners
-            document.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('mousewheel', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('DOMMouseScroll', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('touchmove', preventTouch, { capture: true })
-            document.removeEventListener('touchstart', preventAllScroll, { capture: true })
-            document.removeEventListener('touchend', preventAllScroll, { capture: true })
-            document.removeEventListener('keydown', preventKeyScroll, { capture: true })
-            document.removeEventListener('scroll', preventAllScroll, { capture: true })
-
-            window.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
-            window.removeEventListener('scroll', preventAllScroll, { capture: true })
+            document.removeEventListener('wheel', preventBackgroundScroll, { capture: true })
+            window.removeEventListener('wheel', preventBackgroundScroll, { capture: true })
+            document.removeEventListener('touchmove', preventTouchMove, { capture: true })
+            window.removeEventListener('touchmove', preventTouchMove, { capture: true })
+            document.removeEventListener('scroll', preventBackgroundScroll, { capture: true })
+            window.removeEventListener('scroll', preventBackgroundScroll, { capture: true })
         }
     }, [isOpen])
 
