@@ -81,3 +81,28 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }
+// UPDATE ORDER STATUS
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+    try {
+        await connectDB();
+        const { id } = await params;
+        const body = await req.json();
+        const { status, paymentStatus, deliveryStatus } = body;
+
+        const order = await Order.findById(id);
+
+        if (!order) {
+            return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+        }
+
+        if (status) order.status = status;
+        if (paymentStatus) order.paymentStatus = paymentStatus;
+        if (deliveryStatus) order.deliveryStatus = deliveryStatus;
+
+        await order.save();
+
+        return NextResponse.json({ success: true, data: order });
+    } catch (error: any) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+}

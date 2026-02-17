@@ -10,6 +10,7 @@ interface CartItem {
   name?: string
   price?: string | number
   image?: string
+  customSize?: any
 }
 import { cookies } from 'next/headers'
 

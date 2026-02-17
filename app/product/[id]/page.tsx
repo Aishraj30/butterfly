@@ -45,6 +45,7 @@ interface Product {
     brand?: string;
     createdAt?: string;
     updatedAt?: string;
+    isCustomizable?: boolean;
 }
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -66,6 +67,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
     const [touchStart, setTouchStart] = useState(0);
     const [touchEnd, setTouchEnd] = useState(0);
+    const [showMeasurementModal, setShowMeasurementModal] = useState(false);
+    const [customSize, setCustomSize] = useState({
+        chest: '',
+        waist: '',
+        shoulder: '',
+        sleeveLength: '',
+        length: '',
+        fit: 'Regular',
+        notes: '',
+        unit: 'inch'
+    });
 
     useEffect(() => {
         if (id) {
@@ -99,27 +111,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
     const onTouchEnd = () => {
         if (!touchStart || !touchEnd) return;
-        
+
         const distance = touchStart - touchEnd;
         const isLeftSwipe = distance > minSwipeDistance;
         const isRightSwipe = distance < -minSwipeDistance;
 
-        if (isLeftSwipe && selectedImageIndex < allImages.length - 1) {
+        if (isLeftSwipe && selectedImageIndex < (product?.images?.length || 0)) {
             setSelectedImageIndex(prev => prev + 1);
         }
         if (isRightSwipe && selectedImageIndex > 0) {
-            setSelectedImageIndex(prev => prev - 1);
-        }
-    };
-
-    const nextImage = () => {
-        if (selectedImageIndex < allImages.length - 1) {
-            setSelectedImageIndex(prev => prev + 1);
-        }
-    };
-
-    const prevImage = () => {
-        if (selectedImageIndex > 0) {
             setSelectedImageIndex(prev => prev - 1);
         }
     };
@@ -158,14 +158,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     };
 
     const isSizeAvailable = (size: string) => {
-        if (!inventory.length) return true; // Default to true if no inventory records exist yet
+        if (size === 'Custom') return true; // Custom size always available
+        if (!inventory.length) return true;
 
-        // Exact match for size and color
         let inv = inventory.find(i =>
             i.size === size && (i.color === product?.color || i.color === 'N/A')
         );
 
-        // Fallback to No Variant match ONLY if no specific size records exist at all
         if (!inv) {
             const hasAnySpecificSizeRecord = inventory.some(i => i.size !== 'N/A');
             if (!hasAnySpecificSizeRecord) {
@@ -173,19 +172,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             }
         }
 
-        if (!inv) return false; // If we have inventory data but no record for this size, it's out of stock
-        return (inv.totalStock - inv.reservedStock) > 0;
+        if (!inv) return false;
+        return (inv.totalStock - (inv.reservedStock || 0)) > 0;
     };
 
     const getStockInfo = (size: string) => {
+        if (size === 'Custom') return null;
         if (!inventory.length) return null;
 
-        // Exact match for size and color
         let inv = inventory.find(i =>
             i.size === size && (i.color === product?.color || i.color === 'N/A')
         );
 
-        // Fallback to No Variant match ONLY if no specific size records exist at all
         if (!inv) {
             const hasAnySpecificSizeRecord = inventory.some(i => i.size !== 'N/A');
             if (!hasAnySpecificSizeRecord) {
@@ -216,7 +214,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
         try {
             if (isInWishlist(product.id)) {
-                // Find the wishlist item and remove it
                 const response = await fetch('/api/wishlist');
                 if (response.ok) {
                     const data = await response.json();
@@ -226,23 +223,44 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     }
                 }
             } else {
-                // Add to wishlist
                 await addToWishlist(product.id);
             }
         } catch (error) {
             console.error('Wishlist error:', error);
-            // Show error message to user
             alert('Failed to update wishlist. Please try again.');
         }
     };
 
+    const isCustomSizeEmpty = () => {
+        return !customSize.chest || !customSize.waist || !customSize.shoulder || !customSize.sleeveLength || !customSize.length;
+    };
+
+    const handleCustomSizeChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        if (['chest', 'waist', 'shoulder', 'sleeveLength', 'length'].includes(name)) {
+            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                setCustomSize(prev => ({ ...prev, [name]: value }));
+            }
+        } else {
+            setCustomSize(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
     const handleAddToCart = async () => {
-        if (!product || !selectedSize) {
+        if (!product) return;
+
+        if (!selectedSize) {
             setCartError('Please select a size');
             return;
         }
 
-        if (!product.inStock) {
+        if (selectedSize === 'Custom' && isCustomSizeEmpty()) {
+            setCartError('Please enter your custom measurements');
+            setShowMeasurementModal(true);
+            return;
+        }
+
+        if (selectedSize !== 'Custom' && !product.inStock) {
             setCartError('Product is out of stock');
             return;
         }
@@ -258,11 +276,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 product.color || '',
                 product.name,
                 product.salePrice || product.price,
-                product.images?.[0] || product.imageUrl || product.image
+                product.images?.[0] || product.imageUrl || product.image,
+                selectedSize === 'Custom' ? customSize : undefined
             );
 
             if (result.success) {
-                // Show success message
                 alert(`${product.name} added to cart!`);
             } else {
                 throw new Error(result.error || 'Failed to add to cart');
@@ -305,30 +323,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         );
     }
 
-    const discountPercent = product.onSale && product.salePrice
-        ? Math.round(((product.price - product.salePrice) / product.price) * 100)
-        : 0;
-
     const allImages = product.images || [product.imageUrl, product.image].filter(Boolean);
-    const displayImage = allImages[selectedImageIndex] || product.images?.[0] || product.imageUrl || product.image;
-
-    // Helper for display
     const displayColors = product.colors && product.colors.length > 0
         ? product.colors.join(', ')
         : product.color || 'N/A';
-
     const reviewCount = product.reviewsCount !== undefined ? product.reviewsCount : (product.reviews || 0);
 
     return (
         <main className="w-full bg-white min-h-screen">
             <div className="max-w-[1400px] mx-auto px-6 pt-12">
-                {/* Product Detail - Unified Scroll Layout */}
                 <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Left: Images Column */}
+                    {/* Left: Images */}
                     <div className="lg:w-1/2">
-                        {/* Mobile Carousel - Only visible on mobile */}
+                        {/* Mobile Carousel */}
                         <div className="lg:hidden">
-                            <div 
+                            <div
                                 className="relative aspect-[3/4] bg-gray-100 overflow-hidden"
                                 onTouchStart={onTouchStart}
                                 onTouchMove={onTouchMove}
@@ -343,35 +352,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 ) : (
                                     <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
                                 )}
-                                
-                                {/* Badge on first image */}
+
                                 {selectedImageIndex === 0 && (product.isNew || product.onSale) && (
                                     <div className="absolute top-4 left-4 z-10">
-                                        {product.isNew && (
-                                            <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2">
-                                                NEW
-                                            </div>
-                                        )}
-                                        {product.onSale && (
-                                            <div className="bg-red-600 text-white text-xs font-bold px-3 py-1">
-                                                SALE
-                                            </div>
-                                        )}
+                                        {product.isNew && <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2 uppercase">NEW</div>}
+                                        {product.onSale && <div className="bg-red-600 text-white text-xs font-bold px-3 py-1 uppercase">SALE</div>}
                                     </div>
                                 )}
 
-                                {/* Image Indicators */}
                                 {allImages.length > 1 && (
                                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                                         {allImages.map((_, index) => (
                                             <button
                                                 key={index}
                                                 onClick={() => setSelectedImageIndex(index)}
-                                                className={`w-2 h-2 rounded-full transition-all ${
-                                                    index === selectedImageIndex 
-                                                        ? 'bg-white w-6' 
-                                                        : 'bg-white/50'
-                                                }`}
+                                                className={`w-2 h-2 rounded-full transition-all ${index === selectedImageIndex ? 'bg-white w-6' : 'bg-white/50'}`}
                                             />
                                         ))}
                                     </div>
@@ -379,128 +374,76 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             </div>
                         </div>
 
-                        {/* Desktop Images - Only visible on desktop */}
+                        {/* Desktop Images */}
                         <div className="hidden lg:block space-y-0">
                             {allImages.map((image, index) => (
-                                <div key={index} className="relative">
-                                    <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
-                                        {image ? (
-                                            <img
-                                                src={image}
-                                                alt={`${product.name} ${index + 1}`}
-                                                className="w-full h-full object-cover object-top"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
-                                        )}
-                                        
-                                        {/* Badge on first image */}
-                                        {index === 0 && (product.isNew || product.onSale) && (
-                                            <div className="absolute top-4 left-4 z-10">
-                                                {product.isNew && (
-                                                    <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2">
-                                                        NEW
-                                                    </div>
-                                                )}
-                                                {product.onSale && (
-                                                    <div className="bg-red-600 text-white text-xs font-bold px-3 py-1">
-                                                        SALE
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
+                                <div key={index} className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
+                                    {image ? (
+                                        <img src={image} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover object-top" />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
+                                    )}
+                                    {index === 0 && (product.isNew || product.onSale) && (
+                                        <div className="absolute top-4 left-4 z-10">
+                                            {product.isNew && <div className="bg-green-600 text-white text-xs font-bold px-3 py-1 mb-2 uppercase">NEW</div>}
+                                            {product.onSale && <div className="bg-red-600 text-white text-xs font-bold px-3 py-1 uppercase">SALE</div>}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Right: Product Specifications - Sticky on desktop */}
+                    {/* Right: Specifications */}
                     <div className="lg:w-1/2">
                         <div className="lg:sticky lg:top-8 space-y-8 pr-4">
-                            {/* Product Header */}
-                            <div className="flex items-start justify-between mb-6">
+                            <div className="flex items-start justify-between">
                                 <div>
-                                    {product.brand && (
-                                        <p className="text-gray-500 text-xs tracking-widest mb-1 uppercase">
-                                            {product.brand}
-                                        </p>
-                                    )}
+                                    {product.brand && <p className="text-gray-500 text-xs tracking-widest mb-1 uppercase">{product.brand}</p>}
                                     <h1 className="font-serif text-2xl text-black mb-1">{product.name}</h1>
                                     <p className="text-gray-600 text-sm">{product.gender}</p>
                                 </div>
-                                <div className="relative">
-                                    <button
-                                        onClick={toggleWishlist}
-                                        className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
-                                        title={!user ? "Login to add to wishlist" : "Add to wishlist"}
-                                    >
-                                        <Heart
-                                            size={18}
-                                            className={product && isInWishlist(product.id) ? "text-red-500 fill-red-500" : "text-gray-400 hover:text-red-500"}
-                                        />
-                                    </button>
-                                    {!user && (
-                                        <span className="absolute top-0 right-0 w-2 h-2 bg-orange-500 rounded-full"></span>
-                                    )}
-                                </div>
+                                <button onClick={toggleWishlist} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                    <Heart size={18} className={isInWishlist(product.id) ? "text-red-500 fill-red-500" : "text-gray-400"} />
+                                </button>
                             </div>
 
-                            {/* Price Section */}
                             <div className="mb-6">
                                 <p className="text-2xl font-bold text-black">IDR {(product.salePrice || product.price).toLocaleString()}</p>
                             </div>
 
-                            {/* Stock Status */}
                             <div className="flex items-center gap-2">
                                 <span className={`text-sm font-medium ${product.inStock ? 'text-green-600' : 'text-red-600'}`}>
                                     {product.inStock ? '✓ In Stock' : 'Out of Stock'}
                                 </span>
                             </div>
 
-                            {/* Low Stock Warning */}
                             {selectedSize && (() => {
                                 const stockInfo = getStockInfo(selectedSize);
                                 if (stockInfo && stockInfo.isLow) {
                                     return (
                                         <div className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-                                            <svg className="w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                            </svg>
-                                            <span className="text-sm font-medium text-orange-800">
-                                                Only {stockInfo.available} {stockInfo.available === 1 ? 'item' : 'items'} left in stock!
-                                            </span>
+                                            <span className="text-sm font-medium text-orange-800">Only {stockInfo.available} left in stock!</span>
                                         </div>
                                     );
                                 }
                                 return null;
                             })()}
 
-                            {/* Rating */}
                             <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
                                 <div className="flex items-center gap-1">
-                                    <span className="text-lg font-bold">{product.rating}</span>
+                                    <span className="text-lg font-bold">{Number(product.rating || 0).toFixed(1)}</span>
                                     <div className="flex">
                                         {[...Array(5)].map((_, i) => (
-                                            <Star
-                                                key={i}
-                                                size={16}
-                                                className={i < Math.round(product.rating) ? "fill-gray-400 text-gray-400" : "text-gray-300"}
-                                            />
+                                            <Star key={i} size={16} className={i < Math.round(product.rating) ? "fill-gray-400 text-gray-400" : "text-gray-300"} />
                                         ))}
                                     </div>
                                 </div>
-                                <span className="text-sm text-gray-600">
-                                    ({product.reviewsCount !== undefined ? product.reviewsCount : (product.reviews || 0)} reviews)
-                                </span>
+                                <span className="text-sm text-gray-600">({reviewCount} reviews)</span>
                             </div>
 
-                            {/* Description & Model Info */}
                             <div className="space-y-4 text-gray-600">
-                                {product.description && (
-                                    <p className="text-sm leading-relaxed">{product.description}</p>
-                                )}
-
+                                {product.description && <p className="text-sm leading-relaxed">{product.description}</p>}
                                 {(product.modelSize || product.modelHeight) && (
                                     <ul className="text-sm list-disc pl-4 space-y-1">
                                         {product.modelSize && <li>Model wears a size: {product.modelSize}</li>}
@@ -537,7 +480,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                             </button>
                                         );
                                     })}
+                                    {/* Always show CUSTOM size option */}
+                                    <button
+                                        onClick={() => {
+                                            setSelectedSize('Custom');
+                                            setShowMeasurementModal(true);
+                                        }}
+                                        className={`relative min-w-[4rem] h-12 px-4 flex items-center justify-center border transition-all text-xs font-bold tracking-widest overflow-hidden group
+                                            ${selectedSize === 'Custom' ? 'bg-black text-white border-black shadow-lg' : 'border-gray-200 text-gray-400 hover:border-black hover:text-black'}`}
+                                    >
+                                        CUSTOM
+                                    </button>
                                 </div>
+                                {selectedSize === 'Custom' && !isCustomSizeEmpty() && (
+                                    <div className="mt-2 text-xs text-green-600">
+                                        Custom: {customSize.chest}-{customSize.waist}-{customSize.shoulder} ({customSize.fit})
+                                        <button onClick={() => setShowMeasurementModal(true)} className="ml-2 underline text-black">Edit</button>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Quantity & Add to Cart */}
@@ -570,7 +530,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
                                         <button
                                             onClick={handleAddToCart}
-                                            disabled={!product.inStock || addingToCart}
+                                            disabled={addingToCart}
                                             className="flex-1 bg-black text-white font-bold uppercase flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed rounded"
                                         >
                                             {addingToCart ? 'Adding...' : 'ADD TO CART'}
@@ -605,7 +565,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             {/* Login Prompt Modal */}
                             {showWishlistPrompt && (
                                 <div className="fixed inset-0 bg-black/20 backdrop-blur-xl flex items-center justify-center z-50 h-screen">
-                                    <div className="bg-white rounded-lg p-6 max-w-sm mx-4 space-y-4 shadow-xl border border-gray-200">
+                                    <div className="bg-white rounded-lg p-6 max-sm mx-4 space-y-4 shadow-xl border border-gray-200">
                                         <h3 className="text-lg font-bold text-black">Login Required</h3>
                                         <p className="text-gray-600">Please login to add items to your wishlist.</p>
                                         <div className="flex gap-3">
@@ -633,11 +593,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 {/* Recommended Products Section */}
                 {recommendedProducts.length > 0 && (
                     <div className="mt-16 mb-16 pt-12 border-t border-gray-200">
-                        <h2 className="font-sans text-2xl text-black mb-8 text-center">RECOMMENDATIONS</h2>
+                        <h2 className="font-sans text-2xl text-black mb-8 text-center uppercase tracking-widest">Recommendations</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             {recommendedProducts.map((recProduct) => (
-                                <Link 
-                                    key={recProduct.id} 
+                                <Link
+                                    key={recProduct.id}
                                     href={`/product/${recProduct.id}`}
                                     className="group"
                                 >
@@ -668,6 +628,100 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     </div>
                 )}
             </div>
+
+            {/* Custom Size Modal */}
+            {showMeasurementModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg p-6 max-w-xl w-full shadow-xl overflow-y-auto max-h-[90vh]">
+                        <h3 className="text-xl font-bold text-black mb-4 uppercase tracking-widest">Custom Measurement Form</h3>
+
+                        <div className="flex gap-4 mb-6 border-b pb-4">
+                            <button
+                                onClick={() => setCustomSize(prev => ({ ...prev, unit: 'inch' }))}
+                                className={`px-4 py-2 text-xs font-bold tracking-widest border ${customSize.unit === 'inch' ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-400'}`}
+                            >
+                                INCH
+                            </button>
+                            <button
+                                onClick={() => setCustomSize(prev => ({ ...prev, unit: 'cm' }))}
+                                className={`px-4 py-2 text-xs font-bold tracking-widest border ${customSize.unit === 'cm' ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-400'}`}
+                            >
+                                CM
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-6">
+                            {[
+                                { id: 'chest', label: 'Chest' },
+                                { id: 'waist', label: 'Waist' },
+                                { id: 'shoulder', label: 'Shoulder' },
+                                { id: 'sleeveLength', label: 'Sleeve Length' },
+                                { id: 'length', label: 'Length' }
+                            ].map((field) => (
+                                <div key={field.id}>
+                                    <label className="block text-[10px] font-bold uppercase tracking-widest mb-1">{field.label} ({customSize.unit})</label>
+                                    <input
+                                        type="text"
+                                        name={field.id}
+                                        value={(customSize as any)[field.id]}
+                                        onChange={handleCustomSizeChange}
+                                        className="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-black transition-colors"
+                                        placeholder="0.0"
+                                    />
+                                </div>
+                            ))}
+                            <div>
+                                <label className="block text-[10px] font-bold uppercase tracking-widest mb-1">Fit Type</label>
+                                <select
+                                    name="fit"
+                                    value={customSize.fit}
+                                    onChange={handleCustomSizeChange}
+                                    className="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-black transition-colors bg-white"
+                                >
+                                    <option value="Slim">Slim Fit</option>
+                                    <option value="Regular">Regular Fit</option>
+                                    <option value="Loose">Loose Fit</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block text-[10px] font-bold uppercase tracking-widest mb-1">Additional Notes</label>
+                            <textarea
+                                name="notes"
+                                value={customSize.notes}
+                                onChange={handleCustomSizeChange}
+                                className="w-full border border-gray-300 p-3 text-sm focus:outline-none focus:border-black transition-colors min-h-[100px] resize-none"
+                                placeholder="e.g. Keep loose at waist, specific requirements, etc."
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowMeasurementModal(false);
+                                    if (isCustomSizeEmpty()) setSelectedSize('');
+                                }}
+                                className="flex-1 px-4 py-3 border border-gray-300 text-black font-bold text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (isCustomSizeEmpty()) {
+                                        alert("Please fill all mandatory fields (Chest, Waist, Shoulder, Sleeve, Length)");
+                                        return;
+                                    }
+                                    setShowMeasurementModal(false);
+                                }}
+                                className="flex-1 px-4 py-3 bg-black text-white font-bold text-xs uppercase tracking-widest hover:bg-gray-800 transition-colors"
+                            >
+                                Save Custom Size
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

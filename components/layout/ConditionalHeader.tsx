@@ -7,7 +7,9 @@ export function ConditionalHeader() {
     const pathname = usePathname()
     const isAdmin = pathname?.startsWith('/admin')
 
-    if (isAdmin) {
+    const isOrders = pathname?.startsWith('/orders')
+
+    if (isAdmin || isOrders) {
         return null
     }
 

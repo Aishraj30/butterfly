@@ -40,6 +40,20 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    address: {
+      street: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      zip: { type: String, default: "" },
+      country: { type: String, default: "" },
+    },
+
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -56,4 +70,8 @@ userSchema.methods.comparePassword = function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-export default mongoose.models.User || mongoose.model("User", userSchema);
+// Avoid OverwriteModelError
+delete mongoose.models.User;
+const User = mongoose.model("User", userSchema);
+
+export default User;

@@ -7,6 +7,10 @@ const orderSchema = new mongoose.Schema(
             unique: true,
             default: () => "ORD-" + Math.random().toString(36).substring(2, 9).toUpperCase(),
         },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
         customer: {
             name: String,
             email: String,
@@ -20,6 +24,8 @@ const orderSchema = new mongoose.Schema(
                 quantity: Number,
                 size: String,
                 color: String,
+                measurements: Object,
+                customSize: Object,
             },
         ],
         total: {
@@ -57,8 +63,15 @@ const orderSchema = new mongoose.Schema(
         transactionId: {
             type: String,
         },
+        deliveryStatus: {
+            type: String,
+            enum: ["pending", "shipped", "delivered"],
+            default: "pending",
+        },
     },
     { timestamps: true }
 );
 
+// Avoid OverwriteModelError
+delete mongoose.models.Order;
 export default mongoose.models.Order || mongoose.model("Order", orderSchema);

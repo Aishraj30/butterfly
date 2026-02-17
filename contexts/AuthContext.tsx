@@ -30,6 +30,14 @@ interface User {
   role: string;
   createdAt: string;
   avatar?: string;
+  phoneNumber?: string;
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
 }
 
 interface AuthContextType {

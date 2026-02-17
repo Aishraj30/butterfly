@@ -16,6 +16,7 @@ export class OrderController {
                 items,
                 total,
                 customer,
+                userId,
                 shipping: shippingAddress,
                 billing: billingAddress,
                 paymentMethod = 'COD',
@@ -35,6 +36,7 @@ export class OrderController {
                 items,
                 total: Math.round(total * 100) / 100,
                 customer,
+                userId: userId || undefined,
                 shipping: shippingAddress,
                 billing: billingAddress,
                 status: 'pending',
@@ -122,8 +124,18 @@ export class OrderController {
     static async getAll(req) {
         try {
             await connectDB();
-            const email = req.nextUrl.searchParams.get('email');
-            const orders = email ? await Order.find({ 'customer.email': email }).sort({ createdAt: -1 }) : await Order.find({}).sort({ createdAt: -1 });
+            const url = new URL(req.url);
+            const email = url.searchParams.get('email');
+            const userId = url.searchParams.get('userId');
+
+            let query = {};
+            if (userId && Types.ObjectId.isValid(userId)) {
+                query = { userId: userId };
+            } else if (email) {
+                query = { 'customer.email': email };
+            }
+
+            const orders = await Order.find(query).sort({ createdAt: -1 });
 
             return NextResponse.json({
                 success: true,

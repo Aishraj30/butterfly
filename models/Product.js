@@ -55,6 +55,13 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
+
     // ✅ MULTIPLE IMAGES
     images: [
       {
@@ -88,6 +95,11 @@ const productSchema = new mongoose.Schema(
     shippingTime: { type: String }, // "Within 10-12 Weeks..."
 
     isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    isCustomizable: {
       type: Boolean,
       default: true,
     },

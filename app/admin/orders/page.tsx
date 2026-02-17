@@ -25,8 +25,27 @@ export default function AdminOrdersPage() {
             .finally(() => setIsLoading(false))
     }, [])
 
+    const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+        try {
+            const res = await fetch(`/api/orders/${orderId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setOrders(prev => prev.map(o => o.id === orderId || o._id === orderId ? { ...o, status: newStatus } : o));
+            } else {
+                alert('Failed to update status: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Failed to update status');
+        }
+    };
+
     const filteredOrders = orders.filter((order) =>
-        order.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.id || order._id)?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customer?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customer?.email.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -103,9 +122,21 @@ export default function AdminOrdersPage() {
                                                     ${order.total?.toFixed(2)}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 uppercase">
-                                                        {order.status}
-                                                    </span>
+                                                    <select
+                                                        value={order.status}
+                                                        onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
+                                                        className={`px-2 py-1 text-xs font-semibold rounded-full uppercase border-none focus:ring-2 focus:ring-primary cursor-pointer ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                                            order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                                order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                                                    'bg-yellow-100 text-yellow-800'
+                                                            }`}
+                                                    >
+                                                        <option value="pending">Pending</option>
+                                                        <option value="processing">Processing</option>
+                                                        <option value="shipped">Shipped</option>
+                                                        <option value="delivered">Delivered</option>
+                                                        <option value="cancelled">Cancelled</option>
+                                                    </select>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <button className="p-2 text-primary hover:bg-secondary rounded-sm transition-colors" title="View Details">

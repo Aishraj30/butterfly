@@ -13,5 +13,9 @@ export function ConditionalAnnouncementBar() {
 
     const isHome = pathname === '/'
 
+    if (!isHome) {
+        return null
+    }
+
     return <AnnouncementBar isHome={isHome} />
 }

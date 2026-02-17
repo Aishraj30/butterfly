@@ -100,9 +100,8 @@ const inventorySchema = new mongoose.Schema(
 );
 
 // Pre-save hook to keep availableStock in sync
-inventorySchema.pre("save", function (next) {
+inventorySchema.pre("save", function () {
     this.availableStock = this.totalStock - this.reservedStock;
-    next();
 });
 
 // Index for fast search
