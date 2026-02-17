@@ -4,6 +4,9 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { CatalogBanner } from '@/components/catalog/CatalogBanner'
 import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer'
+import { Pagination } from '@/components/ui/PaginationComponent'
+
+const ITEMS_PER_PAGE = 12
 
 // --- ICONS FOR MOBILE VIEW ---
 const SingleColumnIcon = ({ active }: { active: boolean }) => (
@@ -86,6 +89,7 @@ export default function CollectionPage() {
     const [mobileLayout, setMobileLayout] = useState<'1' | '2'>('2') // Default to 2 columns
     const [activeGender, setActiveGender] = useState<string | null>(null)
     const [gridView, setGridView] = useState<'3' | '4'>('4') // Desktop grid
+    const [currentPage, setCurrentPage] = useState(1)
 
     const params = useParams()
     const collectionId = params.collectionId as string
@@ -183,6 +187,7 @@ export default function CollectionPage() {
         }
 
         setFilteredProducts(filtered)
+        setCurrentPage(1) // Reset to first page on filter
     }
 
     // Handle Quick Size Select
@@ -356,39 +361,52 @@ export default function CollectionPage() {
                     </div>
                 ) : (
                     // --- PRODUCTS GRID ---
-                    <div className={`grid gap-4 md:gap-8 
-                        ${/* Mobile Layout Logic */ mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'} 
-                        ${/* Desktop Layout Overrides */ gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'}
-                    `}>
-                        {filteredProducts.map((product) => (
-                            <Link
-                                key={product._id}
-                                href={`/product/${product._id}`}
-                                className="group block"
-                            >
-                                <div className="bg-gray-50 rounded-lg overflow-hidden transition-shadow duration-300">
-                                    <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
-                                        <div className={`w-full h-full ${product.imageUrl || 'bg-gradient-to-br from-pink-100 to-rose-100'} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}>
-                                            {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />}
-                                            {product.onSale && <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">Sale</div>}
-                                            {product.isNew && <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">New</div>}
+                    <>
+                        <div className={`grid gap-4 md:gap-8 
+                            ${/* Mobile Layout Logic */ mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'} 
+                            ${/* Desktop Layout Overrides */ gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'}
+                        `}>
+                            {filteredProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((product) => (
+                                <Link
+                                    key={product._id}
+                                    href={`/product/${product._id}`}
+                                    className="group block"
+                                >
+                                    {/* ... rest of the product card ... */}
+                                    <div className="bg-gray-50 rounded-lg overflow-hidden transition-shadow duration-300">
+                                        <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
+                                            <div className={`w-full h-full ${product.imageUrl || 'bg-gradient-to-br from-pink-100 to-rose-100'} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}>
+                                                {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />}
+                                                {product.onSale && <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">Sale</div>}
+                                                {product.isNew && <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">New</div>}
+                                            </div>
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="font-normal text-xs text-black text-left uppercase mb-2 font-inter truncate">{product.name}</h3>
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-black font-normal text-base font-inter">₹{product.salePrice || product.price}</p>
+                                                {product.salePrice && (
+                                                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                        {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="p-4">
-                                        <h3 className="font-normal text-xs text-black text-left uppercase mb-2 font-inter truncate">{product.name}</h3>
-                                        <div className="flex items-center justify-between">
-                                            <p className="text-black font-normal text-base font-inter">₹{product.salePrice || product.price}</p>
-                                            {product.salePrice && (
-                                                <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                                    {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                                </Link>
+                            ))}
+                        </div>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={Math.ceil(filteredProducts.length / ITEMS_PER_PAGE)}
+                            onPageChange={(page) => {
+                                setCurrentPage(page)
+                                window.scrollTo({ top: 0, behavior: 'smooth' })
+                            }}
+                            className="mt-12"
+                        />
+                    </>
                 )}
             </div>
 

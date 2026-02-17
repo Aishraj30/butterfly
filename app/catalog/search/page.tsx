@@ -4,6 +4,9 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ShoppingBag } from 'lucide-react'
+import { Pagination } from '@/components/ui/PaginationComponent'
+
+const ITEMS_PER_PAGE = 12
 
 // UI Loading state for Suspense fallback
 function SearchLoading() {
@@ -51,6 +54,7 @@ function SearchContent() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -75,7 +79,10 @@ function SearchContent() {
         console.error('Search error:', err)
         setError('Failed to fetch search results')
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        setLoading(false)
+        setCurrentPage(1)
+      })
   }, [query])
 
   if (loading) {
@@ -165,7 +172,7 @@ function SearchContent() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
-          {products.map((product: Product) => (
+          {products.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((product: Product) => (
             <Link
               key={product._id}
               href={`/product/${product._id}`}
@@ -195,6 +202,16 @@ function SearchContent() {
             </Link>
           ))}
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.ceil(products.length / ITEMS_PER_PAGE)}
+          onPageChange={(page) => {
+            setCurrentPage(page)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+          className="mt-12"
+        />
       </div>
     </main>
   )

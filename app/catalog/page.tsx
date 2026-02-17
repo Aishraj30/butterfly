@@ -7,6 +7,9 @@ import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer';
 import { filterAndSortProducts, FilterOptions, getAllProducts, Product } from '@/lib/products';
 import { Sliders } from 'lucide-react';
 import { ProductCard } from '@/components/product/ProductCard';
+import { Pagination } from '@/components/ui/PaginationComponent';
+
+const ITEMS_PER_PAGE = 12;
 
 const SingleColumnIcon = ({ active }: { active: boolean }) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -41,6 +44,7 @@ function CatalogContent() {
     const [mobileLayout, setMobileLayout] = useState<'1' | '2'>('2');
     const [activeGender, setActiveGender] = useState<string | null>(null);
     const [gridView, setGridView] = useState<'3' | '4'>('4');
+    const [currentPage, setCurrentPage] = useState(1);
     const searchParams = useSearchParams();
     const collectionParam = searchParams.get('collection');
 
@@ -78,6 +82,17 @@ function CatalogContent() {
 
         return filterAndSortProducts(products, options);
     }, [searchParams, activeFilters, products]);
+
+    // Reset to first page when filters/search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchParams, activeFilters]);
+
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+    const paginatedProducts = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+    }, [filteredProducts, currentPage]);
 
     useEffect(() => {
         const loadPageData = async () => {
@@ -286,12 +301,24 @@ function CatalogContent() {
                                 </div>
                             </div>
                         ) : (
-                            <div className={`grid ${mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'
-                                } ${gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-x-6 gap-y-12`}>
-                                {filteredProducts.map((product: Product) => (
-                                    <ProductCard key={(product as any)._id || product.id} product={product} />
-                                ))}
-                            </div>
+                            <>
+                                <div className={`grid ${mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'
+                                    } ${gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-x-6 gap-y-12`}>
+                                    {paginatedProducts.map((product: Product) => (
+                                        <ProductCard key={(product as any)._id || product.id} product={product} />
+                                    ))}
+                                </div>
+
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    onPageChange={(page) => {
+                                        setCurrentPage(page);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    className="mt-12"
+                                />
+                            </>
                         )}
                     </div>
                 ) : collections.length === 0 ? (

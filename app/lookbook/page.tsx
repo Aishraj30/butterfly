@@ -95,11 +95,10 @@ export default function LookbookPage() {
               <button
                 key={season}
                 onClick={() => setSelectedSeason(season)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                  selectedSeason === season
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${selectedSeason === season
                     ? 'bg-black text-white'
                     : 'bg-white text-black border border-gray-300 hover:border-gray-400'
-                }`}
+                  }`}
               >
                 {lookbookData[season as keyof typeof lookbookData].title}
               </button>
@@ -131,7 +130,7 @@ export default function LookbookPage() {
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300" />
-                  
+
                   {/* Quick Actions */}
                   <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
                     <button
@@ -154,7 +153,7 @@ export default function LookbookPage() {
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Image Info */}
                 <div className="mt-4">
                   <h3 className="text-lg font-medium mb-2">{image.title}</h3>
@@ -168,11 +167,11 @@ export default function LookbookPage() {
 
       {/* Lightbox */}
       {selectedImage && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedImage(null)}
         >
-          <div 
+          <div
             className="relative max-w-4xl max-h-[90vh] mx-auto"
             onClick={(e) => e.stopPropagation()}
           >

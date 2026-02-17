@@ -36,10 +36,10 @@ function CarouselItem({ product }: { product: Product }) {
   }, [product.videoUrl]);
 
   return (
-    <div className="flex-none w-[80vw] md:w-[calc(25%-2px)] sm:w-[calc(25%-2px)] md:w-[calc(30%-2px)] lg:w-[calc(22%-2px)] snap-start group border-r border-gray-300 px-1 md:px-2 last:border-r-0">
-      <div className="cursor-pointer group mb-4 flex flex-col h-full">
+    <div className="flex-none w-[80vw] md:w-[calc(25%-2px)] sm:w-[calc(25%-2px)] md:w-[calc(30%-2px)] lg:w-[calc(22%-2px)] snap-start group px-[2px]">
+      <Link href={`/product/${product.id}`} className="cursor-pointer group mb-1 flex flex-col h-full">
         {/* Main Media Container */}
-        <div className="relative aspect-[3/4] md:h-[75vh] overflow-hidden rounded-xl bg-gray-100 group/img">
+        <div className="relative aspect-[3/4] md:h-[75vh] overflow-hidden rounded-sm bg-gray-100 group/img">
           {/* Images */}
           <div className={`relative w-full h-full transition-opacity duration-1000 ${videoLoaded && timerFinished ? 'opacity-0' : 'opacity-100'}`}>
             <Image
@@ -85,18 +85,16 @@ function CarouselItem({ product }: { product: Product }) {
         </div>
 
         {/* Product Info */}
-        <Link href={`/product/${product.id}`}>
-          <div className="mt-4 px-0 pb-6 md:pb-4">
-            <div className="flex justify-between items-start mb-1.5 md:mb-2">
-              <h3 className="font-bold text-black text-[10px] md:text-xs uppercase tracking-[0.2em] line-clamp-1 pr-2">{product.name}</h3>
-              <p className="font-bold text-black text-[11px] md:text-xs tracking-wide whitespace-nowrap">{product.price}</p>
-            </div>
-            <p className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-gray-400">
-              Luxury Collection
-            </p>
+        <div className="mt-2 px-2 pb-4">
+          <div className="flex justify-between items-start mb-1 md:mb-1.5">
+            <h3 className="font-bold text-black text-[10px] md:text-xs uppercase tracking-[0.2em] line-clamp-1 pr-2">{product.name}</h3>
+            <p className="font-bold text-black text-[11px] md:text-xs tracking-wide whitespace-nowrap">{product.price}</p>
           </div>
-        </Link>
-      </div>
+          <p className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-gray-400">
+            Luxury Collection
+          </p>
+        </div>
+      </Link>
     </div>
   );
 }
@@ -110,7 +108,7 @@ export function ProductCarousel({ title, products, showAddToCart = true, showQui
         <div className="relative overflow-hidden">
           <div
             ref={carouselRef}
-            className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4 py-4"
+            className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory px-0 pb-2 pt-0"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {products.map((product: Product) => (

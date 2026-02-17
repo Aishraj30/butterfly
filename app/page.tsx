@@ -58,6 +58,12 @@ export default async function Home() {
     .sort({ createdAt: -1 })
     .limit(7)
 
+  // Fetch global highlights as fallback for empty collections
+  const globalHighlights = await Product.find({ isActive: true, inStock: true })
+    .sort({ rating: -1, createdAt: -1 })
+    .limit(8)
+    .lean()
+
   return (
     <main className="min-h-screen transition-[padding] duration-300">
       {collections.length > 0 ? (
@@ -75,10 +81,10 @@ export default async function Home() {
             />
 
             {/* Product Carousel for the collection */}
-            {col.products && col.products.length > 0 && (
+            {(col.products && col.products.filter((p: any) => p !== null).length > 0) ? (
               <ProductCarousel
                 title={`${col.name} Highlights`}
-                products={col.products.map((p: any) => ({
+                products={col.products.filter((p: any) => p !== null).map((p: any) => ({
                   id: p._id.toString(),
                   name: p.name,
                   price: `₹${p.price.toLocaleString()}`,
@@ -86,6 +92,18 @@ export default async function Home() {
                   videoUrl: p.videoUrl
                 }))}
                 shopAllLink={`/catalog?collection=${encodeURIComponent(col.name)}`}
+              />
+            ) : globalHighlights.length > 0 && (
+              <ProductCarousel
+                title="Featured Highlights"
+                products={globalHighlights.map((p: any) => ({
+                  id: p._id.toString(),
+                  name: p.name,
+                  price: `₹${p.price.toLocaleString()}`,
+                  images: p.images && p.images.length > 0 ? p.images : ["/uploads/product-1769084011566.jpeg"],
+                  videoUrl: p.videoUrl
+                }))}
+                shopAllLink="/catalog"
               />
             )}
           </div>
