@@ -4,34 +4,33 @@ const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
       trim: true,
     },
 
     brand: {
       type: String,
-      required: true,
+      default: "Butterfly Couture",
     },
 
     price: {
       type: Number,
-      required: true,
     },
 
     category: {
-      type: String,
-      required: true, // e.g. "Clothing"
+      type: String, // e.g. "Clothing"
+    },
+
+    collectionName: {
+      type: String, // e.g. "Summer 2026"
     },
 
     subCategory: {
-      type: String,
-      required: true, // e.g. "Jacket"
+      type: String, // e.g. "Jacket"
     },
 
     gender: {
       type: String,
       enum: ["Male", "Female", "Unisex"],
-      required: true,
     },
 
     colors: [
@@ -56,11 +55,17 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
+
     // ✅ MULTIPLE IMAGES
     images: [
       {
         type: String, // image URLs
-        required: true,
       },
     ],
 
@@ -90,6 +95,11 @@ const productSchema = new mongoose.Schema(
     shippingTime: { type: String }, // "Within 10-12 Weeks..."
 
     isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    isCustomizable: {
       type: Boolean,
       default: true,
     },

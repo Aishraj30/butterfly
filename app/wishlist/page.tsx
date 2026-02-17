@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+
 export default function WishlistPage() {
     const { wishlistItems, loading, removeFromWishlist } = useWishlist();
     const { user, logout, isLoading: authLoading } = useAuth();
@@ -51,7 +52,7 @@ export default function WishlistPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
+            {/* Page Header */}
             <div className="bg-white border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex items-center justify-between">
@@ -99,7 +100,7 @@ export default function WishlistPage() {
                                         </div>
                                         <ChevronRight className="h-4 w-4 text-gray-400" />
                                     </Link>
-                                    
+
                                     <Link
                                         href="/wishlist"
                                         className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-100 text-gray-900"
@@ -110,7 +111,7 @@ export default function WishlistPage() {
                                         </div>
                                         <ChevronRight className="h-4 w-4 text-gray-400" />
                                     </Link>
-                                    
+
                                     <Link
                                         href="/addresses"
                                         className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
@@ -121,9 +122,9 @@ export default function WishlistPage() {
                                         </div>
                                         <ChevronRight className="h-4 w-4 text-gray-400" />
                                     </Link>
-                                    
+
                                     <Separator className="my-4" />
-                                    
+
                                     <Link
                                         href="/profile"
                                         className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
@@ -134,7 +135,7 @@ export default function WishlistPage() {
                                         </div>
                                         <ChevronRight className="h-4 w-4 text-gray-400" />
                                     </Link>
-                                    
+
                                     <Link
                                         href="/settings"
                                         className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"

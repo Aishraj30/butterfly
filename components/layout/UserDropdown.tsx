@@ -8,19 +8,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { 
-  User, 
-  LogOut, 
-  Settings, 
-  Package, 
-  ShieldCheck 
+import {
+  User,
+  LogOut,
+  Settings,
+  Package,
+  ShieldCheck
 } from 'lucide-react'
 import Link from 'next/link'
 
 export function UserDropdown() {
   const { user, logout } = useAuth()
   const pathname = usePathname()
-  
+
   // Check if we're on the homepage or product detail page
   const isHomePage = pathname === '/'
   const isProductPage = pathname.startsWith('/product/')
@@ -103,7 +103,7 @@ export function UserDropdown() {
           ) : (
             // Logged Out View
             <div className="flex flex-col gap-2 p-1">
-               <DropdownMenuItem asChild className="rounded-xl focus:bg-white/60 focus:backdrop-blur-sm cursor-pointer py-2.5 justify-center font-medium text-gray-700">
+              <DropdownMenuItem asChild className="rounded-xl hover:bg-gray-100 focus:bg-gray-100 focus:text-black cursor-pointer py-2.5 justify-center font-medium text-gray-900">
                 <Link href="/login">Login</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="rounded-xl bg-[#1c2434]/90 text-white focus:bg-[#1c2434] focus:text-white cursor-pointer py-2.5 justify-center font-semibold shadow-lg shadow-black/10">

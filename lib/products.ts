@@ -102,6 +102,7 @@ export interface Product {
   name: string
   price: number
   category: string
+  collectionName?: string
   subCategory?: string
   brand?: string
   color: string
@@ -138,6 +139,8 @@ export interface Product {
 
 export interface FilterOptions {
   categories?: string[]
+  subCategories?: string[]
+  collectionNames?: string[]
   sizes?: string[]
   colors?: string[]
   genders?: string[]
@@ -164,11 +167,27 @@ export function filterAndSortProducts(
 
   // Category filter
   if (filters.categories && filters.categories.length > 0) {
-    filtered = filtered.filter((p) => 
-      filters.categories!.some(cat => 
-        p.category.toLowerCase() === cat.toLowerCase() ||
-        p.category.toLowerCase().includes(cat.toLowerCase()) ||
-        cat.toLowerCase().includes(p.category.toLowerCase())
+    filtered = filtered.filter((p) =>
+      p.category && filters.categories!.some(cat =>
+        p.category.toLowerCase() === cat.toLowerCase()
+      )
+    )
+  }
+
+  // Sub-Category filter
+  if (filters.subCategories && filters.subCategories.length > 0) {
+    filtered = filtered.filter((p) =>
+      p.subCategory && filters.subCategories!.some(sub =>
+        p.subCategory!.toLowerCase() === sub.toLowerCase()
+      )
+    )
+  }
+
+  // Collection filter
+  if (filters.collectionNames && filters.collectionNames.length > 0) {
+    filtered = filtered.filter((p) =>
+      p.collectionName && filters.collectionNames!.some(col =>
+        p.collectionName!.toLowerCase() === col.toLowerCase()
       )
     )
   }

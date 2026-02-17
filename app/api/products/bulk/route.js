@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
 import Collection from "@/models/Collection";
+import Category from "@/models/Category";
 import { verifyToken } from "@/lib/jwt";
 
 // 🔒 helper: admin check
@@ -50,23 +51,47 @@ export async function POST(req) {
 
         const createdProducts = await Product.insertMany(productsToCreate);
 
-        // Group products by category to optimize updates
-        const categoryMap = {};
+        // Group products by collection to optimize updates
+        const collectionMap = {};
         createdProducts.forEach(p => {
-            if (p.category) {
-                if (!categoryMap[p.category]) categoryMap[p.category] = [];
-                categoryMap[p.category].push(p._id);
+            if (p.collectionName) {
+                if (!collectionMap[p.collectionName]) collectionMap[p.collectionName] = [];
+                collectionMap[p.collectionName].push(p._id);
             }
         });
 
         // Update collections
         await Promise.all(
-            Object.entries(categoryMap).map(([categoryName, pIds]) =>
+            Object.entries(collectionMap).map(([colName, pIds]) =>
                 Collection.findOneAndUpdate(
-                    { name: categoryName },
+                    { name: colName },
                     { $addToSet: { products: { $each: pIds } } }
                 )
             )
+        );
+
+        // Update Categories
+        const categoryMap = {};
+        createdProducts.forEach(p => {
+            if (p.category) {
+                if (!categoryMap[p.category]) categoryMap[p.category] = new Set();
+                if (p.subCategory) categoryMap[p.category].add(p.subCategory);
+            }
+        });
+
+        await Promise.all(
+            Object.entries(categoryMap).map(([catName, subCats]) => {
+                const subCatsArray = Array.from(subCats);
+                const update = { $setOnInsert: { name: catName, isActive: true } };
+                if (subCatsArray.length > 0) {
+                    update.$addToSet = { subCategories: { $each: subCatsArray } };
+                }
+                return Category.findOneAndUpdate(
+                    { name: catName },
+                    update,
+                    { upsert: true, new: true }
+                );
+            })
         );
 
         return NextResponse.json(

@@ -29,29 +29,37 @@ function CatalogContent() {
     const allProducts = products;
 
     const filteredProducts = useMemo(() => {
-        if (!collectionParam && !activeFilters) return products;
+        const categoryParam = searchParams.get('category');
+        const subCategoryParam = searchParams.get('subCategory');
+        const collectionParam = searchParams.get('collection');
 
-        let options: FilterOptions = {};
+        if (!categoryParam && !subCategoryParam && !collectionParam && !activeFilters) return products;
+
+        const options: FilterOptions = {};
+
+        if (categoryParam) {
+            options.categories = [decodeURIComponent(categoryParam)];
+        }
+        if (subCategoryParam) {
+            options.subCategories = [decodeURIComponent(subCategoryParam)];
+        }
         if (collectionParam) {
-            options.categories = [decodeURIComponent(collectionParam)];
+            options.collectionNames = [decodeURIComponent(collectionParam)];
         }
 
         if (activeFilters) {
-            options = {
-                ...options,
-                sizes: activeFilters.sizes,
-                colors: activeFilters.colors,
-                genders: activeFilters.genders,
-                priceRange: [
-                    Number(activeFilters.priceRange.min) || 0,
-                    Number(activeFilters.priceRange.max) || 10000000 // High enough for IDR
-                ],
-                sortBy: activeFilters.sortBy
-            }
+            options.sizes = activeFilters.sizes;
+            options.colors = activeFilters.colors;
+            options.genders = activeFilters.genders;
+            options.priceRange = [
+                Number(activeFilters.priceRange.min) || 0,
+                Number(activeFilters.priceRange.max) || 10000000
+            ];
+            options.sortBy = activeFilters.sortBy;
         }
 
-        return filterAndSortProducts(allProducts, options);
-    }, [collectionParam, activeFilters, allProducts, products]);
+        return filterAndSortProducts(products, options);
+    }, [searchParams, activeFilters, products]);
 
     useEffect(() => {
         const loadPageData = async () => {
@@ -113,22 +121,40 @@ function CatalogContent() {
                     <div className="flex justify-center items-center py-12">
                         <p className="text-gray-600">Loading...</p>
                     </div>
-                ) : collectionParam ? (
+                ) : (collectionParam || searchParams.get('category') || searchParams.get('subCategory')) ? (
                     <div className="space-y-8">
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             <Link href="/catalog" className="hover:text-black">Catalog</Link>
-                            <span>/</span>
-                            <span className="text-black font-medium capitalize">{collectionParam}</span>
+                            {collectionParam && (
+                                <>
+                                    <span>/</span>
+                                    <span className="text-black font-medium capitalize">{collectionParam}</span>
+                                </>
+                            )}
+                            {searchParams.get('category') && (
+                                <>
+                                    <span>/</span>
+                                    <span className="text-black font-medium capitalize">{decodeURIComponent(searchParams.get('category')!)}</span>
+                                </>
+                            )}
+                            {searchParams.get('subCategory') && (
+                                <>
+                                    <span>/</span>
+                                    <span className="text-black font-medium capitalize">{decodeURIComponent(searchParams.get('subCategory')!)}</span>
+                                </>
+                            )}
                         </div>
 
                         <div className="mb-8 flex justify-between items-center bg-gray-50 p-6">
                             <div className="flex items-center gap-6">
                                 <div>
                                     <h1 className="text-3xl font-bold text-black capitalize">
-                                        {collectionParam}
+                                        {collectionParam || searchParams.get('subCategory') || searchParams.get('category') || 'Products'}
                                     </h1>
                                     <p className="text-gray-600 mt-2">
-                                        Showing {filteredProducts.length} pieces in {collectionParam} collection
+                                        Showing {filteredProducts.length} pieces
+                                        {collectionParam && ` in ${collectionParam} collection`}
+                                        {searchParams.get('category') && ` in ${decodeURIComponent(searchParams.get('category')!)} category`}
                                     </p>
                                 </div>
                                 <div className="hidden md:flex items-center gap-3 pl-6 border-l">
@@ -173,8 +199,8 @@ function CatalogContent() {
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
                                 {filteredProducts.map((product: Product) => (
                                     <Link
-                                        href={`/product/${product.id}`}
-                                        key={product.id}
+                                        href={`/product/${(product as any)._id || product.id}`}
+                                        key={(product as any)._id || product.id}
                                         className="group block"
                                     >
                                         <div className="relative overflow-hidden bg-[#F9F9F9] mb-4 aspect-[3/4]">
@@ -222,37 +248,38 @@ function CatalogContent() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         {collections.map((collection: Collection) => (
-                            <Link
-                                href={`/catalog?collection=${encodeURIComponent(collection.name)}`}
+                            <div
                                 key={collection.id}
                                 className="group relative overflow-hidden rounded-lg border border-gray-200 hover:border-[#8D7B68] transition-colors cursor-pointer"
                             >
-                                {/* Category Image Placeholder */}
-                                <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
-                                    <div className={`w-full h-full ${getPlaceholderImage(collection.name)} flex items-center justify-center`}>
-                                        <div className="text-center">
-                                            <div className="text-4xl font-serif text-gray-400 mb-2">
-                                                {collection.name.charAt(0)}
+                                <Link href={`/catalog?collection=${encodeURIComponent(collection.name)}`}>
+                                    {/* Category Image Placeholder */}
+                                    <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
+                                        <div className={`w-full h-full ${getPlaceholderImage(collection.name)} flex items-center justify-center`}>
+                                            <div className="text-center">
+                                                <div className="text-4xl font-serif text-gray-400 mb-2">
+                                                    {collection.name.charAt(0)}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Category Info */}
-                                <div className="p-6 bg-white">
-                                    <h3 className="text-xl font-serif font-bold text-black mb-2 group-hover:text-[#8D7B68] transition-colors">
-                                        {collection.name}
-                                    </h3>
-                                    {collection.description && (
-                                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                                            {collection.description}
+                                    {/* Category Info */}
+                                    <div className="p-6 bg-white">
+                                        <h3 className="text-xl font-serif font-bold text-black mb-2 group-hover:text-[#8D7B68] transition-colors">
+                                            {collection.name}
+                                        </h3>
+                                        {collection.description && (
+                                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                                                {collection.description}
+                                            </p>
+                                        )}
+                                        <p className="text-sm text-gray-500">
+                                            {collection.productCount || 0} Products
                                         </p>
-                                    )}
-                                    <p className="text-sm text-gray-500">
-                                        {collection.productCount || 0} Products
-                                    </p>
-                                </div>
-                            </Link>
+                                    </div>
+                                </Link>
+                            </div>
                         ))}
                     </div>
                 )}

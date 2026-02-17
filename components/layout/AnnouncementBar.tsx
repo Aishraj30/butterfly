@@ -3,7 +3,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-export function AnnouncementBar() {
+interface AnnouncementBarProps {
+    isHome?: boolean
+}
+
+export function AnnouncementBar({ isHome = false }: AnnouncementBarProps) {
     const [messages, setMessages] = useState(['FREE SHIPPING ON ALL ORDERS'])
     const [currentIndex, setCurrentIndex] = useState(0)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -60,10 +64,37 @@ export function AnnouncementBar() {
         setCurrentIndex((prev) => (prev - 1 + messages.length) % messages.length)
     }
 
+    const [isVisible, setIsVisible] = useState(true)
+
+    // Scroll handler for visibility
+    useEffect(() => {
+        if (!isHome) return
+
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY
+            // Hide whenever scrolled down past a small threshold
+            setIsVisible(currentScrollY < 10)
+        }
+
+        window.addEventListener('scroll', handleScroll, { passive: true })
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [isHome])
+
+    useEffect(() => {
+        if (isHome && messages.length > 0) {
+            document.documentElement.style.setProperty('--announcement-height', isVisible ? '40px' : '0px')
+        } else {
+            document.documentElement.style.removeProperty('--announcement-height')
+        }
+        return () => {
+            document.documentElement.style.removeProperty('--announcement-height')
+        }
+    }, [isHome, messages.length, isVisible])
+
     if (messages.length === 0) return null
 
     return (
-        <div className="bg-black text-white text-[10px] md:text-xs font-bold tracking-[0.2em] relative z-40 overflow-hidden">
+        <div className={`${isHome ? 'fixed top-0 left-0 w-full' : 'relative'} ${!isVisible && isHome ? '-translate-y-full' : 'translate-y-0'} bg-black text-white text-[10px] md:text-xs font-bold tracking-[0.2em] z-[1000] overflow-hidden transition-all duration-300`}>
             <div className="max-w-[1400px] mx-auto px-4 relative h-10 flex items-center justify-between">
 
                 {/* Left Arrow */}

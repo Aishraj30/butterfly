@@ -11,6 +11,16 @@ export interface CartItem {
   name?: string
   price?: number | string
   image?: string
+  customSize?: {
+    chest: string | number
+    waist: string | number
+    shoulder: string | number
+    sleeveLength: string | number
+    length: string | number
+    fit: string
+    notes: string
+    unit: string
+  }
 }
 
 export interface CartData {
@@ -42,7 +52,7 @@ export function useCart() {
   }
 
   const addToCart = useCallback(
-    async (productId: string, quantity: number, size: string, color: string, name?: string, price?: number, image?: string) => {
+    async (productId: string, quantity: number, size: string, color: string, name?: string, price?: number, image?: string, customSize?: any) => {
       try {
         const response = await fetch('/api/cart', {
           method: 'POST',
@@ -59,6 +69,7 @@ export function useCart() {
               name: name || 'Product',
               price: price || 0, // Keep as number
               image: image || '',
+              customSize
             },
           }),
         })

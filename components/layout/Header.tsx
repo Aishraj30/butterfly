@@ -3,20 +3,20 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { 
-  Star, 
-  Minus, 
-  Plus, 
-  ShoppingCart, 
-  Heart, 
-  ChevronLeft, 
-  ChevronRight, 
-  Search, 
-  ChevronDown, 
-  Menu, 
-  X, 
-  ShoppingBag, 
-  Package 
+import {
+  Star,
+  Minus,
+  Plus,
+  ShoppingCart,
+  Heart,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  ChevronDown,
+  Menu,
+  X,
+  ShoppingBag,
+  Package
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { CartDrawer } from './CartDrawer'
@@ -51,6 +51,7 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchSuggestions, setSearchSuggestions] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const { cart } = useCart()
@@ -97,6 +98,17 @@ export function Header() {
     }
   }, [searchQuery]);
 
+  // Scroll handler for background change
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollThreshold = window.innerHeight * 0.05
+      setIsScrolled(window.scrollY > scrollThreshold)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
   const isCatalog = pathname === '/catalog'
@@ -108,13 +120,20 @@ export function Header() {
   }
 
   // Header style - transparent on home, black gradient on product pages, white on other pages
-  const headerBg = isHome && !isCatalog ? 'bg-transparent' : isProductPage ? 'bg-gradient-to-b from-black/40 to-transparent' : 'bg-white shadow-sm'
+  const headerBg = isHome && !isCatalog
+    ? 'bg-transparent'
+    : isProductPage
+      ? 'bg-gradient-to-b from-black/40 to-transparent'
+      : 'bg-transparent'
   const textColor = isHome && !isCatalog ? 'text-white' : isProductPage ? 'text-white' : 'text-black'
   const logoColor = isHome && !isCatalog ? 'text-white' : isProductPage ? 'text-white' : 'text-black'
 
   return (
-    <header className={`w-full z-[999] transition-all duration-300 ${headerBg} ${isProductPage ? 'py-2' : 'py-4'} ${!isProductPage ? 'sticky top-0' : ''}`}>
-      <nav className="max-w-[1400px] mx-auto pl-2 pr-3.5 md:px-6 py-0.5 grid grid-cols-3 items-center">
+    <header
+      style={{ top: isHome ? 'var(--announcement-height, 0px)' : undefined }}
+      className={`w-full z-[999] transition-all duration-300 ${headerBg} py-0 absolute top-0 left-0`}
+    >
+      <nav className="max-w-[1400px] mx-auto pl-2 pr-3.5 md:px-6 py-0 grid grid-cols-3 items-center">
         {/* Left Navigation (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
           {navigation.slice(0, 2).map((item) => (
@@ -169,9 +188,11 @@ export function Header() {
         {/* Center Logo */}
         <div className="flex justify-center items-center pl-4 md:pl-0">
           <Link href="/" className="flex-shrink-0">
-            <span className={`font-sans text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-[0.1em] md:tracking-[0.2em] whitespace-nowrap transition-all ${logoColor} ${!isHome || isCatalog ? '' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]'}`}>
-              BUTTERFLY
-            </span>
+            <img
+              src="/Logo 2.png"
+              alt="Butterfly Couture"
+              className={`h-18 md:h-22 lg:h-26 w-auto object-contain transition-all ${!isHome || isCatalog ? '' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]'}`}
+            />
           </Link>
         </div>
 

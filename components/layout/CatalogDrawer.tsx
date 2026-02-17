@@ -11,20 +11,10 @@ interface CatalogDrawerProps {
     onClose: () => void
 }
 
-interface Product {
-    _id: string
-    name: string
-    category: string
-    subCategory: string
-    gender: string
-    brand: string
-    price: number
-}
+
 
 interface CategoryData {
-    [category: string]: {
-        [subCategory: string]: Product[]
-    }
+    [category: string]: Set<string>
 }
 
 // --- Components ---
@@ -49,63 +39,41 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
     // State
     const [categories, setCategories] = useState<CategoryData>({})
+
     const [isLoading, setIsLoading] = useState(true)
     const [expandedCategories, setExpandedCategories] = useState<string[]>([])
     const [error, setError] = useState<string | null>(null)
 
     // Fetch logic
     useEffect(() => {
-        // Only fetch if we haven't already
-        if (Object.keys(categories).length === 0) {
+        if (isOpen && Object.keys(categories).length === 0) {
             setIsLoading(true)
             setError(null)
-            fetch('/api/products')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.products) {
-                        organizeProductsByCategory(data.products)
-                    } else {
-                        setError(data.message || 'Failed to load categories')
+
+            Promise.all([
+                fetch('/api/products').then(res => res.json())
+            ])
+                .then(([productsData]) => {
+                    if (productsData.success && productsData.products) {
+                        const catMap: CategoryData = {}
+                        productsData.products.forEach((p: any) => {
+                            if (p.category) {
+                                if (!catMap[p.category]) catMap[p.category] = new Set()
+                                if (p.subCategory) catMap[p.category].add(p.subCategory)
+                            }
+                        })
+                        setCategories(catMap)
                     }
+
+                    // Collections removed from here
                 })
                 .catch(err => {
-                    console.error('Failed to fetch products:', err)
-                    setError('Unable to fetch categories. Please check your connection.')
+                    console.error('Failed to fetch catalog data:', err)
+                    setError('Unable to load catalog.')
                 })
                 .finally(() => setIsLoading(false))
         }
-    }, [])
-
-    const organizeProductsByCategory = (products: Product[]) => {
-        const organized: CategoryData = {}
-        
-        // Debug: Log all product categories to see what we're working with
-        console.log('All product categories:', products.map(p => p.category))
-        console.log('All product brands:', products.map(p => p.brand))
-        
-        // Define collection names to exclude
-        const collectionNames = ['Butterfly Couture', 'Ethereal Collection', 'Classic Collection', 'Modern Collection', 'Vintage Collection']
-        
-        products.forEach(product => {
-            const category = product.category || 'Uncategorized'
-            const subCategory = product.subCategory || 'General'
-            
-            // Skip if the category is a collection name
-            if (collectionNames.includes(category)) {
-                console.log('Skipping collection:', category)
-                return // Skip this product
-            }
-
-            if (!organized[category]) organized[category] = {}
-            if (!organized[category][subCategory]) {
-                organized[category][subCategory] = []
-            }
-            organized[category][subCategory].push(product)
-        })
-        
-        console.log('Final organized categories:', Object.keys(organized))
-        setCategories(organized)
-    }
+    }, [isOpen])
 
     const toggleCategory = (category: string) => {
         setExpandedCategories(prev =>
@@ -115,7 +83,7 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
         )
     }
 
-    // Body Scroll Lock - ultra robust version to completely prevent background scrolling
+    // Body Scroll Lock - simplified version that doesn't interfere with homepage components
     useEffect(() => {
         const htmlElement = document.documentElement
         const bodyElement = document.body
@@ -147,17 +115,9 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             const scrollX = window.scrollX
             const scrollbarWidth = getScrollbarWidth()
 
-            // Apply comprehensive lock styles with scrollbar compensation
+            // Apply gentle lock styles - only prevent body scroll, don't interfere with other components
             htmlElement.style.overflow = 'hidden'
-            bodyElement.style.position = 'fixed'
-            bodyElement.style.top = `-${scrollY}px`
-            bodyElement.style.left = `-${scrollX}px`
-            bodyElement.style.width = `calc(100vw - ${scrollbarWidth}px)`
-            bodyElement.style.height = '100vh'
             bodyElement.style.overflow = 'hidden'
-            bodyElement.style.touchAction = 'none'
-            bodyElement.style.webkitUserSelect = 'none'
-            bodyElement.style.userSelect = 'none'
             bodyElement.style.marginRight = `${scrollbarWidth}px`
 
                 // Store scroll positions for restoration
@@ -182,12 +142,12 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
 
             // Restore styles first
             htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.position = storedStyles.bodyPosition || ''
             bodyElement.style.top = storedStyles.bodyTop || ''
             bodyElement.style.left = storedStyles.bodyLeft || ''
             bodyElement.style.width = storedStyles.bodyWidth || ''
             bodyElement.style.height = storedStyles.bodyHeight || ''
-            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.touchAction = ''
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
@@ -207,12 +167,12 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
             // Ensure cleanup on unmount
             const storedStyles = (bodyElement as any).originalStyles || {}
             htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.position = storedStyles.bodyPosition || ''
             bodyElement.style.top = storedStyles.bodyTop || ''
             bodyElement.style.left = storedStyles.bodyLeft || ''
             bodyElement.style.width = storedStyles.bodyWidth || ''
             bodyElement.style.height = storedStyles.bodyHeight || ''
-            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.touchAction = ''
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
@@ -224,92 +184,65 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
         }
     }, [isOpen])
 
-    // Prevent any background scrolling with comprehensive event blocking
+    // Prevent background scrolling when drawer is open
     useEffect(() => {
-        const preventAllScroll = (e: Event) => {
+        const preventBackgroundScroll = (e: Event) => {
             if (isOpen) {
                 const drawerElement = drawerRef.current
-                // Always prevent default and stop propagation for background elements
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-                // For drawer elements, just stop propagation to prevent body scroll
-                if (drawerElement && drawerElement.contains(e.target as Node)) {
-                    e.stopPropagation()
-                }
-            }
-        }
+                // Check if the event target is inside the drawer
+                const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
 
-        const preventWheel = (e: Event) => {
-            if (isOpen) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
+                // If scrolling inside drawer, allow it but prevent it from bubbling to body
+                if (isInsideDrawer) {
                     e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
+                    return
                 }
-                // Allow wheel scrolling in drawer but prevent bubbling
+
+                // If scrolling outside drawer, prevent it entirely
+                e.preventDefault()
                 e.stopPropagation()
+                return false
             }
         }
 
-        const preventTouch = (e: TouchEvent) => {
+        const preventTouchMove = (e: TouchEvent) => {
             if (isOpen) {
                 const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-            }
-        }
+                const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
 
-        const preventKeyScroll = (e: KeyboardEvent) => {
-            if (isOpen && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
+                if (isInsideDrawer) {
+                    // Allow touch scrolling inside drawer
+                    return
                 }
+
+                // Prevent touch scrolling outside drawer
+                e.preventDefault()
+                e.stopPropagation()
+                return false
             }
         }
 
         if (isOpen) {
-            // Block all possible scroll events with capture phase
-            document.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('mousewheel', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('DOMMouseScroll', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('touchmove', preventTouch, { passive: false, capture: true })
-            document.addEventListener('touchstart', preventAllScroll, { passive: false, capture: true })
-            document.addEventListener('touchend', preventAllScroll, { passive: false, capture: true })
-            document.addEventListener('keydown', preventKeyScroll, { capture: true })
-            document.addEventListener('scroll', preventAllScroll, { capture: true })
+            // Prevent wheel events on document and window
+            document.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
+            window.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
 
-            // Also block on window level
-            window.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
-            window.addEventListener('scroll', preventAllScroll, { capture: true })
+            // Prevent touch events
+            document.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
+            window.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
+
+            // Prevent scroll events
+            document.addEventListener('scroll', preventBackgroundScroll, { capture: true })
+            window.addEventListener('scroll', preventBackgroundScroll, { capture: true })
         }
 
         return () => {
-            // Clean up all event listeners
-            document.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('mousewheel', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('DOMMouseScroll', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('touchmove', preventTouch, { capture: true })
-            document.removeEventListener('touchstart', preventAllScroll, { capture: true })
-            document.removeEventListener('touchend', preventAllScroll, { capture: true })
-            document.removeEventListener('keydown', preventKeyScroll, { capture: true })
-            document.removeEventListener('scroll', preventAllScroll, { capture: true })
-
-            window.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
-            window.removeEventListener('scroll', preventAllScroll, { capture: true })
+            document.removeEventListener('wheel', preventBackgroundScroll, { capture: true })
+            window.removeEventListener('wheel', preventBackgroundScroll, { capture: true })
+            document.removeEventListener('touchmove', preventTouchMove, { capture: true })
+            window.removeEventListener('touchmove', preventTouchMove, { capture: true })
+            document.removeEventListener('scroll', preventBackgroundScroll, { capture: true })
+            window.removeEventListener('scroll', preventBackgroundScroll, { capture: true })
         }
     }, [isOpen])
 
@@ -407,22 +340,22 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                         ) : error ? (
                             <div className="py-8 text-center space-y-4">
                                 <p className="text-xs text-white/50 uppercase tracking-widest">{error}</p>
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="text-[10px] text-white underline underline-offset-4 uppercase tracking-widest"
-                                >
-                                    Try Refreshing
-                                </button>
                             </div>
                         ) : (
                             <div className="space-y-1">
-                                {Object.entries(categories).map(([category, subCategories], index) => {
+                                {/* Featured Collections Section */}
+
+
+                                <h3 className="text-[10px] tracking-[0.4em] uppercase text-white/40 font-bold mb-4">
+                                    Browse by Category
+                                </h3>
+
+                                {Object.entries(categories).map(([category, subCategoriesSet]) => {
                                     const isExpanded = expandedCategories.includes(category)
-                                    const subCategoryCount = Object.keys(subCategories).length
+                                    const subCategories = Array.from(subCategoriesSet)
 
                                     return (
                                         <div key={category} className="border-b border-white/10">
-                                            {/* Category Header */}
                                             <button
                                                 onClick={() => toggleCategory(category)}
                                                 className="w-full flex items-center justify-between py-4 text-left group"
@@ -430,38 +363,28 @@ export function CatalogDrawer({ isOpen, onClose }: CatalogDrawerProps) {
                                                 <span className="text-xs font-light uppercase tracking-[0.2em] text-white">
                                                     {category}
                                                 </span>
-                                                <div className="flex items-center gap-3">
-                                                    {isExpanded ? (
-                                                        <ChevronUp className="w-4 h-4 text-white/60 transition-transform duration-300" />
-                                                    ) : (
-                                                        <ChevronDown className="w-4 h-4 text-white/60 transition-transform duration-300" />
-                                                    )}
-                                                </div>
+                                                {subCategories.length > 0 && (
+                                                    <ChevronDown className={`w-4 h-4 text-white/60 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                                                )}
                                             </button>
 
-                                            {/* Subcategories Dropdown */}
-                                            <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                                                }`}>
+                                            <div className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
                                                 <div className="pb-4 space-y-2">
-                                                    {/* View All Link */}
                                                     <Link
-                                                        href={`/catalog/${encodeURIComponent(category)}`}
+                                                        href={`/catalog?category=${encodeURIComponent(category)}`}
                                                         onClick={onClose}
-                                                        className="flex items-center justify-between py-2 px-4 text-xs uppercase tracking-[0.15em] text-white/60 hover:text-white hover:bg-white/5 rounded transition-colors"
+                                                        className="block py-2 px-4 text-xs uppercase tracking-[0.15em] text-white/60 hover:text-white"
                                                     >
-                                                        <span>View All {category}</span>
-                                                        <ArrowRight className="w-3 h-3" />
+                                                        View All {category}
                                                     </Link>
-
-                                                    {/* Subcategory Links */}
-                                                    {Object.keys(subCategories).map((subCategory) => (
+                                                    {subCategories.map((subCat) => (
                                                         <Link
-                                                            key={subCategory}
-                                                            href={`/catalog/${encodeURIComponent(category)}/${encodeURIComponent(subCategory)}`}
+                                                            key={subCat}
+                                                            href={`/catalog?category=${encodeURIComponent(category)}&subCategory=${encodeURIComponent(subCat)}`}
                                                             onClick={onClose}
-                                                            className="block py-2 px-4 text-xs uppercase tracking-[0.15em] text-white/50 hover:text-white hover:bg-white/5 rounded transition-colors"
+                                                            className="block py-2 px-4 text-xs uppercase tracking-[0.15em] text-white/40 hover:text-white"
                                                         >
-                                                            {subCategory}
+                                                            {subCat}
                                                         </Link>
                                                     ))}
                                                 </div>

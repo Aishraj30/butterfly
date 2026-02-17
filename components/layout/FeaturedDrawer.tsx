@@ -43,7 +43,7 @@ const CollectionSkeleton = () => (
 export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
     const { user } = useAuth()
-    
+
     // State
     const [collections, setCollections] = useState<Collection[]>([])
     const [loading, setLoading] = useState(true)
@@ -56,8 +56,8 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.collections) {
-                        const featuredCollections = data.collections.filter((collection: Collection) => 
-                            collection.isFeatured && collection.isActive
+                        const featuredCollections = data.collections.filter((collection: Collection) =>
+                            collection.isActive
                         )
                         setCollections(featuredCollections)
                     }
@@ -67,11 +67,11 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
         }
     }, [])
 
-    // Body Scroll Lock - ultra robust version to completely prevent background scrolling
+    // Body Scroll Lock - simplified version that doesn't interfere with homepage components
     useEffect(() => {
         const htmlElement = document.documentElement
         const bodyElement = document.body
-        
+
         // Store original styles
         const originalHtmlOverflow = htmlElement.style.overflow
         const originalBodyOverflow = bodyElement.style.overflow
@@ -81,7 +81,7 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
         const originalBodyWidth = bodyElement.style.width
         const originalBodyHeight = bodyElement.style.height
         const originalBodyMarginRight = bodyElement.style.marginRight
-        
+
         // Calculate scrollbar width to prevent layout shift
         const getScrollbarWidth = () => {
             // Create a temporary element to measure scrollbar width
@@ -92,79 +92,71 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
             document.body.removeChild(temp)
             return scrollbarWidth
         }
-        
+
         if (isOpen) {
             // Save current scroll position
             const scrollY = window.scrollY
             const scrollX = window.scrollX
             const scrollbarWidth = getScrollbarWidth()
-            
-            // Apply comprehensive lock styles with scrollbar compensation
+
+            // Apply gentle lock styles - only prevent body scroll, don't interfere with other components
             htmlElement.style.overflow = 'hidden'
-            bodyElement.style.position = 'fixed'
-            bodyElement.style.top = `-${scrollY}px`
-            bodyElement.style.left = `-${scrollX}px`
-            bodyElement.style.width = `calc(100vw - ${scrollbarWidth}px)`
-            bodyElement.style.height = '100vh'
             bodyElement.style.overflow = 'hidden'
-            bodyElement.style.touchAction = 'none'
-            bodyElement.style.webkitUserSelect = 'none'
-            bodyElement.style.userSelect = 'none'
             bodyElement.style.marginRight = `${scrollbarWidth}px`
-            
-            // Store scroll positions for restoration
-            ;(bodyElement as any).storedScrollY = scrollY
-            ;(bodyElement as any).storedScrollX = scrollX
-            ;(bodyElement as any).scrollbarWidth = scrollbarWidth
-            ;(bodyElement as any).originalStyles = {
-                htmlOverflow: originalHtmlOverflow,
-                bodyOverflow: originalBodyOverflow,
-                bodyPosition: originalBodyPosition,
-                bodyTop: originalBodyTop,
-                bodyLeft: originalBodyLeft,
-                bodyWidth: originalBodyWidth,
-                bodyHeight: originalBodyHeight,
-                bodyMarginRight: originalBodyMarginRight
-            }
+
+                // Store scroll positions for restoration
+                ; (bodyElement as any).storedScrollY = scrollY
+                ; (bodyElement as any).storedScrollX = scrollX
+                ; (bodyElement as any).scrollbarWidth = scrollbarWidth
+                ; (bodyElement as any).originalStyles = {
+                    htmlOverflow: originalHtmlOverflow,
+                    bodyOverflow: originalBodyOverflow,
+                    bodyPosition: originalBodyPosition,
+                    bodyTop: originalBodyTop,
+                    bodyLeft: originalBodyLeft,
+                    bodyWidth: originalBodyWidth,
+                    bodyHeight: originalBodyHeight,
+                    bodyMarginRight: originalBodyMarginRight
+                }
         } else {
             // Restore scroll position and styles
             const storedScrollY = (bodyElement as any).storedScrollY || 0
             const storedScrollX = (bodyElement as any).storedScrollX || 0
             const storedStyles = (bodyElement as any).originalStyles || {}
-            
+
             // Restore styles first
             htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.position = storedStyles.bodyPosition || ''
             bodyElement.style.top = storedStyles.bodyTop || ''
             bodyElement.style.left = storedStyles.bodyLeft || ''
             bodyElement.style.width = storedStyles.bodyWidth || ''
             bodyElement.style.height = storedStyles.bodyHeight || ''
-            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.touchAction = ''
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
             bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
-            
+
             // Restore scroll position
             window.scrollTo(storedScrollX, storedScrollY)
-            
+
             // Clean up stored data
             delete (bodyElement as any).storedScrollY
             delete (bodyElement as any).storedScrollX
             delete (bodyElement as any).scrollbarWidth
             delete (bodyElement as any).originalStyles
         }
-        
+
         return () => {
             // Ensure cleanup on unmount
             const storedStyles = (bodyElement as any).originalStyles || {}
             htmlElement.style.overflow = storedStyles.htmlOverflow || ''
+            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.position = storedStyles.bodyPosition || ''
             bodyElement.style.top = storedStyles.bodyTop || ''
             bodyElement.style.left = storedStyles.bodyLeft || ''
             bodyElement.style.width = storedStyles.bodyWidth || ''
             bodyElement.style.height = storedStyles.bodyHeight || ''
-            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
             bodyElement.style.touchAction = ''
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
@@ -176,92 +168,65 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
         }
     }, [isOpen])
 
-    // Prevent any background scrolling with comprehensive event blocking
+    // Prevent background scrolling when drawer is open
     useEffect(() => {
-        const preventAllScroll = (e: Event) => {
+        const preventBackgroundScroll = (e: Event) => {
             if (isOpen) {
                 const drawerElement = drawerRef.current
-                // Always prevent default and stop propagation for background elements
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-                // For drawer elements, just stop propagation to prevent body scroll
-                if (drawerElement && drawerElement.contains(e.target as Node)) {
-                    e.stopPropagation()
-                }
-            }
-        }
+                // Check if the event target is inside the drawer
+                const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
 
-        const preventWheel = (e: Event) => {
-            if (isOpen) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
+                // If scrolling inside drawer, allow it but prevent it from bubbling to body
+                if (isInsideDrawer) {
                     e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
+                    return
                 }
-                // Allow wheel scrolling in drawer but prevent bubbling
+
+                // If scrolling outside drawer, prevent it entirely
+                e.preventDefault()
                 e.stopPropagation()
+                return false
             }
         }
 
-        const preventTouch = (e: TouchEvent) => {
+        const preventTouchMove = (e: TouchEvent) => {
             if (isOpen) {
                 const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-            }
-        }
+                const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
 
-        const preventKeyScroll = (e: KeyboardEvent) => {
-            if (isOpen && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
+                if (isInsideDrawer) {
+                    // Allow touch scrolling inside drawer
+                    return
                 }
+
+                // Prevent touch scrolling outside drawer
+                e.preventDefault()
+                e.stopPropagation()
+                return false
             }
         }
 
         if (isOpen) {
-            // Block all possible scroll events with capture phase
-            document.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('mousewheel', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('DOMMouseScroll', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('touchmove', preventTouch, { passive: false, capture: true })
-            document.addEventListener('touchstart', preventAllScroll, { passive: false, capture: true })
-            document.addEventListener('touchend', preventAllScroll, { passive: false, capture: true })
-            document.addEventListener('keydown', preventKeyScroll, { capture: true })
-            document.addEventListener('scroll', preventAllScroll, { capture: true })
-            
-            // Also block on window level
-            window.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
-            window.addEventListener('scroll', preventAllScroll, { capture: true })
+            // Prevent wheel events on document and window
+            document.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
+            window.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
+
+            // Prevent touch events
+            document.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
+            window.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
+
+            // Prevent scroll events
+            document.addEventListener('scroll', preventBackgroundScroll, { capture: true })
+            window.addEventListener('scroll', preventBackgroundScroll, { capture: true })
         }
 
         return () => {
-            // Clean up all event listeners
-            document.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('mousewheel', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('DOMMouseScroll', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('touchmove', preventTouch, { capture: true })
-            document.removeEventListener('touchstart', preventAllScroll, { capture: true })
-            document.removeEventListener('touchend', preventAllScroll, { capture: true })
-            document.removeEventListener('keydown', preventKeyScroll, { capture: true })
-            document.removeEventListener('scroll', preventAllScroll, { capture: true })
-            
-            window.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
-            window.removeEventListener('scroll', preventAllScroll, { capture: true })
+            document.removeEventListener('wheel', preventBackgroundScroll, { capture: true })
+            window.removeEventListener('wheel', preventBackgroundScroll, { capture: true })
+            document.removeEventListener('touchmove', preventTouchMove, { capture: true })
+            window.removeEventListener('touchmove', preventTouchMove, { capture: true })
+            document.removeEventListener('scroll', preventBackgroundScroll, { capture: true })
+            window.removeEventListener('scroll', preventBackgroundScroll, { capture: true })
         }
     }, [isOpen])
 
@@ -271,7 +236,7 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
         const activeClass = isOpen && !loading ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         return `${baseClass} ${activeClass}`
     }
-    
+
     const getDelayStyle = (index: number) => ({ transitionDelay: `${150 + (index * 50)}ms` })
 
     return (
@@ -328,13 +293,13 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
                         '--webkit-scrollbar-thumb:hover'?: string;
                         msOverflowStyle?: string;
                     }}>
-                        
+
                         {loading ? (
                             <CollectionSkeleton />
                         ) : collections.length > 0 ? (
                             <div className="space-y-1">
                                 {collections.map((collection, index) => (
-                                    <Link 
+                                    <Link
                                         key={collection._id}
                                         href={`/collections/${collection.slug}`}
                                         onClick={onClose}
@@ -343,16 +308,14 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    {collection.isFeatured && (
-                                                        <Star className="w-3 h-3 fill-current text-amber-200/60" />
-                                                    )}
+
                                                     <span className="text-xs font-light uppercase tracking-[0.2em] text-white">
                                                         {collection.name}
                                                     </span>
                                                 </div>
                                                 <ArrowRight className="w-4 h-4 text-white/40 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                                             </div>
-                                            
+
                                             {collection.description && (
                                                 <p className="text-[10px] text-white/40 leading-relaxed line-clamp-1 font-light tracking-wide mt-1">
                                                     {collection.description}

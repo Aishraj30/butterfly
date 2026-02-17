@@ -13,6 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, User, Mail, LogOut, Camera, Settings, MapPin, Heart, ChevronRight, Package, Edit3, ShoppingBag, CreditCard, Bell, Shield } from "lucide-react";
 import Image from "next/image";
 
+
+
 export default function ProfilePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -57,7 +59,7 @@ export default function ProfilePage() {
     setMessage(null);
 
     try {
-      await updateUser({ name, email, avatar: avatarPreview });
+      await updateUser({ name, email, avatar: avatarPreview || undefined });
       setMessage("Profile updated successfully!");
       setIsEditing(false);
       setAvatarPreview(null);
@@ -84,10 +86,9 @@ export default function ProfilePage() {
   if (!user) {
     return null;
   }
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Page Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
@@ -160,7 +161,7 @@ export default function ProfilePage() {
                     </div>
                     <ChevronRight className="h-4 w-4 text-gray-400" />
                   </Link>
-                  
+
                   <Link
                     href="/wishlist"
                     className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
@@ -171,7 +172,7 @@ export default function ProfilePage() {
                     </div>
                     <ChevronRight className="h-4 w-4 text-gray-400" />
                   </Link>
-                  
+
                   <Link
                     href="/addresses"
                     className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
@@ -182,9 +183,9 @@ export default function ProfilePage() {
                     </div>
                     <ChevronRight className="h-4 w-4 text-gray-400" />
                   </Link>
-                  
+
                   <Separator className="my-4" />
-                  
+
                   <Link
                     href="/settings"
                     className="flex items-center justify-between w-full p-3 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
@@ -300,7 +301,7 @@ export default function ProfilePage() {
                       <Label className="text-sm font-medium text-gray-700">Phone Number</Label>
                       <Input
                         type="tel"
-                        value={user.phone || ''}
+                        value={user.phoneNumber || ''}
                         disabled={!isEditing || isSubmitting}
                         className="h-11 border-gray-300 focus:border-black focus:ring-black"
                         placeholder="Enter your phone number"

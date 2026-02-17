@@ -6,11 +6,13 @@ import Image from 'next/image';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const steps = ['Information', 'Shipping', 'Payment', 'Success'];
 
 export default function CheckoutPage() {
   const { cart, clearCart, isLoading: isCartLoading } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,6 +76,7 @@ export default function CheckoutPage() {
             email: formData.email,
             phone: formData.phone
           },
+          userId: user?.id || (user as any)?._id,
           items: cart.items,
           total: cart.total,
           shipping: {
@@ -165,7 +168,32 @@ export default function CheckoutPage() {
         <div className="flex-1 bg-[#FDF6E9] p-8 border border-[#E5D3B3] min-h-[500px]">
           {currentStep === 0 && (
             <div className="space-y-6">
-              <h2 className="font-serif text-3xl text-gray-800 mb-6 uppercase tracking-wider">SHIPPING INFORMATION</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-serif text-3xl text-gray-800 uppercase tracking-wider">SHIPPING INFORMATION</h2>
+                {user && user.address && (
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-[#8B5E34]"
+                      onChange={(e) => {
+                        if (e.target.checked && user && user.address) {
+                          setFormData(prev => ({
+                            ...prev,
+                            firstName: user.name.split(' ')[0] || '',
+                            lastName: user.name.split(' ').slice(1).join(' ') || '',
+                            email: user.email || '',
+                            phone: user.phoneNumber || '',
+                            address: user.address?.street || '',
+                            city: user.address?.city || '',
+                            country: user.address?.country || '',
+                          }));
+                        }
+                      }}
+                    />
+                    <span className="text-sm text-gray-600">Use saved address</span>
+                  </label>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <input name="firstName" value={formData.firstName} onChange={handleInputChange} type="text" placeholder="First Name" className="p-3 border border-gray-200 w-full bg-white" />
                 <input name="lastName" value={formData.lastName} onChange={handleInputChange} type="text" placeholder="Last Name" className="p-3 border border-gray-200 w-full bg-white" />
