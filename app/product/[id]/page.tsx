@@ -568,7 +568,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
                             {/* Login Prompt Modal */}
                             {showWishlistPrompt && (
-                                <div className="fixed inset-0 bg-black/20 backdrop-blur-xl flex items-center justify-center z-50 h-screen">
+                                <div className="fixed inset-0 bg-black/20 backdrop-blur-xl flex items-center justify-center z-[10001] h-screen">
                                     <div className="bg-white rounded-lg p-6 max-sm mx-4 space-y-4 shadow-xl border border-gray-200">
                                         <h3 className="text-lg font-bold text-black">Login Required</h3>
                                         <p className="text-gray-600">Please login to add items to your wishlist.</p>
@@ -635,7 +635,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Custom Size Modal */}
             {showMeasurementModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10001] p-4">
                     <div className="bg-white rounded-lg p-6 max-w-xl w-full shadow-xl overflow-y-auto max-h-[90vh]">
                         <h3 className="text-xl font-bold text-black mb-4 uppercase tracking-widest">Custom Measurement Form</h3>
 
