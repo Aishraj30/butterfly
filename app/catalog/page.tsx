@@ -115,7 +115,7 @@ function CatalogContent() {
                 backgroundImage="/banners/b2.JPG"
             />
 
-            <div className="max-w-[1400px] mx-auto px-5 py-8">
+            <div className="max-w-[1400px] mx-auto px-5 py-12">
                 {/* Categories/Products Section */}
                 {isLoading ? (
                     <div className="flex justify-center items-center py-12">

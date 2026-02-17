@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, MapPin, Pencil, Trash2, Plus } from "lucide-react";
 import { AccountSidebar } from "@/components/account/AccountSidebar";
+import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
 
 
 type AddressForm = {
@@ -134,6 +135,7 @@ export default function AddressesPage() {
               <h1 className="text-2xl font-bold text-gray-900">My Addresses</h1>
               <p className="text-sm text-gray-600 mt-1">Manage your shipping addresses</p>
             </div>
+            <BackToHomeButton variant="elegant" />
           </div>
         </div>
       </div>

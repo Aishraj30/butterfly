@@ -59,7 +59,7 @@ export default async function Home() {
     .limit(7)
 
   return (
-    <main className="min-h-screen transition-[padding] duration-300" style={{ paddingTop: 'var(--announcement-height, 0px)' }}>
+    <main className="min-h-screen transition-[padding] duration-300">
       {collections.length > 0 ? (
         collections.map((col: any, index: number) => (
           <div key={col._id.toString()}>

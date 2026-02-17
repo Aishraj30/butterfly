@@ -9,7 +9,6 @@ import SmoothScroll from '@/components/SmoothScroll'
 
 import './globals.css'
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader"
-import { ConditionalAnnouncementBar } from "@/components/layout/ConditionalAnnouncementBar"
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter"
 import { LoadingProvider } from "@/components/LoadingProvider"
 
@@ -63,7 +62,6 @@ export default function RootLayout({
           <AuthProvider>
             <LoadingProvider>
               <SmoothScroll>
-                <ConditionalAnnouncementBar />
                 <ConditionalHeader />
                 {children}
                 <ConditionalFooter />

@@ -11,7 +11,7 @@ export default function CartPage() {
   if (isLoading) {
     return (
       <div className="pt-60 flex flex-col items-center justify-center min-h-[400px]">
-        <Loader2 className="animate-spin text-[#8B5E34] mb-4" size={40} />
+        <Loader2 className="animate-spin text-black mb-4" size={40} />
         <p className="text-gray-500 font-medium">Loading your luxury cart...</p>
       </div>
     );
@@ -23,16 +23,16 @@ export default function CartPage() {
     return (
       <main className="pt-60 pb-20 max-w-[1400px] mx-auto px-6 text-center">
         <div className="flex flex-col items-center justify-center space-y-6">
-          <div className="bg-[#FDF6E9] p-8 rounded-full">
-            <ShoppingBag size={64} className="text-[#E5D3B3]" strokeWidth={1} />
+          <div className="bg-gray-50 p-8 rounded-full">
+            <ShoppingBag size={64} className="text-gray-200" strokeWidth={1} />
           </div>
-          <h1 className="font-serif text-4xl text-gray-800">YOUR CART IS EMPTY</h1>
+          <h1 className="font-sans text-4xl text-gray-800">YOUR CART IS EMPTY</h1>
           <p className="text-gray-500 max-w-xs mx-auto">
             Explore our exquisite collection and find something truly unique for your wardrobe.
           </p>
           <Link
             href="/products"
-            className="inline-block bg-[#8B5E34] text-white px-10 py-4 font-bold tracking-widest hover:bg-[#7A5229] transition-all"
+            className="inline-block bg-black text-white px-10 py-4 font-bold tracking-widest hover:bg-gray-800 transition-all"
           >
             START SHOPPING
           </Link>
@@ -42,14 +42,14 @@ export default function CartPage() {
   }
 
   return (
-    <main className="pt-40 pb-20 max-w-[1400px] mx-auto px-6">
-      <h1 className="font-serif text-5xl text-[#4A4A4A] mb-12 tracking-tight">CART</h1>
+    <main className="pt-16 pb-20 max-w-[1400px] mx-auto px-6">
+      <h1 className="font-sans text-5xl text-[#4A4A4A] mb-12 tracking-tight">CART</h1>
 
       <div className="flex flex-col lg:flex-row gap-16">
         {/* Cart Items */}
         <div className="flex-1 space-y-10">
           {cart.items.map((item, idx) => (
-            <div key={`${item.productId}-${idx}`} className="flex gap-8 border-b border-[#FDF6E9] pb-10 group">
+            <div key={`${item.productId}-${idx}`} className="flex gap-8 border-b border-gray-100 pb-10 group">
               <div className="w-32 aspect-[3/4] relative bg-gray-100 flex-shrink-0 overflow-hidden">
                 {item.image ? (
                   <Image src={item.image} alt={item.name || 'Item'} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -59,7 +59,7 @@ export default function CartPage() {
               </div>
               <div className="flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-serif text-2xl text-gray-800 tracking-wide uppercase">{item.name}</h3>
+                  <h3 className="font-sans text-2xl text-gray-800 tracking-wide uppercase">{item.name}</h3>
                   <button
                     onClick={() => removeFromCart(item.productId, item.size, item.color)}
                     className="text-gray-400 hover:text-red-500 transition-colors p-2"
@@ -79,17 +79,17 @@ export default function CartPage() {
                     <p className="text-xl font-medium text-gray-900">IDR {typeof item.price === 'string' ? parseFloat(item.price).toLocaleString() : item.price?.toLocaleString()}</p>
                   </div>
 
-                  <div className="flex items-center border border-[#E5D3B3] bg-white rounded-sm overflow-hidden">
+                  <div className="flex items-center border border-gray-200 bg-white rounded-sm overflow-hidden">
                     <button
                       onClick={() => updateQuantity(item.productId, item.size, item.color, Math.max(1, item.quantity - 1))}
-                      className="p-3 hover:bg-[#FDF6E9] transition-colors"
+                      className="p-3 hover:bg-gray-50 transition-colors"
                     >
                       <Minus size={14} />
                     </button>
                     <span className="px-6 font-bold text-sm min-w-[3rem] text-center">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.productId, item.size, item.color, item.quantity + 1)}
-                      className="p-3 hover:bg-[#FDF6E9] transition-colors"
+                      className="p-3 hover:bg-gray-50 transition-colors"
                     >
                       <Plus size={14} />
                     </button>
@@ -99,15 +99,15 @@ export default function CartPage() {
             </div>
           ))}
 
-          <div className="bg-[#FDF6E9]/50 p-6 text-gray-500 border border-[#E5D3B3] rounded-sm italic text-sm">
+          <div className="bg-gray-50 p-6 text-gray-500 border border-gray-200 rounded-sm italic text-sm">
             <p>Notes: Please specify any special delivery instructions here.</p>
           </div>
         </div>
 
         {/* Summary Sidebar */}
         <div className="w-full lg:w-[450px]">
-          <div className="bg-white p-10 border border-[#FDF6E9] shadow-sm sticky top-32">
-            <h3 className="font-serif text-2xl mb-8 text-gray-800 uppercase tracking-wider">SHOPPING INFO</h3>
+          <div className="bg-white p-10 border border-gray-100 shadow-sm sticky top-32">
+            <h3 className="font-sans text-2xl mb-8 text-gray-800 uppercase tracking-wider">SHOPPING INFO</h3>
 
             <div className="space-y-6 mb-10 text-sm">
               <div className="flex justify-between text-gray-500">
@@ -123,13 +123,13 @@ export default function CartPage() {
                 <span className="font-medium">IDR {cart.tax.toLocaleString()}</span>
               </div>
 
-              <div className="pt-6 border-t border-[#FDF6E9] flex justify-between items-end">
-                <span className="font-serif text-3xl text-gray-900">TOTAL</span>
-                <span className="text-3xl font-bold text-[#8B5E34]">IDR {cart.total.toLocaleString()}</span>
+              <div className="pt-6 border-t border-gray-100 flex justify-between items-end">
+                <span className="font-sans text-3xl text-gray-900">TOTAL</span>
+                <span className="text-3xl font-bold text-black">IDR {cart.total.toLocaleString()}</span>
               </div>
             </div>
 
-            <Link href="/checkout" className="block w-full bg-[#8B5E34] text-white py-5 text-center font-bold tracking-[0.2em] hover:bg-[#7A5229] transition-all hover:scale-[1.02] active:scale-100 shadow-lg shadow-[#8B5E34]/20">
+            <Link href="/checkout" className="block w-full bg-black text-white py-5 text-center font-bold tracking-[0.2em] hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-100 shadow-lg shadow-black/10">
               PROCEED TO CHECKOUT
             </Link>
           </div>

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Package, Star } from "lucide-react";
 import { AccountSidebar } from "@/components/account/AccountSidebar";
+import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
 
 export default function OrdersPage() {
   const { user, token, logout, isLoading: authLoading } = useAuth();
@@ -130,6 +131,7 @@ export default function OrdersPage() {
               <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
               <p className="text-sm text-gray-600 mt-1">Track orders, view invoices, and manage returns</p>
             </div>
+            <BackToHomeButton variant="elegant" />
           </div>
         </div>
       </div>
@@ -220,7 +222,7 @@ export default function OrdersPage() {
                                   <Button
                                     variant="link"
                                     size="sm"
-                                    className="text-xs h-auto p-0 text-[#8B5E34] mt-1"
+                                    className="text-xs h-auto p-0 text-black mt-1"
                                     onClick={() => openReviewModal(item)}
                                   >
                                     Rate Product

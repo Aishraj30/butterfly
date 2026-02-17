@@ -7,6 +7,7 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { BackToHomeButton } from '@/components/ui/BackToHomeButton';
 
 const steps = ['Information', 'Shipping', 'Payment', 'Success'];
 
@@ -150,31 +151,34 @@ export default function CheckoutPage() {
   // --- Render Helpers ---
 
   if (isCartLoading) {
-    return <div className="pt-40 text-center">Loading...</div>;
+    return <div className="pt-8 text-center">Loading...</div>;
   }
 
   return (
-    <main className="pt-40 pb-20 max-w-[1400px] mx-auto px-6">
-      <div className="flex gap-4 mb-8 text-sm text-gray-400">
-        {steps.map((step, idx) => (
-          <span key={step} className={idx <= currentStep ? 'text-[#8B5E34] font-bold' : ''}>
-            {step} {idx < steps.length - 1 && '/'}
-          </span>
-        ))}
+    <main className="pt-8 pb-20 max-w-[1400px] mx-auto px-6">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex gap-4 text-sm text-gray-400">
+          {steps.map((step, idx) => (
+            <span key={step} className={idx <= currentStep ? 'text-black font-bold' : ''}>
+              {step} {idx < steps.length - 1 && '/'}
+            </span>
+          ))}
+        </div>
+        <BackToHomeButton variant="minimal" />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-12">
         {/* Main Content Area */}
-        <div className="flex-1 bg-[#FDF6E9] p-8 border border-[#E5D3B3] min-h-[500px]">
+        <div className="flex-1 bg-gray-50 p-8 border border-gray-200 min-h-[500px]">
           {currentStep === 0 && (
             <div className="space-y-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="font-serif text-3xl text-gray-800 uppercase tracking-wider">SHIPPING INFORMATION</h2>
+                <h2 className="font-sans text-3xl text-gray-800 uppercase tracking-wider">SHIPPING INFORMATION</h2>
                 {user && user.address && (
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="form-checkbox h-4 w-4 text-[#8B5E34]"
+                      className="form-checkbox h-4 w-4 text-black"
                       onChange={(e) => {
                         if (e.target.checked && user && user.address) {
                           setFormData(prev => ({
@@ -208,7 +212,7 @@ export default function CheckoutPage() {
               <button
                 onClick={handlePlaceOrder}
                 disabled={isSubmitting || cart.items.length === 0}
-                className="w-full bg-[#8B5E34] text-white py-4 font-bold tracking-widest hover:bg-[#7A5229] transition-colors mt-8 flex justify-center items-center"
+                className="w-full bg-black text-white py-4 font-bold tracking-widest hover:bg-gray-800 transition-colors mt-8 flex justify-center items-center"
               >
                 {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : 'CONTINUE TO DELIVERY'}
               </button>
@@ -217,7 +221,7 @@ export default function CheckoutPage() {
 
           {currentStep === 1 && (
             <div className="space-y-6">
-              <h2 className="font-serif text-3xl text-gray-800 mb-6 uppercase tracking-wider">SHIPPING DELIVERY</h2>
+              <h2 className="font-sans text-3xl text-gray-800 mb-6 uppercase tracking-wider">SHIPPING DELIVERY</h2>
               <div className="space-y-3">
                 <label className="flex items-center gap-4 bg-white p-4 border border-gray-200 cursor-pointer">
                   <input type="radio" name="shippingMethod" defaultChecked />
@@ -232,7 +236,7 @@ export default function CheckoutPage() {
               </div>
               <button
                 onClick={nextStep}
-                className="w-full bg-[#8B5E34] text-white py-4 font-bold tracking-widest hover:bg-[#7A5229] transition-colors mt-8"
+                className="w-full bg-black text-white py-4 font-bold tracking-widest hover:bg-gray-800 transition-colors mt-8"
               >
                 CONTINUE TO PAYMENT
               </button>
@@ -242,7 +246,7 @@ export default function CheckoutPage() {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="font-serif text-3xl text-gray-800 uppercase tracking-wider">SECURE PAYMENT</h2>
+                <h2 className="font-sans text-3xl text-gray-800 uppercase tracking-wider">SECURE PAYMENT</h2>
                 <div className="flex items-center gap-2 opacity-30 grayscale invert">
                   <span className="text-xl font-black italic tracking-tighter">stripe</span>
                 </div>
@@ -255,7 +259,7 @@ export default function CheckoutPage() {
                     <span className="text-black font-bold">IDR {orderData?.total?.toLocaleString()}</span>
                   </div>
                   <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#8B5E34] w-full"></div>
+                    <div className="h-full bg-black w-full"></div>
                   </div>
                 </div>
 
@@ -321,14 +325,14 @@ export default function CheckoutPage() {
           {currentStep === 3 && (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
               <CheckCircle size={64} className="text-green-500 mb-6" />
-              <h2 className="font-serif text-4xl text-gray-800 mb-4">PAYMENT SUCCESS!</h2>
+              <h2 className="font-sans text-4xl text-gray-800 mb-4">PAYMENT SUCCESS!</h2>
               <p className="text-gray-500 mb-8 max-w-md">
                 Your order has been confirmed. You will receive an email confirmation shortly.
                 Order ID: <span className="font-bold text-black">#{orderData?.orderId}</span>
               </p>
               <Link
                 href="/"
-                className="bg-[#8B5E34] text-white px-8 py-3 font-bold tracking-widest hover:bg-[#7A5229] transition-colors"
+                className="bg-black text-white px-8 py-3 font-bold tracking-widest hover:bg-gray-800 transition-colors"
               >
                 BACK TO HOME
               </Link>
@@ -351,14 +355,14 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-serif text-sm font-bold truncate max-w-[200px]">{item.name}</p>
+                    <p className="font-sans text-sm font-bold truncate max-w-[200px]">{item.name}</p>
                     <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">IDR {typeof item.price === 'string' ? parseFloat(item.price).toLocaleString() : item.price?.toLocaleString()}</p>
                     <p className="text-xs text-gray-400 mt-1">Qty: {item.quantity} | Size: {item.size}</p>
                   </div>
                 </div>
               ))}
 
-              <div className="border-t border-[#E5D3B3] pt-6 space-y-3 text-sm">
+              <div className="border-t border-gray-200 pt-6 space-y-3 text-sm">
                 <div className="flex justify-between text-gray-500">
                   <span className="uppercase tracking-widest text-xs font-bold">Subtotal</span>
                   <span className="font-medium">IDR {cart.subtotal.toLocaleString()}</span>
@@ -367,11 +371,11 @@ export default function CheckoutPage() {
                   <span className="uppercase tracking-widest text-xs font-bold">Tax</span>
                   <span className="font-medium">IDR {cart.tax.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-[#8B5E34]">
+                <div className="flex justify-between text-gray-500">
                   <span className="uppercase tracking-widest text-xs font-bold">Discount</span>
                   <span className="font-medium">- IDR 0.00</span>
                 </div>
-                <div className="flex justify-between font-bold text-xl pt-4 border-t border-[#E5D3B3] text-gray-900">
+                <div className="flex justify-between font-bold text-xl pt-4 border-t border-gray-200 text-gray-900">
                   <span className="uppercase tracking-widest text-xs">Total</span>
                   <span>IDR {cart.total.toLocaleString()}</span>
                 </div>

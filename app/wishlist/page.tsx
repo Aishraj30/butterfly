@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
 
 
 export default function WishlistPage() {
@@ -60,6 +61,7 @@ export default function WishlistPage() {
                             <h1 className="text-2xl font-bold text-gray-900">My Wishlist</h1>
                             <p className="text-sm text-gray-600 mt-1">Save your favorite items for later</p>
                         </div>
+                        <BackToHomeButton variant="elegant" />
                     </div>
                 </div>
             </div>

@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, User, Mail, LogOut, Camera, Settings, MapPin, Heart, ChevronRight, Package, Edit3, ShoppingBag, CreditCard, Bell, Shield } from "lucide-react";
 import Image from "next/image";
+import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
 
 
 
@@ -96,14 +97,17 @@ export default function ProfilePage() {
               <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
               <p className="text-sm text-gray-600 mt-1">Manage your account settings and preferences</p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setIsEditing(!isEditing)}
-              className="hidden sm:flex items-center gap-2"
-            >
-              <Edit3 className="h-4 w-4" />
-              {isEditing ? "Cancel" : "Edit Profile"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <BackToHomeButton variant="elegant" />
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(!isEditing)}
+                className="hidden sm:flex items-center gap-2"
+              >
+                <Edit3 className="h-4 w-4" />
+                {isEditing ? "Cancel" : "Edit Profile"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -240,14 +240,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             {/* Backdrop */}
             <div
                 onClick={onClose}
-                className={`fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             />
 
             {/* Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed top-0 right-0 z-[101] h-[100dvh] w-full max-w-[380px] 
+                className={`fixed top-0 right-0 z-[9999] h-[100dvh] w-full max-w-[380px] 
                     bg-black/40 backdrop-blur-2xl 
                     border-l border-white/20 shadow-[20px_0_50px_rgba(0,0,0,0.1)]
                     font-sans text-white
