@@ -13,7 +13,8 @@ import {
   LogOut,
   Settings,
   Package,
-  ShieldCheck
+  ShieldCheck,
+  Heart
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -75,6 +76,13 @@ export function UserDropdown() {
                   <Link href="/orders" className="flex items-center w-full">
                     <Package className="mr-3 h-4 w-4 text-gray-500" strokeWidth={2} />
                     <span>Orders</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild className="rounded-xl focus:bg-white/60 focus:backdrop-blur-sm cursor-pointer py-2.5 px-3 text-gray-700 focus:text-black font-medium transition-all duration-200">
+                  <Link href="/wishlist" className="flex items-center w-full">
+                    <Heart className="mr-3 h-4 w-4 text-gray-500" strokeWidth={2} />
+                    <span>Wishlist</span>
                   </Link>
                 </DropdownMenuItem>
 
