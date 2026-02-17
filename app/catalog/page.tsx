@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer';
 import { filterAndSortProducts, FilterOptions, getAllProducts, Product } from '@/lib/products';
 import { Sliders } from 'lucide-react';
+import { ProductCard } from '@/components/product/ProductCard';
 
 interface Collection {
     id: number;
@@ -198,45 +199,7 @@ function CatalogContent() {
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
                                 {filteredProducts.map((product: Product) => (
-                                    <Link
-                                        href={`/product/${(product as any)._id || product.id}`}
-                                        key={(product as any)._id || product.id}
-                                        className="group block"
-                                    >
-                                        <div className="relative overflow-hidden bg-[#F9F9F9] mb-4 aspect-[3/4]">
-                                            <img
-                                                src={product.images?.[0] || product.image || product.imageUrl}
-                                                alt={product.name}
-                                                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                                            />
-                                            <div className="absolute top-4 left-4 z-10 flex gap-2">
-                                                {product.isNew && (
-                                                    <div className="bg-black text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest">
-                                                        NEW
-                                                    </div>
-                                                )}
-                                                {product.onSale && (
-                                                    <div className="bg-red-600 text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest">
-                                                        SALE
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-start">
-                                                <h3 className="text-xs font-bold uppercase tracking-widest text-black group-hover:text-gray-600 transition-colors pr-4">
-                                                    {product.name}
-                                                </h3>
-                                                <span className="text-xs font-bold text-black whitespace-nowrap">
-                                                    IDR {product.price.toLocaleString('id-ID')}
-                                                </span>
-                                            </div>
-                                            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400">
-                                                {product.category}
-                                            </p>
-                                        </div>
-                                    </Link>
+                                    <ProductCard key={(product as any)._id || product.id} product={product} />
                                 ))}
                             </div>
                         )}

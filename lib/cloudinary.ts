@@ -7,12 +7,14 @@ cloudinary.config({
 });
 
 export async function uploadToCloudinary(buffer: Buffer, filename: string, contentType: string) {
+    const isVideo = contentType.startsWith('video/');
+
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
             {
-                resource_type: 'auto',
+                resource_type: isVideo ? 'video' : 'auto',
                 folder: 'butterfly-couture',
-                public_id: filename.split('.')[0], // Use filename without extension as public_id
+                public_id: filename.split('.')[0],
             },
             (error, result) => {
                 if (error) {
@@ -25,6 +27,28 @@ export async function uploadToCloudinary(buffer: Buffer, filename: string, conte
         );
 
         uploadStream.end(buffer);
+    });
+}
+
+export async function uploadLargeToCloudinary(filePath: string, filename: string) {
+    return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload(
+            filePath,
+            {
+                resource_type: 'video',
+                folder: 'butterfly-couture',
+                public_id: filename.split('.')[0],
+                chunk_size: 6000000, // 6MB chunks for reliability
+            },
+            (error, result) => {
+                if (error) {
+                    console.error('Cloudinary large upload error:', error);
+                    reject(error);
+                } else {
+                    resolve(result?.secure_url);
+                }
+            }
+        );
     });
 }
 

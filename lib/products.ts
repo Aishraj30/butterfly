@@ -117,6 +117,7 @@ export interface Product {
   imageGradient?: string
   imageUrl?: string
   images?: string[]
+  videoUrl?: string
   inStock: boolean
   stock?: number
   onSale?: boolean

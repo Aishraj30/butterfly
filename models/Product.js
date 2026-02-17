@@ -72,6 +72,9 @@ const productSchema = new mongoose.Schema(
     imageGradient: {
       type: String,
     },
+    videoUrl: {
+      type: String,
+    },
 
     inStock: {
       type: Boolean,
