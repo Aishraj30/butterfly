@@ -8,6 +8,19 @@ import { filterAndSortProducts, FilterOptions, getAllProducts, Product } from '@
 import { Sliders } from 'lucide-react';
 import { ProductCard } from '@/components/product/ProductCard';
 
+const SingleColumnIcon = ({ active }: { active: boolean }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="16" height="16" fill={active ? "black" : "#D1D5DB"} />
+    </svg>
+)
+
+const DoubleColumnIcon = ({ active }: { active: boolean }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="4" width="6" height="16" fill={active ? "black" : "#D1D5DB"} />
+        <rect x="13" y="4" width="6" height="16" fill={active ? "black" : "#D1D5DB"} />
+    </svg>
+)
+
 interface Collection {
     id: number;
     _id: string;
@@ -24,6 +37,10 @@ function CatalogContent() {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [activeFilters, setActiveFilters] = useState<FilterState | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+    const [mobileLayout, setMobileLayout] = useState<'1' | '2'>('2');
+    const [activeGender, setActiveGender] = useState<string | null>(null);
+    const [gridView, setGridView] = useState<'3' | '4'>('4');
     const searchParams = useSearchParams();
     const collectionParam = searchParams.get('collection');
 
@@ -95,6 +112,26 @@ function CatalogContent() {
         }
     };
 
+    const handleSizeSelect = (size: string) => {
+        const newSizes = selectedSizes.includes(size)
+            ? selectedSizes.filter(s => s !== size)
+            : [...selectedSizes, size];
+        setSelectedSizes(newSizes);
+        setActiveFilters(prev => ({
+            ...prev || { genders: [], sizes: [], colors: [], priceRange: { min: null, max: null }, sortBy: 'name' },
+            sizes: newSizes
+        }));
+    };
+
+    const toggleMobileGender = (gender: string) => {
+        const newGender = activeGender === gender ? null : gender;
+        setActiveGender(newGender);
+        setActiveFilters(prev => ({
+            ...prev || { genders: [], sizes: [], colors: [], priceRange: { min: null, max: null }, sortBy: 'name' },
+            genders: newGender ? [newGender] : []
+        }));
+    };
+
     const getPlaceholderImage = (productName: string): string => {
         const gradients = [
             'bg-gradient-to-br from-purple-100 to-pink-100',
@@ -107,12 +144,30 @@ function CatalogContent() {
         return gradients[productName.length % gradients.length];
     };
 
+    const categoryParam = searchParams.get('category');
+    const subCategoryParam = searchParams.get('subCategory');
+
+
+
+    const bannerTitle = (
+        subCategoryParam ? decodeURIComponent(subCategoryParam) :
+            categoryParam ? decodeURIComponent(categoryParam) :
+                collectionParam ? decodeURIComponent(collectionParam) :
+                    "CATALOG"
+    ).toUpperCase();
+
+    const bannerSubtitle =
+        subCategoryParam ? `Explore our ${decodeURIComponent(subCategoryParam)} collection` :
+            categoryParam ? `Browse through our ${decodeURIComponent(categoryParam)} pieces` :
+                collectionParam ? `Discover our ${decodeURIComponent(collectionParam)} collection` :
+                    "Explore our complete collection";
+
     return (
         <main className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
             {/* Banner Section */}
             <CatalogBanner
-                title={collectionParam ? decodeURIComponent(collectionParam).toUpperCase() : "CATALOG"}
-                subtitle={collectionParam ? `Explore our ${decodeURIComponent(collectionParam)} collection` : "Explore our complete collection"}
+                topTitle="Discover"
+                title={bannerTitle}
                 backgroundImage="/banners/b2.JPG"
             />
 
@@ -123,81 +178,116 @@ function CatalogContent() {
                         <p className="text-gray-600">Loading...</p>
                     </div>
                 ) : (collectionParam || searchParams.get('category') || searchParams.get('subCategory')) ? (
-                    <div className="space-y-8">
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Link href="/catalog" className="hover:text-black">Catalog</Link>
-                            {collectionParam && (
-                                <>
-                                    <span>/</span>
-                                    <span className="text-black font-medium capitalize">{collectionParam}</span>
-                                </>
-                            )}
-                            {searchParams.get('category') && (
-                                <>
-                                    <span>/</span>
-                                    <span className="text-black font-medium capitalize">{decodeURIComponent(searchParams.get('category')!)}</span>
-                                </>
-                            )}
-                            {searchParams.get('subCategory') && (
-                                <>
-                                    <span>/</span>
-                                    <span className="text-black font-medium capitalize">{decodeURIComponent(searchParams.get('subCategory')!)}</span>
-                                </>
-                            )}
+                    <div className="space-y-4">
+                        {/* --- MOBILE FILTER BAR (Top Sticky) --- */}
+                        <div className="sticky top-[72px] md:top-[88px] lg:top-[104px] z-30 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between md:hidden shadow-sm -mx-5 mb-6">
+                            {/* Item Count */}
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-black">
+                                {filteredProducts.length} Items
+                            </span>
+
+                            {/* Gender Toggles */}
+                            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest">
+                                <button
+                                    onClick={() => toggleMobileGender('Male')}
+                                    className={`transition-colors ${activeGender?.toLowerCase() === 'male' ? 'text-black' : 'text-gray-300'}`}
+                                >
+                                    Male
+                                </button>
+                                <button
+                                    onClick={() => toggleMobileGender('Female')}
+                                    className={`transition-colors ${activeGender?.toLowerCase() === 'female' ? 'text-black' : 'text-gray-300'}`}
+                                >
+                                    Female
+                                </button>
+                            </div>
+
+                            {/* Layout Toggles */}
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => setMobileLayout('1')}>
+                                    <SingleColumnIcon active={mobileLayout === '1'} />
+                                </button>
+                                <button onClick={() => setMobileLayout('2')}>
+                                    <DoubleColumnIcon active={mobileLayout === '2'} />
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="mb-8 flex justify-between items-center bg-gray-50 p-6">
-                            <div className="flex items-center gap-6">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-black capitalize">
-                                        {collectionParam || searchParams.get('subCategory') || searchParams.get('category') || 'Products'}
-                                    </h1>
-                                    <p className="text-gray-600 mt-2">
-                                        Showing {filteredProducts.length} pieces
-                                        {collectionParam && ` in ${collectionParam} collection`}
-                                        {searchParams.get('category') && ` in ${decodeURIComponent(searchParams.get('category')!)} category`}
-                                    </p>
-                                </div>
-                                <div className="hidden md:flex items-center gap-3 pl-6 border-l">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Sort:</span>
-                                    <select
-                                        value={activeFilters?.sortBy || 'name'}
-                                        onChange={(e) => setActiveFilters(prev => ({
-                                            ...prev || { genders: [], sizes: [], colors: [], priceRange: { min: null, max: null }, sortBy: 'name' },
-                                            sortBy: e.target.value as any
-                                        }))}
-                                        className="text-xs font-bold uppercase tracking-widest bg-transparent border-none focus:ring-0 cursor-pointer text-black"
-                                    >
-                                        <option value="name">Featured</option>
-                                        <option value="price-low">Price: Low to High</option>
-                                        <option value="price-high">Price: High to Low</option>
-                                        <option value="rating">Top Rated</option>
-                                    </select>
-                                </div>
-                            </div>
+                        {/* --- DESKTOP FILTER BAR (Hidden on Mobile) --- */}
+                        <div className="hidden md:flex items-center justify-between mb-10 border-b pb-6">
                             <button
                                 onClick={() => setIsFilterOpen(true)}
-                                className="flex items-center gap-2 px-6 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all flex-shrink-0"
+                                className="flex items-center gap-3 px-6 py-3 border border-gray-200 hover:border-black transition-all text-[10px] font-bold uppercase tracking-[0.2em]"
                             >
-                                <Sliders size={18} />
-                                Refine
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                    <line x1="4" y1="21" x2="4" y2="14" />
+                                    <line x1="4" y1="10" x2="4" y2="3" />
+                                    <line x1="12" y1="21" x2="12" y2="12" />
+                                    <line x1="12" y1="8" x2="12" y2="3" />
+                                    <line x1="20" y1="21" x2="20" y2="16" />
+                                    <line x1="20" y1="12" x2="20" y2="3" />
+                                    <circle cx="4" cy="7" r="1.5" />
+                                    <circle cx="12" cy="5" r="1.5" />
+                                    <circle cx="20" cy="9" r="1.5" />
+                                </svg>
+                                FILTER & SORT
                             </button>
+
+                            <div className="flex items-center gap-2">
+                                {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
+                                    <button
+                                        key={size}
+                                        onClick={() => handleSizeSelect(size)}
+                                        className={`px-5 py-2.5 border text-[10px] font-bold transition-all tracking-widest ${selectedSizes.includes(size)
+                                            ? 'bg-black text-white border-black'
+                                            : 'bg-white text-black border-gray-200 hover:border-black'
+                                            }`}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex items-center gap-6">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                    {filteredProducts.length} Items
+                                </span>
+                                <div className="flex items-center gap-2 pl-6 border-l border-gray-100">
+                                    <button
+                                        onClick={() => setGridView('3')}
+                                        className={`p-2 transition-colors ${gridView === '3' ? 'text-black' : 'text-gray-300 hover:text-black'}`}
+                                    >
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
+                                    </button>
+                                    <button
+                                        onClick={() => setGridView('4')}
+                                        className={`p-2 transition-colors ${gridView === '4' ? 'text-black' : 'text-gray-300 hover:text-black'}`}
+                                    >
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="4" height="4" /><rect x="10" y="3" width="4" height="4" /><rect x="17" y="3" width="4" height="4" /><rect x="3" y="10" width="4" height="4" /><rect x="10" y="10" width="4" height="4" /><rect x="17" y="10" width="4" height="4" /><rect x="3" y="17" width="4" height="4" /><rect x="10" y="17" width="4" height="4" /><rect x="17" y="17" width="4" height="4" /></svg>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         {filteredProducts.length === 0 ? (
-                            <div className="flex justify-center items-center py-20">
+                            <div className="flex justify-center items-center py-24">
                                 <div className="text-center">
-                                    <p className="text-gray-600 text-lg mb-4">No products found matching your filters</p>
+                                    <p className="text-gray-400 text-sm tracking-widest uppercase mb-6">No products found matching your filters</p>
                                     <button
-                                        onClick={() => setActiveFilters(null)}
-                                        className="inline-flex items-center justify-center px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors duration-300 text-sm tracking-wide uppercase"
+                                        onClick={() => {
+                                            setActiveFilters(null);
+                                            setSelectedSizes([]);
+                                            setActiveGender(null);
+                                        }}
+                                        className="inline-flex items-center justify-center px-8 py-3 bg-black text-white hover:bg-gray-800 transition-all text-[10px] font-bold uppercase tracking-[0.2em]"
                                     >
                                         Clear Filters
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+                            <div className={`grid ${mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'
+                                } ${gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-x-6 gap-y-12`}>
                                 {filteredProducts.map((product: Product) => (
                                     <ProductCard key={(product as any)._id || product.id} product={product} />
                                 ))}
@@ -253,6 +343,12 @@ function CatalogContent() {
                 onClose={() => setIsFilterOpen(false)}
                 onApplyFilters={(filters) => {
                     setActiveFilters(filters)
+                    setSelectedSizes(filters.sizes)
+                    if (filters.genders.length === 1) {
+                        setActiveGender(filters.genders[0])
+                    } else {
+                        setActiveGender(null)
+                    }
                     setIsFilterOpen(false)
                 }}
                 initialFilters={activeFilters || undefined}

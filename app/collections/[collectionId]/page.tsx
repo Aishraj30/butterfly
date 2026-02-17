@@ -243,8 +243,8 @@ export default function CollectionPage() {
             {/* Added padding-bottom on mobile to prevent content being hidden behind sticky button */}
 
             <CatalogBanner
+                topTitle="Discover"
                 title={collectionDetails?.name || collectionInfo.title}
-                subtitle={collectionDetails?.description || collectionInfo.description}
                 backgroundImage={collectionDetails?.bannerImage || collectionInfo.image}
             />
 

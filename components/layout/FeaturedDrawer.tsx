@@ -244,14 +244,14 @@ export function FeaturedDrawer({ isOpen, onClose }: FeaturedDrawerProps) {
             {/* Backdrop */}
             <div
                 onClick={onClose}
-                className={`fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[10000] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             />
 
             {/* Left Side Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed top-0 left-0 z-[9999] h-full w-full max-w-[320px] 
+                className={`fixed top-0 left-0 z-[10001] h-full w-full max-w-[320px] 
                     bg-black/40 backdrop-blur-2xl 
                     border-r border-white/20 shadow-[20px_0_50px_rgba(0,0,0,0.1)]
                     font-sans text-white

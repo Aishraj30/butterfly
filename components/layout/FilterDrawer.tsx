@@ -48,13 +48,93 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
 
     // Body Scroll Lock
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
+        const htmlElement = document.documentElement
+        const bodyElement = document.body
+
+        // Store original styles
+        const originalHtmlOverflow = htmlElement.style.overflow
+        const originalBodyOverflow = bodyElement.style.overflow
+        const originalBodyMarginRight = bodyElement.style.marginRight
+
+        // Calculate scrollbar width to prevent layout shift
+        const getScrollbarWidth = () => {
+            const temp = document.createElement('div')
+            temp.style.cssText = 'position: absolute; top: -9999px; width: 100px; height: 100px; overflow: scroll; visibility: hidden;'
+            document.body.appendChild(temp)
+            const scrollbarWidth = temp.offsetWidth - temp.clientWidth
+            document.body.removeChild(temp)
+            return scrollbarWidth
         }
+
+        if (isOpen) {
+            const scrollbarWidth = getScrollbarWidth()
+            htmlElement.style.overflow = 'hidden'
+            bodyElement.style.overflow = 'hidden'
+            bodyElement.style.marginRight = `${scrollbarWidth}px`
+        } else {
+            htmlElement.style.overflow = originalHtmlOverflow || ''
+            bodyElement.style.overflow = originalBodyOverflow || ''
+            bodyElement.style.marginRight = originalBodyMarginRight || ''
+        }
+
         return () => {
-            document.body.style.overflow = ''
+            htmlElement.style.overflow = originalHtmlOverflow || ''
+            bodyElement.style.overflow = originalBodyOverflow || ''
+            bodyElement.style.marginRight = originalBodyMarginRight || ''
+        }
+    }, [isOpen])
+
+    // Prevent background scrolling via events
+    useEffect(() => {
+        const preventBackgroundScroll = (e: Event) => {
+            if (isOpen) {
+                const drawerElement = drawerRef.current
+                const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
+
+                if (isInsideDrawer) {
+                    e.stopPropagation()
+                    return
+                }
+
+                e.preventDefault()
+                e.stopPropagation()
+                return false
+            }
+        }
+
+        const preventTouchMove = (e: TouchEvent) => {
+            if (isOpen) {
+                const drawerElement = drawerRef.current
+                const isInsideDrawer = drawerElement && drawerElement.contains(e.target as Node)
+
+                if (isInsideDrawer) {
+                    return
+                }
+
+                if (e.cancelable) {
+                    e.preventDefault()
+                }
+                e.stopPropagation()
+                return false
+            }
+        }
+
+        if (isOpen) {
+            document.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
+            window.addEventListener('wheel', preventBackgroundScroll, { passive: false, capture: true })
+            document.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
+            window.addEventListener('touchmove', preventTouchMove, { passive: false, capture: true })
+            document.addEventListener('scroll', preventBackgroundScroll, { capture: true })
+            window.addEventListener('scroll', preventBackgroundScroll, { capture: true })
+        }
+
+        return () => {
+            document.removeEventListener('wheel', preventBackgroundScroll, { capture: true })
+            window.removeEventListener('wheel', preventBackgroundScroll, { capture: true })
+            document.removeEventListener('touchmove', preventTouchMove, { capture: true })
+            window.removeEventListener('touchmove', preventTouchMove, { capture: true })
+            document.removeEventListener('scroll', preventBackgroundScroll, { capture: true })
+            window.removeEventListener('scroll', preventBackgroundScroll, { capture: true })
         }
     }, [isOpen])
 
@@ -100,7 +180,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
         const activeClass = isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         return `${baseClass} ${activeClass}`
     }
-    
+
     const getDelayStyle = (index: number) => ({ transitionDelay: `${200 + (index * 50)}ms` })
 
     return (
@@ -108,16 +188,16 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
             {/* Backdrop */}
             <div
                 onClick={onClose}
-                className={`fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[10000] bg-black/40 backdrop-blur-[4px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             />
 
             {/* Right Side Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed inset-y-0 right-0 z-[9999] w-full max-w-[420px]
-                    bg-black/60 backdrop-blur-2xl 
-                    border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.3)]
+                className={`fixed inset-y-0 right-0 z-[10001] w-full max-w-[420px]
+                    bg-black/40 backdrop-blur-2xl 
+                    border-l border-white/20 shadow-[-20px_0_50px_rgba(0,0,0,0.2)]
                     font-sans text-white
                     flex flex-col
                     transition-transform duration-500 ease-[cubic-bezier(0.4, 0, 0.2, 1)] 
@@ -148,8 +228,8 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
                 </div>
 
                 {/* 2. Scrollable Content */}
-                <div className="relative flex-1 overflow-y-auto px-8 py-8 space-y-10 scrollbar-hide">
-                    
+                <div className="relative flex-1 overflow-y-auto px-8 py-8 space-y-10">
+
                     {/* Sort By */}
                     <section className={getAnimationClass(0)} style={getDelayStyle(0)}>
                         <h3 className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-4 font-semibold">Sort By</h3>
@@ -251,14 +331,14 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
                                     title={color}
                                     className={`group relative flex items-center justify-center aspect-square rounded-full hover:scale-110 transition-all`}
                                 >
-                                    <div 
+                                    <div
                                         className={`w-6 h-6 rounded-full shadow-sm transition-all ${selectedColors.includes(color) ? 'ring-2 ring-white ring-offset-0' : ''}`}
-                                        style={{ 
-                                            backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' : 
-                                                             color.toLowerCase() === 'black' ? '#000000' :
-                                                             color.toLowerCase() === 'cream' ? '#F5F5DC' : 
-                                                             color.toLowerCase() === 'gold' ? '#FFD700' :
-                                                             color.toLowerCase() === 'navy' ? '#000080' : color 
+                                        style={{
+                                            backgroundColor: color.toLowerCase() === 'white' ? '#ffffff' :
+                                                color.toLowerCase() === 'black' ? '#000000' :
+                                                    color.toLowerCase() === 'cream' ? '#F5F5DC' :
+                                                        color.toLowerCase() === 'gold' ? '#FFD700' :
+                                                            color.toLowerCase() === 'navy' ? '#000080' : color
                                         }}
                                     />
                                 </button>
@@ -279,7 +359,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
                         <RotateCcw className="w-3 h-3" />
                         Reset
                     </button>
-                    
+
                     <button
                         onClick={applyFilters}
                         className="flex-[2] bg-white text-black py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white/90 transition-transform active:scale-[0.98]"

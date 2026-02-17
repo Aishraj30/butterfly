@@ -22,7 +22,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     useEffect(() => {
         const htmlElement = document.documentElement
         const bodyElement = document.body
-        
+
         // Store original styles
         const originalHtmlOverflow = htmlElement.style.overflow
         const originalBodyOverflow = bodyElement.style.overflow
@@ -32,7 +32,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         const originalBodyWidth = bodyElement.style.width
         const originalBodyHeight = bodyElement.style.height
         const originalBodyMarginRight = bodyElement.style.marginRight
-        
+
         // Calculate scrollbar width to prevent layout shift
         const getScrollbarWidth = () => {
             // Create a temporary element to measure scrollbar width
@@ -43,13 +43,13 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             document.body.removeChild(temp)
             return scrollbarWidth
         }
-        
+
         if (isOpen) {
             // Save current scroll position
             const scrollY = window.scrollY
             const scrollX = window.scrollX
             const scrollbarWidth = getScrollbarWidth()
-            
+
             // Apply comprehensive lock styles with scrollbar compensation
             htmlElement.style.overflow = 'hidden'
             bodyElement.style.position = 'fixed'
@@ -62,27 +62,27 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             bodyElement.style.webkitUserSelect = 'none'
             bodyElement.style.userSelect = 'none'
             bodyElement.style.marginRight = `${scrollbarWidth}px`
-            
-            // Store scroll positions for restoration
-            ;(bodyElement as any).storedScrollY = scrollY
-            ;(bodyElement as any).storedScrollX = scrollX
-            ;(bodyElement as any).scrollbarWidth = scrollbarWidth
-            ;(bodyElement as any).originalStyles = {
-                htmlOverflow: originalHtmlOverflow,
-                bodyOverflow: originalBodyOverflow,
-                bodyPosition: originalBodyPosition,
-                bodyTop: originalBodyTop,
-                bodyLeft: originalBodyLeft,
-                bodyWidth: originalBodyWidth,
-                bodyHeight: originalBodyHeight,
-                bodyMarginRight: originalBodyMarginRight
-            }
+
+                // Store scroll positions for restoration
+                ; (bodyElement as any).storedScrollY = scrollY
+                ; (bodyElement as any).storedScrollX = scrollX
+                ; (bodyElement as any).scrollbarWidth = scrollbarWidth
+                ; (bodyElement as any).originalStyles = {
+                    htmlOverflow: originalHtmlOverflow,
+                    bodyOverflow: originalBodyOverflow,
+                    bodyPosition: originalBodyPosition,
+                    bodyTop: originalBodyTop,
+                    bodyLeft: originalBodyLeft,
+                    bodyWidth: originalBodyWidth,
+                    bodyHeight: originalBodyHeight,
+                    bodyMarginRight: originalBodyMarginRight
+                }
         } else {
             // Restore scroll position and styles
             const storedScrollY = (bodyElement as any).storedScrollY || 0
             const storedScrollX = (bodyElement as any).storedScrollX || 0
             const storedStyles = (bodyElement as any).originalStyles || {}
-            
+
             // Restore styles first
             htmlElement.style.overflow = storedStyles.htmlOverflow || ''
             bodyElement.style.position = storedStyles.bodyPosition || ''
@@ -95,17 +95,17 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             bodyElement.style.webkitUserSelect = ''
             bodyElement.style.userSelect = ''
             bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
-            
+
             // Restore scroll position
             window.scrollTo(storedScrollX, storedScrollY)
-            
+
             // Clean up stored data
             delete (bodyElement as any).storedScrollY
             delete (bodyElement as any).storedScrollX
             delete (bodyElement as any).scrollbarWidth
             delete (bodyElement as any).originalStyles
         }
-        
+
         return () => {
             // Ensure cleanup on unmount
             const storedStyles = (bodyElement as any).originalStyles || {}
@@ -194,7 +194,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             document.addEventListener('touchend', preventAllScroll, { passive: false, capture: true })
             document.addEventListener('keydown', preventKeyScroll, { capture: true })
             document.addEventListener('scroll', preventAllScroll, { capture: true })
-            
+
             // Also block on window level
             window.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
             window.addEventListener('scroll', preventAllScroll, { capture: true })
@@ -210,7 +210,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             document.removeEventListener('touchend', preventAllScroll, { capture: true })
             document.removeEventListener('keydown', preventKeyScroll, { capture: true })
             document.removeEventListener('scroll', preventAllScroll, { capture: true })
-            
+
             window.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
             window.removeEventListener('scroll', preventAllScroll, { capture: true })
         }
@@ -240,14 +240,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             {/* Backdrop */}
             <div
                 onClick={onClose}
-                className={`fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[10000] bg-black/20 backdrop-blur-[2px] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                     }`}
             />
 
             {/* Drawer Panel */}
             <div
                 ref={drawerRef}
-                className={`fixed top-0 right-0 z-[9999] h-[100dvh] w-full max-w-[380px] 
+                className={`fixed top-0 right-0 z-[10001] h-[100dvh] w-full max-w-[380px] 
                     bg-black/40 backdrop-blur-2xl 
                     border-l border-white/20 shadow-[20px_0_50px_rgba(0,0,0,0.1)]
                     font-sans text-white
@@ -261,8 +261,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                     {/* Header: Minimal & Centered */}
                     <div className="relative flex items-center justify-between mb-12">
-                        <div className="w-6" /> 
-                        
+                        <div className="w-6" />
+
                         <h2 className="text-lg tracking-[0.3em] uppercase text-white font-medium font-sans">
                             Cart ({cartItems.length})
                         </h2>
@@ -392,7 +392,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             >
                                 Checkout
                             </Link>
-                            
+
                             {!user && (
                                 <Link
                                     href="/account"
@@ -404,7 +404,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             )}
                         </div>
                     )}
-                    
+
                     {/* Empty Footer */}
                     {isEmpty && (
                         <div className="pt-8 border-t border-white/20">
@@ -418,8 +418,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                 </Link>
                             )}
                             <div className="flex gap-4">
-                                 <div className="w-2 h-2 rounded-full bg-white/20"></div>
-                                 <div className="w-2 h-2 rounded-full bg-white/20"></div>
+                                <div className="w-2 h-2 rounded-full bg-white/20"></div>
+                                <div className="w-2 h-2 rounded-full bg-white/20"></div>
                             </div>
                         </div>
                     )}

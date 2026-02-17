@@ -158,10 +158,10 @@ export function Header() {
                     setIsFeaturedDrawerOpen(true)
                   }
                 } : undefined}
-                className={`text-sm font-semibold transition-all flex items-center gap-1 hover:opacity-100 ${pathname === item.href ? 'text-white' : isHome && !isCatalog ? 'text-white/90' : 'text-white/80'}`}
+                className={`text-sm font-semibold transition-all flex items-center gap-1 hover:opacity-100 ${pathname === item.href ? 'text-white' : 'text-white'}`}
               >
                 {item.name}
-                {item.hasDropdown && <ChevronDown size={12} className="mt-[2px] opacity-70" />}
+                {item.hasDropdown && <ChevronDown size={12} className="mt-[2px]" />}
               </Link>
             ))}
           </nav>
@@ -247,7 +247,7 @@ export function Header() {
 
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="hover:opacity-70 transition-opacity flex items-center hover:cursor-pointer p-2"
+                className="transition-opacity flex items-center hover:cursor-pointer p-2"
               >
                 <Search size={20} strokeWidth={1.5} />
               </button>
@@ -261,7 +261,7 @@ export function Header() {
             {/* Shopping Bag */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="flex items-center hover:opacity-70 transition-opacity cursor-pointer relative p-2"
+              className="flex items-center transition-opacity cursor-pointer relative p-2"
               aria-label="Open Cart"
             >
               <ShoppingBag size={20} strokeWidth={1.5} />
@@ -355,7 +355,7 @@ export function Header() {
                           </span>
                           <ChevronDown
                             size={16}
-                            className="transform -rotate-90 text-white/60 group-hover:text-gray-200"
+                            className="transform -rotate-90 text-white group-hover:text-gray-200"
                           />
                         </button>
                       ) : (
@@ -382,7 +382,7 @@ export function Header() {
                     <Link
                       href="/wishlist"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
+                      className="flex items-center gap-3 py-3 text-white transition-colors"
                     >
                       <Heart size={18} />
                       <span className="text-sm">Wishlist</span>
@@ -390,7 +390,7 @@ export function Header() {
                     <Link
                       href="/search"
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
+                      className="flex items-center gap-3 py-3 text-white transition-colors"
                     >
                       <Search size={18} />
                       <span className="text-sm">Search</span>
@@ -409,7 +409,7 @@ export function Header() {
                         <Link
                           href="/orders"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
+                          className="flex items-center gap-3 py-3 text-white transition-colors"
                         >
                           <Package size={18} />
                           <span className="text-sm">Orders</span>
@@ -438,14 +438,14 @@ export function Header() {
                         <Link
                           href="/login"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
+                          className="flex items-center gap-3 py-3 text-white transition-colors"
                         >
                           <span className="text-sm">Login</span>
                         </Link>
                         <Link
                           href="/signup"
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 py-3 text-white/80 hover:text-white transition-colors"
+                          className="flex items-center gap-3 py-3 text-white transition-colors"
                         >
                           <span className="text-sm">Sign Up</span>
                         </Link>

@@ -31,7 +31,7 @@ export function UserDropdown() {
       <DropdownMenu>
         {/* Trigger */}
         <DropdownMenuTrigger asChild>
-          <button className={`hover:opacity-70 transition-opacity flex items-center gap-1 hover:cursor-pointer outline-none text-white hover:text-white`}>
+          <button className={`transition-opacity flex items-center gap-1 hover:cursor-pointer outline-none text-white`}>
             <User size={20} strokeWidth={1.5} />
           </button>
         </DropdownMenuTrigger>
