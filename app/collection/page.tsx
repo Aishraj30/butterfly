@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { CatalogBanner } from '@/components/catalog/CatalogBanner'
 import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer'
+import { ProductCard } from '@/components/product/ProductCard'
 
 // --- ICONS FOR MOBILE VIEW ---
 const SingleColumnIcon = ({ active }: { active: boolean }) => (
@@ -149,7 +150,7 @@ export default function CollectionPage() {
         }
 
 
-        
+
         // Filter by color
         if (filters.colors.length > 0) {
             filtered = filtered.filter(product =>
@@ -360,8 +361,8 @@ export default function CollectionPage() {
                                 key={size}
                                 onClick={() => handleSizeSelect(size)}
                                 className={`px-4 py-2 border text-sm font-medium transition-colors ${selectedSizes.includes(size)
-                                        ? 'bg-black text-white border-black'
-                                        : 'bg-white text-black border-gray-300 hover:border-black'
+                                    ? 'bg-black text-white border-black'
+                                    : 'bg-white text-black border-gray-300 hover:border-black'
                                     }`}
                             >
                                 {size}
@@ -417,32 +418,7 @@ export default function CollectionPage() {
                             ${/* Desktop Layout Overrides */ gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'}
                         `}>
                             {filteredProducts.map((product) => (
-                                <Link
-                                    key={product._id}
-                                    href={`/product/${product._id}`}
-                                    className="group block"
-                                >
-                                    <div className="bg-gray-50 rounded-lg overflow-hidden transition-shadow duration-300">
-                                        <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
-                                            <div className={`w-full h-full ${product.imageUrl || 'bg-gradient-to-br from-pink-100 to-rose-100'} flex items-center justify-center transition-transform duration-500 group-hover:scale-105`}>
-                                                {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />}
-                                                {product.onSale && <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">Sale</div>}
-                                                {product.isNew && <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">New</div>}
-                                            </div>
-                                        </div>
-                                        <div className="p-4">
-                                            <h3 className="font-normal text-xs text-black text-left uppercase mb-2 font-inter truncate">{product.name}</h3>
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-black font-normal text-base font-inter">₹{product.salePrice || product.price}</p>
-                                                {product.salePrice && (
-                                                    <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                                        {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
+                                <ProductCard key={product._id} product={product as any} />
                             ))}
                         </div>
                     )}

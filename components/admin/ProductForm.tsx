@@ -163,10 +163,12 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             modelHeight: '',
             shippingTime: '',
             imageGradient: '',
+            videoUrl: '',
         }
     )
     const [uploadingImage, setUploadingImage] = useState(false)
-    const [imagePreview, setImagePreview] = useState('')
+    const [uploadingVideo, setUploadingVideo] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState(0)
     const [compressionInfo, setCompressionInfo] = useState<string>('')
 
     const [colorInput, setColorInput] = useState('')
@@ -639,6 +641,122 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                             </label>
                             <p className="text-xs text-foreground/50">Primary photo will be the first one.</p>
                         </div>
+                    </div>
+                </div>
+
+                {/* Video Upload */}
+                <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-medium text-foreground">Product Video (Compressed to .webm at 32 CRF)</label>
+                    <div className="space-y-4">
+                        {formData.videoUrl && (
+                            <div className="relative group w-full max-w-[300px] aspect-[3/4] border border-border rounded-sm overflow-hidden bg-secondary shadow-sm">
+                                <video src={formData.videoUrl} controls className="w-full h-full object-cover" />
+                                <div className="absolute top-2 left-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded-sm backdrop-blur-sm">
+                                    15s Preview
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, videoUrl: '' }))}
+                                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="flex items-center gap-4">
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0]
+                                    if (!file) return
+
+                                    setUploadingVideo(true)
+                                    setUploadProgress(0)
+                                    try {
+                                        const uploadFormData = new FormData()
+                                        uploadFormData.append('file', file)
+
+                                        const xhr = new XMLHttpRequest()
+
+                                        // Track upload progress
+                                        xhr.upload.onprogress = (event) => {
+                                            if (event.lengthComputable) {
+                                                const percentComplete = Math.round((event.loaded / event.total) * 100)
+                                                setUploadProgress(percentComplete)
+                                            }
+                                        }
+
+                                        const uploadPromise = new Promise((resolve, reject) => {
+                                            xhr.onload = () => {
+                                                if (xhr.status >= 200 && xhr.status < 300) {
+                                                    resolve(JSON.parse(xhr.responseText))
+                                                } else {
+                                                    try {
+                                                        const errorData = JSON.parse(xhr.responseText)
+                                                        reject(new Error(errorData.error || 'Upload failed'))
+                                                    } catch (e) {
+                                                        reject(new Error('Upload failed'))
+                                                    }
+                                                }
+                                            }
+                                            xhr.onerror = () => reject(new Error('Network error during upload'))
+                                            xhr.onabort = () => reject(new Error('Upload aborted'))
+                                        })
+
+                                        xhr.open('POST', '/api/upload')
+                                        xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+                                        xhr.send(uploadFormData)
+
+                                        const data: any = await uploadPromise
+                                        if (data.success) {
+                                            setFormData(prev => ({ ...prev, videoUrl: data.url }))
+                                        } else {
+                                            alert(data.error || 'Video upload failed')
+                                        }
+                                    } catch (err: any) {
+                                        console.error('Video upload error:', err)
+                                        alert(err.message || 'Video upload failed')
+                                    } finally {
+                                        setUploadingVideo(false)
+                                        setUploadProgress(0)
+                                    }
+                                }}
+                                disabled={uploadingVideo}
+                                className="hidden"
+                                id="video-upload"
+                            />
+                            <label
+                                htmlFor="video-upload"
+                                className="flex items-center gap-2 px-6 py-2 bg-secondary text-secondary-foreground font-medium rounded-sm cursor-pointer hover:bg-secondary/80 transition-all shadow-sm"
+                            >
+                                {uploadingVideo ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+                                <Upload size={18} />
+                                {uploadingVideo ? 'Compressing & Uploading...' : 'Add Product Video'}
+                            </label>
+                            <p className="text-xs text-foreground/50">Max size 500MB. Optimized for web.</p>
+                        </div>
+
+                        {uploadingVideo && (
+                            <div className="space-y-2 w-full max-w-[300px]">
+                                <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold text-primary">
+                                    <span>{uploadProgress < 100 ? 'Uploading...' : 'Processing & Compressing...'}</span>
+                                    <span>{uploadProgress}%</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-primary transition-all duration-300 ease-out"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    />
+                                </div>
+                                {uploadProgress === 100 && (
+                                    <p className="text-[10px] text-foreground/40 italic">
+                                        Note: Compression can take 1-2 minutes for large videos.
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -43,9 +43,9 @@ interface Product {
     shippingTime?: string;
     isActive?: boolean;
     brand?: string;
-    createdAt?: string;
     updatedAt?: string;
     isCustomizable?: boolean;
+    videoUrl?: string;
 }
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -78,6 +78,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         notes: '',
         unit: 'inch'
     });
+
+
 
     useEffect(() => {
         if (id) {
@@ -392,6 +394,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 </div>
                             ))}
                         </div>
+
+
                     </div>
 
                     {/* Right: Specifications */}

@@ -74,7 +74,25 @@ export class ProductController {
             // }
 
             const body = await req.json();
-            const product = await Product.create(body);
+
+            // Map and filter fields to match Mongoose schema
+            const createData = { ...body };
+
+            // Map frontend 'size' to backend 'sizes'
+            if (body.size && Array.isArray(body.size)) {
+                createData.sizes = body.size;
+                delete createData.size;
+            }
+
+            // Remove computed fields
+            delete createData.reviews;
+            delete createData.imageUrl;
+            delete createData.image;
+            delete createData.color;
+            delete createData._id;
+            delete createData.id;
+
+            const product = await Product.create(createData);
 
             // Link product to collection if collectionName is provided
             if (body.collectionName) {
@@ -130,128 +148,168 @@ export class ProductController {
         await connectDB();
         const { id } = await params;
 
-        const product = await Product.findById(id);
-        if (!product) {
-            return NextResponse.json(
-                { message: "Product not found" },
-                { status: 404 }
-            );
+        try {
+            const product = await Product.findById(id);
+            if (!product) {
+                return NextResponse.json(
+                    { message: "Product not found" },
+                    { status: 404 }
+                );
+            }
+
+            // Check inventory status
+            const inventoryItems = await Inventory.find({ productId: id });
+            const hasInventory = inventoryItems.length > 0;
+            const totalAvailableStock = inventoryItems.reduce((sum, item) => sum + ((item.totalStock || 0) - (item.reservedStock || 0)), 0);
+
+            // A product is in stock ONLY if it has an inventory record AND available stock > 0
+            const isActuallyInStock = hasInventory && totalAvailableStock > 0;
+
+            // Transform MongoDB document to match frontend interface
+            const transformedProduct = {
+                ...product.toObject(),
+                id: product._id.toString(), // Convert ObjectId to string and assign to id
+                color: product.colors?.[0] || '', // Use first color for backward compatibility
+                size: product.sizes || [], // Map sizes field
+                reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
+                imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
+                image: product.imageGradient || '', // Map imageGradient to image
+                inStock: isActuallyInStock, // Override with real inventory status
+                inventory: inventoryItems.map(item => ({
+                    color: item.color,
+                    size: item.size,
+                    available: (item.totalStock - item.reservedStock) > 0,
+                    availableStock: item.totalStock - item.reservedStock
+                }))
+            };
+
+            return NextResponse.json({ success: true, data: transformedProduct });
+        } catch (error) {
+            console.error(`[ProductController] getById error for ${id}:`, error);
+            return NextResponse.json({ success: false, message: error.message }, { status: 500 });
         }
-
-        // Check inventory status
-        const inventoryItems = await Inventory.find({ productId: id });
-        const hasInventory = inventoryItems.length > 0;
-        const totalAvailableStock = inventoryItems.reduce((sum, item) => sum + ((item.totalStock || 0) - (item.reservedStock || 0)), 0);
-
-        // A product is in stock ONLY if it has an inventory record AND available stock > 0
-        const isActuallyInStock = hasInventory && totalAvailableStock > 0;
-
-        // Transform MongoDB document to match frontend interface
-        const transformedProduct = {
-            ...product.toObject(),
-            id: product._id.toString(), // Convert ObjectId to string and assign to id
-            color: product.colors?.[0] || '', // Use first color for backward compatibility
-            size: product.sizes || [], // Map sizes field
-            reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
-            imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
-            image: product.imageGradient || '', // Map imageGradient to image
-            inStock: isActuallyInStock, // Override with real inventory status
-            inventory: inventoryItems.map(item => ({
-                color: item.color,
-                size: item.size,
-                available: (item.totalStock - item.reservedStock) > 0,
-                availableStock: item.totalStock - item.reservedStock
-            }))
-        };
-
-        return NextResponse.json({ success: true, data: transformedProduct });
     }
 
-    // UPDATE PRODUCT
     static async update(req, { params }) {
         await connectDB();
         const { id } = await params;
+        try {
+            const body = await req.json();
+            console.log(`[ProductController] Updating product ${id} with body:`, JSON.stringify(body, null, 2));
 
-        // const user = isAdmin(req);
-        // if (!user || user.role !== "admin") {
-        //   return NextResponse.json(
-        //     { message: "Admin access only" },
-        //     { status: 403 }
-        //   );
-        // }
+            // Remove immutable fields or fields that shouldn't be updated directly via body
+            const { _id, id: bodyId, createdAt, updatedAt, ...rawData } = body;
 
-        const body = await req.json();
-        const product = await Product.findByIdAndUpdate(
-            id,
-            body,
-            { new: true }
-        );
+            // Map and filter fields to match Mongoose schema
+            const updateData = { ...rawData };
 
-        if (!product) {
-            return NextResponse.json(
-                { message: "Product not found" },
-                { status: 404 }
-            );
-        }
-
-        // Upsert Collection if provided
-        if (body.collectionName) {
-            const slug = body.collectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-            await Collection.findOneAndUpdate(
-                { name: body.collectionName },
-                {
-                    $addToSet: { products: product._id },
-                    $setOnInsert: { slug: slug, isActive: true }
-                },
-                { upsert: true, new: true }
-            );
-        }
-
-        // Upsert Category/SubCategory if provided
-        if (body.category) {
-            const update = { $setOnInsert: { name: body.category, isActive: true } };
-            if (body.subCategory) {
-                update.$addToSet = { subCategories: body.subCategory };
+            // Map frontend 'size' to backend 'sizes' if singular size exists
+            if (rawData.size && Array.isArray(rawData.size)) {
+                updateData.sizes = rawData.size;
+                delete updateData.size;
             }
-            await Category.findOneAndUpdate(
-                { name: body.category },
-                update,
-                { upsert: true, new: true }
+
+            // Remove computed fields that should not be saved to Mongoose
+            // (they are re-computed on GET by the controller)
+            delete updateData.reviews;
+            delete updateData.imageUrl;
+            delete updateData.image;
+            delete updateData.color;
+            delete updateData.inventory;
+
+            const product = await Product.findByIdAndUpdate(
+                id,
+                updateData,
+                { new: true, runValidators: true }
             );
+
+            if (!product) {
+                return NextResponse.json(
+                    { message: "Product not found" },
+                    { status: 404 }
+                );
+            }
+
+            // Upsert Collection if provided
+            if (body.collectionName) {
+                const slug = body.collectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                await Collection.findOneAndUpdate(
+                    { name: body.collectionName },
+                    {
+                        $addToSet: { products: product._id },
+                        $setOnInsert: { slug: slug, isActive: true }
+                    },
+                    { upsert: true, new: true }
+                );
+            }
+
+            // Upsert Category/SubCategory if provided
+            if (body.category) {
+                const update = { $setOnInsert: { name: body.category, isActive: true } };
+                if (body.subCategory) {
+                    update.$addToSet = { subCategories: body.subCategory };
+                }
+                await Category.findOneAndUpdate(
+                    { name: body.category },
+                    update,
+                    { upsert: true, new: true }
+                );
+            }
+
+            // Fetch final state with inventory for consistent UI refresh
+            const inventoryItems = await Inventory.find({ productId: product._id });
+            const hasInventory = inventoryItems.length > 0;
+            const totalAvailableStock = inventoryItems.reduce((sum, item) => sum + ((item.totalStock || 0) - (item.reservedStock || 0)), 0);
+            const isActuallyInStock = hasInventory && totalAvailableStock > 0;
+
+            // Transform MongoDB document to match frontend interface
+            const transformedProduct = {
+                ...product.toObject(),
+                id: product._id.toString(), // Convert ObjectId to string and assign to id
+                color: product.colors?.[0] || '', // Use first color for backward compatibility
+                size: product.sizes || [], // Map sizes field
+                reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
+                imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
+                image: product.imageGradient || '', // Map imageGradient to image
+                inStock: isActuallyInStock,
+                inventory: inventoryItems.map(item => ({
+                    color: item.color,
+                    size: item.size,
+                    available: (item.totalStock - item.reservedStock) > 0,
+                    availableStock: item.totalStock - item.reservedStock
+                }))
+            };
+
+            return NextResponse.json({ success: true, data: transformedProduct });
+        } catch (error) {
+            console.error(`[ProductController] Update error for ${id}:`, error);
+            return NextResponse.json({ success: false, message: error.message }, { status: 500 });
         }
-
-        // Transform MongoDB document to match frontend interface
-        const transformedProduct = {
-            ...product.toObject(),
-            id: product._id.toString(), // Convert ObjectId to string and assign to id
-            color: product.colors?.[0] || '', // Use first color for backward compatibility
-            size: product.sizes || [], // Map sizes field
-            reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
-            imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
-            image: product.imageGradient || '', // Map imageGradient to image
-        };
-
-        return NextResponse.json({ success: true, data: transformedProduct });
     }
 
-    // DELETE PRODUCT
+    // DELETE PRODUCT (ADMIN)
     static async delete(req, { params }) {
-        await connectDB();
-        const { id } = await params;
+        try {
+            await connectDB();
+            const { id } = await params;
 
-        // const user = isAdmin(req);
-        // if (!user || user.role !== "admin") {
-        //   return NextResponse.json(
-        //     { message: "Admin access only" },
-        //     { status: 403 }
-        //   );
-        // }
+            // const user = isAdmin(req);
+            // if (!user || user.role !== "admin") {
+            //   return NextResponse.json(
+            //     { message: "Admin access only" },
+            //     { status: 403 }
+            //   );
+            // }
 
-        await Product.findByIdAndDelete(id);
+            await Product.findByIdAndDelete(id);
 
-        return NextResponse.json({
-            success: true,
-            message: "Product deleted successfully",
-        });
+            return NextResponse.json({
+                success: true,
+                message: "Product deleted successfully",
+            });
+        } catch (error) {
+            console.error(`[ProductController] Delete error for ${id}:`, error);
+            return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+        }
     }
 }

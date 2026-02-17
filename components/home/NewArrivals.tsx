@@ -1,40 +1,55 @@
 'use client'
 
-import Image from 'next/image';
-import Link from 'next/link';
+import { ProductCard } from '@/components/product/ProductCard';
 
 const products = [
     {
-        id: 1,
+        id: '1',
         name: 'Floral Summer Dress',
-        price: 'IDR 300.000',
+        price: 300000,
         image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?q=80&w=2574&auto=format&fit=crop',
-        tag: 'NEW',
-        tagColor: 'bg-green-600'
+        category: 'Summer',
+        isNew: true,
+        size: ['S', 'M', 'L'],
+        rating: 4.5,
+        reviews: 45,
+        inStock: true
     },
     {
-        id: 2,
+        id: '2',
         name: 'Abstract Print Shirt',
-        price: 'IDR 250.000',
+        price: 250000,
         image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=2576&auto=format&fit=crop',
-        tag: 'HOT',
-        tagColor: 'bg-red-500'
+        category: 'Shirts',
+        isNew: true,
+        size: ['M', 'L', 'XL'],
+        rating: 4.7,
+        reviews: 32,
+        inStock: true
     },
     {
-        id: 3,
+        id: '3',
         name: 'Classic Yellow Dress',
-        price: 'IDR 450.000',
+        price: 450000,
         image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=2583&auto=format&fit=crop',
-        tag: 'SALE',
-        tagColor: 'bg-orange-500'
+        category: 'Dresses',
+        onSale: true,
+        size: ['S', 'M'],
+        rating: 4.9,
+        reviews: 18,
+        inStock: true
     },
     {
-        id: 4,
+        id: '4',
         name: 'Navy Casual Shirt',
-        price: 'IDR 280.000',
+        price: 280000,
         image: 'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?q=80&w=2292&auto=format&fit=crop',
-        tag: 'NEW',
-        tagColor: 'bg-green-600'
+        category: 'Shirts',
+        isNew: true,
+        size: ['S', 'M', 'L', 'XL'],
+        rating: 4.6,
+        reviews: 24,
+        inStock: true
     }
 ];
 
@@ -49,24 +64,7 @@ export function NewArrivals() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {products.map((product) => (
-                    <div key={product.id} className="group cursor-pointer">
-                        <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 mb-4">
-                            <Image
-                                src={product.image}
-                                alt={product.name}
-                                fill
-                                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                            <div className={`absolute top-4 right-4 ${product.tagColor} text-white text-xs font-bold px-2 py-1 rounded-sm`}>
-                                {product.tag}
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <h3 className="font-serif text-xl text-gray-900">{product.name}</h3>
-                            <p className="text-gray-500">{product.price}</p>
-                        </div>
-                    </div>
+                    <ProductCard key={product.id} product={product as any} />
                 ))}
             </div>
 
