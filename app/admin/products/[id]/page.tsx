@@ -26,25 +26,21 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     if (!product) return <div>Product not found</div>
 
     return (
-        <div className="flex min-h-screen bg-background">
-            <AdminSidebar />
-
-            <main className="flex-1 lg:ml-0">
-                <div className="bg-secondary border-b border-border sticky top-0 z-10">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:ml-0">
-                        <h1 className="font-serif text-3xl font-bold text-primary">
-                            Edit Product
-                        </h1>
-                        <p className="text-foreground/60 text-sm mt-1">
-                            Update existing product details
-                        </p>
-                    </div>
+        <div className="min-h-full bg-background">
+            <div className="bg-secondary border-b border-border sticky top-0 z-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <h1 className="font-serif text-3xl font-bold text-primary">
+                        Edit Product
+                    </h1>
+                    <p className="text-foreground/60 text-sm mt-1">
+                        Update existing product details
+                    </p>
                 </div>
+            </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:ml-0">
-                    <ProductForm initialData={product} isEdit />
-                </div>
-            </main>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <ProductForm initialData={product} isEdit />
+            </div>
         </div>
     )
 }

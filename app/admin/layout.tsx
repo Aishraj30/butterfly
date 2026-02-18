@@ -8,12 +8,14 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar'
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
       <AdminSidebar />
 
       {/* Main Content */}
-      <main className="flex-1">
-        {children}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          {children}
+        </div>
       </main>
 
       <ChatBot />
