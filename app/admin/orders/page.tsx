@@ -104,13 +104,13 @@ export default function AdminOrdersPage() {
                                 </thead>
                                 <tbody>
                                     {isLoading ? (
-                                        <tr><td colSpan={6} className="px-6 py-8 text-center text-foreground/60">Loading orders...</td></tr>
+                                        <tr key="loading-row"><td colSpan={6} className="px-6 py-8 text-center text-foreground/60">Loading orders...</td></tr>
                                     ) : filteredOrders.length === 0 ? (
-                                        <tr><td colSpan={6} className="px-6 py-8 text-center text-foreground/60">No orders found.</td></tr>
+                                        <tr key="empty-row"><td colSpan={6} className="px-6 py-8 text-center text-foreground/60">No orders found.</td></tr>
                                     ) : (
                                         filteredOrders.map((order) => (
-                                            <tr key={order.id} className="border-b border-border hover:bg-secondary/50 transition-colors">
-                                                <td className="px-6 py-4 font-medium text-foreground">{order.id}</td>
+                                            <tr key={order._id || order.id} className="border-b border-border hover:bg-secondary/50 transition-colors">
+                                                <td className="px-6 py-4 font-medium text-foreground">{order._id || order.id}</td>
                                                 <td className="px-6 py-4">
                                                     <p className="font-medium text-foreground">{order.customer?.name}</p>
                                                     <p className="text-xs text-foreground/60">{order.customer?.email}</p>

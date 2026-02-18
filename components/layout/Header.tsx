@@ -316,7 +316,7 @@ export function Header() {
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/20 px-6 py-6">
-                <h2 className="text-xl uppercase tracking-[0.2em] text-white">
+                <h2 className="text-lg tracking-[0.3em] uppercase text-white font-normal drop-shadow-md">
                   Menu
                 </h2>
                 <button
@@ -336,7 +336,7 @@ export function Header() {
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.1 + idx * 0.1 }}
-                      className="border-b border-white/10"
+                      className={idx === navigation.length - 1 ? "" : "border-b border-white/10"}
                     >
                       {item.hasDropdown ? (
                         <button
@@ -350,7 +350,7 @@ export function Header() {
                           }}
                           className="flex items-center justify-between w-full py-4 text-left group"
                         >
-                          <span className="text-lg uppercase tracking-wide group-hover:text-gray-200 transition-colors">
+                          <span className="text-xs font-light uppercase tracking-[0.2em] text-white group-hover:text-gray-200 transition-colors">
                             {item.name}
                           </span>
                           <ChevronDown
@@ -364,7 +364,7 @@ export function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="flex items-center justify-between w-full py-4 text-left group"
                         >
-                          <span className="text-lg uppercase tracking-wide group-hover:text-gray-200 transition-colors">
+                          <span className="text-xs font-light uppercase tracking-[0.2em] text-white group-hover:text-gray-200 transition-colors">
                             {item.name}
                           </span>
                         </Link>
@@ -385,7 +385,7 @@ export function Header() {
                       className="flex items-center gap-3 py-3 text-white transition-colors"
                     >
                       <Heart size={18} />
-                      <span className="text-sm">Wishlist</span>
+                      <span className="text-xs font-light uppercase tracking-[0.2em] text-white">Wishlist</span>
                     </Link>
                     <Link
                       href="/search"
@@ -393,7 +393,7 @@ export function Header() {
                       className="flex items-center gap-3 py-3 text-white transition-colors"
                     >
                       <Search size={18} />
-                      <span className="text-sm">Search</span>
+                      <span className="text-xs font-light uppercase tracking-[0.2em] text-white">Search</span>
                     </Link>
                   </motion.div>
 
@@ -440,14 +440,14 @@ export function Header() {
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="flex items-center gap-3 py-3 text-white transition-colors"
                         >
-                          <span className="text-sm">Login</span>
+                          <span className="text-xs font-light uppercase tracking-[0.2em] text-white">Login</span>
                         </Link>
                         <Link
                           href="/signup"
                           onClick={() => setIsMobileMenuOpen(false)}
                           className="flex items-center gap-3 py-3 text-white transition-colors"
                         >
-                          <span className="text-sm">Sign Up</span>
+                          <span className="text-xs font-light uppercase tracking-[0.2em] text-white">Sign Up</span>
                         </Link>
                       </>
                     )}
