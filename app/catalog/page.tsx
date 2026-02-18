@@ -11,6 +11,14 @@ import { Pagination } from '@/components/ui/PaginationComponent';
 
 const ITEMS_PER_PAGE = 12;
 
+const bannerImages = [
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400106/butterfly-couture/1771400105742-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400121/butterfly-couture/1771400121271-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400157/butterfly-couture/1771400156846-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400180/butterfly-couture/1771400180246-blob.jpg"
+];
+
 const SingleColumnIcon = ({ active }: { active: boolean }) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="4" y="4" width="16" height="16" fill={active ? "black" : "#D1D5DB"} />
@@ -164,6 +172,18 @@ function CatalogContent() {
 
 
 
+    const getDeterministicBannerImage = (categoryParam?: string | null, subCategoryParam?: string | null, collectionParam?: string | null) => {
+        // Create a consistent seed from URL parameters
+        const seed = (subCategoryParam || categoryParam || collectionParam || 'catalog') || 'catalog';
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) {
+            hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        const index = Math.abs(hash) % bannerImages.length;
+        return bannerImages[index];
+    };
+
     const bannerTitle = (
         subCategoryParam ? decodeURIComponent(subCategoryParam) :
             categoryParam ? decodeURIComponent(categoryParam) :
@@ -183,7 +203,7 @@ function CatalogContent() {
             <CatalogBanner
                 topTitle="Discover"
                 title={bannerTitle}
-                backgroundImage="/banners/b2.JPG"
+                backgroundImage={getDeterministicBannerImage(categoryParam, subCategoryParam, collectionParam)}
             />
 
             <div className="max-w-[1400px] mx-auto px-5 py-12">

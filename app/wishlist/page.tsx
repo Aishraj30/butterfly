@@ -1,18 +1,20 @@
 'use client';
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, X, Heart, Package, MapPin, User, LogOut, ChevronRight, Loader2 } from 'lucide-react';
+import { 
+  ShoppingBag, X, Heart, Package, MapPin, User, LogOut, 
+  Loader2, Settings, Menu 
+} from 'lucide-react';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu } from 'lucide-react';
-import { useRef } from 'react';
+import { Inter } from "next/font/google";
 
+const inter = Inter({ subsets: ["latin"] });
 
 export default function WishlistPage() {
     const { wishlistItems, loading, removeFromWishlist } = useWishlist();
@@ -20,193 +22,38 @@ export default function WishlistPage() {
     const [isAccountDrawerOpen, setIsAccountDrawerOpen] = useState(false);
     const drawerRef = useRef<HTMLDivElement>(null);
 
-    // Body Scroll Lock - ultra robust version to completely prevent background scrolling
+    // Body Scroll Lock
     useEffect(() => {
-        const htmlElement = document.documentElement
-        const bodyElement = document.body
-
-        // Store original styles
-        const originalHtmlOverflow = htmlElement.style.overflow
-        const originalBodyOverflow = bodyElement.style.overflow
-        const originalBodyPosition = bodyElement.style.position
-        const originalBodyTop = bodyElement.style.top
-        const originalBodyLeft = bodyElement.style.left
-        const originalBodyWidth = bodyElement.style.width
-        const originalBodyHeight = bodyElement.style.height
-        const originalBodyMarginRight = bodyElement.style.marginRight
-
-        // Calculate scrollbar width to prevent layout shift
-        const getScrollbarWidth = () => {
-            const temp = document.createElement('div')
-            temp.style.cssText = 'position: absolute; top: -9999px; width: 100px; height: 100px; overflow: scroll; visibility: hidden;'
-            document.body.appendChild(temp)
-            const scrollbarWidth = temp.offsetWidth - temp.clientWidth
-            document.body.removeChild(temp)
-            return scrollbarWidth
-        }
+        const htmlElement = document.documentElement;
+        const bodyElement = document.body;
 
         if (isAccountDrawerOpen) {
-            const scrollY = window.scrollY
-            const scrollX = window.scrollX
-            const scrollbarWidth = getScrollbarWidth()
+            const scrollY = window.scrollY;
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
 
-            htmlElement.style.overflow = 'hidden'
-            bodyElement.style.position = 'fixed'
-            bodyElement.style.top = `-${scrollY}px`
-            bodyElement.style.left = `-${scrollX}px`
-            bodyElement.style.width = `calc(100vw - ${scrollbarWidth}px)`
-            bodyElement.style.height = '100vh'
-            bodyElement.style.overflow = 'hidden'
-            bodyElement.style.touchAction = 'none'
-            bodyElement.style.webkitUserSelect = 'none'
-            bodyElement.style.userSelect = 'none'
-            bodyElement.style.marginRight = `${scrollbarWidth}px`
-
-                ; (bodyElement as any).storedScrollY = scrollY
-                ; (bodyElement as any).storedScrollX = scrollX
-                ; (bodyElement as any).scrollbarWidth = scrollbarWidth
-                ; (bodyElement as any).originalStyles = {
-                    htmlOverflow: originalHtmlOverflow,
-                    bodyOverflow: originalBodyOverflow,
-                    bodyPosition: originalBodyPosition,
-                    bodyTop: originalBodyTop,
-                    bodyLeft: originalBodyLeft,
-                    bodyWidth: originalBodyWidth,
-                    bodyHeight: originalBodyHeight,
-                    bodyMarginRight: originalBodyMarginRight
-                }
+            htmlElement.style.overflow = 'hidden';
+            bodyElement.style.position = 'fixed';
+            bodyElement.style.top = `-${scrollY}px`;
+            bodyElement.style.width = `calc(100vw - ${scrollbarWidth}px)`;
+            bodyElement.style.overflow = 'hidden';
+            bodyElement.style.paddingRight = `${scrollbarWidth}px`;
         } else {
-            const storedScrollY = (bodyElement as any).storedScrollY || 0
-            const storedScrollX = (bodyElement as any).storedScrollX || 0
-            const storedStyles = (bodyElement as any).originalStyles || {}
-
-            htmlElement.style.overflow = storedStyles.htmlOverflow || ''
-            bodyElement.style.position = storedStyles.bodyPosition || ''
-            bodyElement.style.top = storedStyles.bodyTop || ''
-            bodyElement.style.left = storedStyles.bodyLeft || ''
-            bodyElement.style.width = storedStyles.bodyWidth || ''
-            bodyElement.style.height = storedStyles.bodyHeight || ''
-            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
-            bodyElement.style.touchAction = ''
-            bodyElement.style.webkitUserSelect = ''
-            bodyElement.style.userSelect = ''
-            bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
-
-            window.scrollTo(storedScrollX, storedScrollY)
-
-            delete (bodyElement as any).storedScrollY
-            delete (bodyElement as any).storedScrollX
-            delete (bodyElement as any).scrollbarWidth
-            delete (bodyElement as any).originalStyles
+            const scrollY = bodyElement.style.top;
+            htmlElement.style.overflow = '';
+            bodyElement.style.position = '';
+            bodyElement.style.top = '';
+            bodyElement.style.width = '';
+            bodyElement.style.overflow = '';
+            bodyElement.style.paddingRight = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
         }
-
-        return () => {
-            const storedStyles = (bodyElement as any).originalStyles || {}
-            htmlElement.style.overflow = storedStyles.htmlOverflow || ''
-            bodyElement.style.position = storedStyles.bodyPosition || ''
-            bodyElement.style.top = storedStyles.bodyTop || ''
-            bodyElement.style.left = storedStyles.bodyLeft || ''
-            bodyElement.style.width = storedStyles.bodyWidth || ''
-            bodyElement.style.height = storedStyles.bodyHeight || ''
-            bodyElement.style.overflow = storedStyles.bodyOverflow || ''
-            bodyElement.style.touchAction = ''
-            bodyElement.style.webkitUserSelect = ''
-            bodyElement.style.userSelect = ''
-            bodyElement.style.marginRight = storedStyles.bodyMarginRight || ''
-            delete (bodyElement as any).storedScrollY
-            delete (bodyElement as any).storedScrollX
-            delete (bodyElement as any).scrollbarWidth
-            delete (bodyElement as any).originalStyles
-        }
-    }, [isAccountDrawerOpen])
-
-    // Prevent any background scrolling with comprehensive event blocking
-    useEffect(() => {
-        const preventAllScroll = (e: Event) => {
-            if (isAccountDrawerOpen) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-                if (drawerElement && drawerElement.contains(e.target as Node)) {
-                    e.stopPropagation()
-                }
-            }
-        }
-
-        const preventWheel = (e: Event) => {
-            if (isAccountDrawerOpen) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-                e.stopPropagation()
-            }
-        }
-
-        const preventTouch = (e: TouchEvent) => {
-            if (isAccountDrawerOpen) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-            }
-        }
-
-        const preventKeyScroll = (e: KeyboardEvent) => {
-            if (isAccountDrawerOpen && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
-                const drawerElement = drawerRef.current
-                if (!drawerElement || !drawerElement.contains(e.target as Node)) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    e.stopImmediatePropagation()
-                    return false
-                }
-            }
-        }
-
-        if (isAccountDrawerOpen) {
-            document.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('mousewheel', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('DOMMouseScroll', preventWheel as EventListener, { passive: false, capture: true })
-            document.addEventListener('touchmove', preventTouch, { passive: false, capture: true })
-            document.addEventListener('touchstart', preventAllScroll, { passive: false, capture: true })
-            document.addEventListener('touchend', preventAllScroll, { passive: false, capture: true })
-            document.addEventListener('keydown', preventKeyScroll, { capture: true })
-            document.addEventListener('scroll', preventAllScroll, { capture: true })
-            window.addEventListener('wheel', preventWheel as EventListener, { passive: false, capture: true })
-            window.addEventListener('scroll', preventAllScroll, { capture: true })
-        }
-
-        return () => {
-            document.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('mousewheel', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('DOMMouseScroll', preventWheel as EventListener, { capture: true })
-            document.removeEventListener('touchmove', preventTouch, { capture: true })
-            document.removeEventListener('touchstart', preventAllScroll, { capture: true })
-            document.removeEventListener('touchend', preventAllScroll, { capture: true })
-            document.removeEventListener('keydown', preventKeyScroll, { capture: true })
-            document.removeEventListener('scroll', preventAllScroll, { capture: true })
-            window.removeEventListener('wheel', preventWheel as EventListener, { capture: true })
-            window.removeEventListener('scroll', preventAllScroll, { capture: true })
-        }
-    }, [isAccountDrawerOpen])
+    }, [isAccountDrawerOpen]);
 
     const removeFromWishlistHandler = async (wishlistItemId: string) => {
         try {
             await removeFromWishlist(wishlistItemId);
         } catch (error) {
             console.error('Failed to remove from wishlist:', error);
-            // In a real app we'd use a toast here
         }
     };
 
@@ -218,14 +65,14 @@ export default function WishlistPage() {
     if (authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin" />
+                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
             </div>
         );
     }
 
     if (!user) {
         return (
-            <main className="min-h-screen bg-white pt-32 pb-20 w-full flex items-center justify-center">
+            <main className={`min-h-screen bg-white pt-32 pb-20 w-full flex items-center justify-center ${inter.className}`}>
                 <div className="max-w-md mx-auto px-5 text-center">
                     <h2 className="text-2xl font-bold text-black mb-4">Please Login</h2>
                     <p className="text-gray-600 mb-8">You need to be logged in to view your wishlist.</p>
@@ -238,124 +85,197 @@ export default function WishlistPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Page Header */}
-            <div className="bg-white border-b border-gray-100 sticky top-0 md:relative z-40">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => setIsAccountDrawerOpen(true)}
-                                className="p-2 -ml-2 hover:bg-gray-50 rounded-full transition-colors"
-                            >
-                                <Menu className="h-6 w-6 text-black" />
-                            </button>
-                            <div>
-                                <h1 className="text-3xl md:text-5xl font-birds text-black lowercase leading-none">
-                                    My Wishlist
-                                </h1>
-                                <p className="hidden md:block text-[10px] uppercase tracking-[0.3em] text-gray-400 mt-4 font-bold">
-                                    Your curated collection of luxury pieces
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <BackToHomeButton variant="elegant" />
-                        </div>
-                    </div>
+        <div className={`min-h-screen bg-white flex ${inter.className}`}>
+            
+            {/* --- Desktop Sidebar (Left Navigation) --- */}
+            <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
+                <div className="px-8 mb-12">
+                    <h1 className="text-xl font-bold text-gray-900 tracking-tight">User Profile</h1>
                 </div>
-            </div>
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="w-full">
+                <nav className="flex-1 space-y-2">
+                    {/* Active Link: Wishlist */}
+                    <div className="flex items-center gap-4 px-8 py-3 text-black relative bg-gray-100">
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-black rounded-r-md" />
+                        <Heart className="w-5 h-5" />
+                        <span className="font-medium text-sm">Wishlist</span>
+                    </div>
+
+                    {/* Inactive Links */}
+                    <Link href="/profile" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                        <User className="w-5 h-5" />
+                        <span className="font-medium text-sm">User Info</span>
+                    </Link>
+
+                    <Link href="/orders" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                        <Package className="w-5 h-5" />
+                        <span className="font-medium text-sm">Orders</span>
+                    </Link>
+
+                    <Link href="/addresses" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                        <MapPin className="w-5 h-5" />
+                        <span className="font-medium text-sm">Addresses</span>
+                    </Link>
+
+                    <Link href="/settings" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                        <Settings className="w-5 h-5" />
+                        <span className="font-medium text-sm">Settings</span>
+                    </Link>
+                </nav>
+
+                <div className="px-8 mt-auto">
+                     <button 
+                        onClick={handleLogout}
+                        className="flex items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors w-full"
+                     >
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-medium text-sm">Log out</span>
+                    </button>
+                </div>
+            </aside>
+
+            {/* --- Main Content Area --- */}
+            <main className="flex-1 p-6 lg:p-12 overflow-y-auto">
+                
+                {/* Mobile Header with Drawer Trigger */}
+                <div className="lg:hidden flex justify-between items-center mb-8">
+                    <div className="flex items-center gap-3">
+                        <Button variant="ghost" size="icon" onClick={() => setIsAccountDrawerOpen(true)}>
+                            <Menu className="h-6 w-6 text-gray-900" />
+                        </Button>
+                        <span className="font-bold text-lg">My Wishlist</span>
+                    </div>
+                    <Link href="/cart">
+                        <ShoppingBag className="h-5 w-5 text-gray-900" />
+                    </Link>
+                </div>
+
+                <div className="max-w-4xl mx-auto">
                     {/* Main Content Area */}
-                    <div className="w-full">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-xl font-semibold text-gray-900">Wishlist Items</CardTitle>
-                                <CardDescription className="mt-1">Manage your favorite products</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-8">
-                                {loading ? (
-                                    <div className="flex items-center justify-center py-12">
-                                        <Loader2 className="h-8 w-8 animate-spin" />
+                    <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+                        <CardHeader className="pb-6">
+                            <CardTitle className="text-xl font-bold text-gray-900">Wishlist Items</CardTitle>
+                            <CardDescription className="mt-2 text-gray-500">Manage your favorite products</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            {loading ? (
+                                <div className="flex justify-center py-12">
+                                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                                </div>
+                            ) : wishlistItems.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Heart className="h-8 w-8 text-gray-400" />
                                     </div>
-                                ) : wishlistItems.length === 0 ? (
-                                    <div className="text-center py-12">
-                                        <Heart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                                        <h3 className="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h3>
-                                        <p className="text-gray-600 mb-6">Start adding items to your wishlist to see them here.</p>
-                                        <Button asChild>
-                                            <Link href="/" className="flex items-center gap-2">
-                                                <ShoppingBag className="h-4 w-4" />
-                                                Start Shopping
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-6">
-                                        {wishlistItems.map((item) => (
-                                            <div key={item._id} className="group relative flex gap-6 pb-6 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 p-2 transition-colors rounded-xl">
-                                                {/* Product Image */}
-                                                <div className="relative w-24 h-32 md:w-32 md:h-44 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
-                                                    {item.product.images?.[0] ? (
-                                                        <Image
-                                                            src={item.product.images[0]}
-                                                            alt={item.product.name}
-                                                            fill
-                                                            className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100" />
-                                                    )}
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">Your wishlist is empty</h3>
+                                    <p className="text-gray-500 mb-8 font-medium">Start adding items you love to see them here.</p>
+                                    <Button asChild className="bg-black hover:bg-gray-800 text-white rounded-2xl shadow-lg shadow-gray-500/20 font-medium transition-all transform active:scale-95">
+                                        <Link href="/" className="flex items-center gap-2">
+                                            <ShoppingBag className="h-4 w-4" />
+                                            Start Shopping
+                                        </Link>
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {wishlistItems.map((item) => (
+                                        <div key={item._id} className="group relative flex gap-4 md:gap-6 p-4 md:p-6 border border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all duration-300">
+                                            
+                                            {/* Product Image */}
+                                            <div className="relative w-24 h-32 md:w-36 md:h-48 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 border border-gray-200">
+                                                {item.product.images?.[0] ? (
+                                                    <Image
+                                                        src={item.product.images[0]}
+                                                        alt={item.product.name}
+                                                        fill
+                                                        className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200" />
+                                                )}
+                                            </div>
+
+                                            {/* Product Details */}
+                                            <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                                                <div className="relative pr-8 md:pr-10">
+                                                    <div className="mb-1 md:mb-2">
+                                                        <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-gray-500 font-bold">
+                                                            {item.product.category || 'Collection'}
+                                                        </span>
+                                                    </div>
+                                                    <Link href={`/product/${item.product._id}`}>
+                                                        <h3 className="font-bold text-sm md:text-lg text-gray-900 uppercase tracking-widest hover:text-gray-700 transition-colors line-clamp-2">
+                                                            {item.product.name}
+                                                        </h3>
+                                                    </Link>
+                                                    <p className="mt-2 text-base md:text-xl font-bold text-gray-900 tracking-tight">
+                                                        ₹{item.product.price.toLocaleString()}
+                                                    </p>
+
+                                                    <button
+                                                        onClick={() => removeFromWishlistHandler(item._id)}
+                                                        className="absolute top-0 right-0 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300"
+                                                        title="Remove from wishlist"
+                                                    >
+                                                        <X className="h-5 w-5" strokeWidth={2} />
+                                                    </button>
                                                 </div>
 
-                                                {/* Product Details */}
-                                                <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                                                    <div className="relative pr-8">
-                                                        <div className="mb-1">
-                                                            <span className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-medium">
-                                                                {item.product.category || 'Luxury Collection'}
-                                                            </span>
-                                                        </div>
+                                                <div className="flex flex-wrap items-center gap-4 mt-4">
+                                                    <Button asChild variant="outline" className="h-10 md:h-12 px-6 md:px-8 text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold border-gray-200 text-gray-700 hover:text-black hover:bg-white transition-all duration-300 rounded-xl w-full md:w-auto">
                                                         <Link href={`/product/${item.product._id}`}>
-                                                            <h3 className="font-bold text-sm md:text-base text-black uppercase tracking-widest hover:text-gray-600 transition-colors truncate">
-                                                                {item.product.name}
-                                                            </h3>
+                                                            View Product
                                                         </Link>
-                                                        <p className="mt-2 text-base md:text-lg font-bold text-black tracking-tight">
-                                                            ₹{item.product.price.toLocaleString()}
-                                                        </p>
-
-                                                        <button
-                                                            onClick={() => removeFromWishlistHandler(item._id)}
-                                                            className="absolute top-0 right-0 p-2 text-gray-300 hover:text-red-500 transition-colors"
-                                                            title="Remove from wishlist"
-                                                        >
-                                                            <X className="h-5 w-5" strokeWidth={1.5} />
-                                                        </button>
-                                                    </div>
-
-                                                    <div className="flex flex-wrap items-center gap-3 mt-4">
-                                                        <Button asChild variant="outline" className="h-10 px-6 text-[10px] uppercase tracking-[0.2em] font-bold border-black hover:bg-black hover:text-white transition-all rounded-none">
-                                                            <Link href={`/product/${item.product._id}`}>
-                                                                View Product
-                                                            </Link>
-                                                        </Button>
-                                                    </div>
+                                                    </Button>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Quick Actions (Desktop Only) */}
+                    <div className="hidden md:block mt-8">
+                        <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+                            <CardHeader>
+                                <CardTitle className="text-xl font-bold text-gray-900">Quick Actions</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <Button variant="outline" asChild className="h-14 border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium">
+                                        <Link href="/profile" className="flex items-center justify-center gap-2">
+                                            <User className="h-4 w-4" />
+                                            Profile
+                                        </Link>
+                                    </Button>
+                                    <Button variant="outline" asChild className="h-14 border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium">
+                                        <Link href="/orders" className="flex items-center justify-center gap-2">
+                                            <Package className="h-4 w-4" />
+                                            Orders
+                                        </Link>
+                                    </Button>
+                                    <Button variant="outline" asChild className="h-14 border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium">
+                                        <Link href="/addresses" className="flex items-center justify-center gap-2">
+                                            <MapPin className="h-4 w-4" />
+                                            Addresses
+                                        </Link>
+                                    </Button>
+                                    <Button variant="outline" asChild className="h-14 border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium">
+                                        <Link href="/settings" className="flex items-center justify-center gap-2">
+                                            <Settings className="h-4 w-4" />
+                                            Settings
+                                        </Link>
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
                 </div>
-            </div>
+            </main>
 
-            {/* Account Management Drawer */}
+            {/* Account Management Drawer (Mobile) */}
             <AnimatePresence>
                 {isAccountDrawerOpen && (
                     <>
@@ -365,7 +285,7 @@ export default function WishlistPage() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsAccountDrawerOpen(false)}
-                            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+                            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] lg:hidden"
                         />
 
                         {/* Drawer Panel */}
@@ -375,15 +295,15 @@ export default function WishlistPage() {
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed top-0 left-0 h-full w-full max-w-sm bg-white z-[101] shadow-2xl flex flex-col"
+                            className="fixed top-0 left-0 h-full w-full max-w-sm bg-white/95 backdrop-blur-xl border-r border-gray-200 shadow-2xl z-[101] flex flex-col lg:hidden"
                         >
                             <div className="p-6 flex items-center justify-between border-b border-gray-100">
-                                <h2 className="text-xl font-bold text-black uppercase tracking-widest">Account</h2>
+                                <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent uppercase tracking-widest">Account</h2>
                                 <button
                                     onClick={() => setIsAccountDrawerOpen(false)}
-                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                    className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300"
                                 >
-                                    <X className="h-6 w-6" />
+                                    <X className="h-6 w-6 text-gray-500" />
                                 </button>
                             </div>
 
@@ -391,33 +311,35 @@ export default function WishlistPage() {
                                 {/* Profile Summary in Drawer */}
                                 <div className="text-center mb-10 mt-4">
                                     <div className="relative h-24 w-24 mx-auto mb-4 group">
-                                        <div className="absolute inset-0 bg-black rounded-full scale-105 opacity-5 group-hover:opacity-10 transition-opacity" />
                                         <Image
                                             src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=000&color=fff`}
                                             alt={user.name}
                                             width={96}
                                             height={96}
-                                            className="rounded-full object-cover border-4 border-white shadow-sm"
+                                            className="rounded-full object-cover border-4 border-white shadow-lg"
                                         />
                                     </div>
-                                    <h3 className="text-xl font-bold text-black uppercase tracking-widest">{user.name}</h3>
-                                    <p className="text-xs text-gray-400 mt-1">{user.email}</p>
+                                    <h3 className="text-lg font-bold text-gray-900 uppercase tracking-widest">{user.name}</h3>
+                                    <p className="text-xs text-gray-500 mt-1 font-medium">{user.email}</p>
                                 </div>
 
-                                <nav className="space-y-4">
+                                <nav className="space-y-2">
                                     {[
                                         { href: '/profile', icon: User, label: 'Profile' },
                                         { href: '/orders', icon: Package, label: 'Orders' },
                                         { href: '/wishlist', icon: Heart, label: 'Wishlist', active: true },
                                         { href: '/addresses', icon: MapPin, label: 'Addresses' },
+                                        { href: '/settings', icon: Settings, label: 'Settings' }
                                     ].map((link) => (
                                         <Link
                                             key={link.label}
                                             href={link.href}
-                                            className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${link.active
-                                                ? 'bg-black text-white shadow-lg'
-                                                : 'text-gray-600 hover:bg-gray-50 hover:text-black'
-                                                }`}
+                                            onClick={() => setIsAccountDrawerOpen(false)}
+                                            className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${
+                                                link.active
+                                                    ? 'bg-black text-white shadow-md'
+                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                            }`}
                                         >
                                             <link.icon className="h-5 w-5" strokeWidth={link.active ? 2.5 : 2} />
                                             <span className="text-xs font-bold uppercase tracking-[0.2em]">{link.label}</span>
@@ -426,17 +348,14 @@ export default function WishlistPage() {
                                 </nav>
                             </div>
 
-                            <div className="p-6 border-t border-gray-100 space-y-4">
+                            <div className="p-6 border-t border-gray-100">
                                 <button
                                     onClick={handleLogout}
-                                    className="w-full flex items-center justify-center gap-3 bg-red-50 text-red-600 py-4 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-100 transition-colors"
+                                    className="w-full flex items-center justify-center gap-3 bg-red-50 text-red-600 py-4 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-100 transition-all duration-300"
                                 >
                                     <LogOut size={16} strokeWidth={2.5} />
                                     Sign Out
                                 </button>
-                                <p className="text-[10px] text-center text-gray-300 uppercase tracking-widest font-medium">
-                                    Butterfly Couture • v1.0.0
-                                </p>
                             </div>
                         </motion.div>
                     </>

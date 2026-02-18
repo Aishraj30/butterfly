@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Inter } from "next/font/google";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,25 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Eye, EyeOff, ArrowRight, Check, X } from "lucide-react";
 import Image from "next/image";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "800", "900"],
+});
+
+// Banner images array
+const bannerImages = [
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400106/butterfly-couture/1771400105742-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400121/butterfly-couture/1771400121271-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400157/butterfly-couture/1771400156846-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400180/butterfly-couture/1771400180246-blob.jpg"
+];
+
+// Function to get random banner image
+const getRandomBannerImage = () => {
+  return bannerImages[Math.floor(Math.random() * bannerImages.length)];
+};
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -85,31 +105,46 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Column - Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-600 to-amber-800">
+    <div className={`min-h-screen flex selection:bg-black selection:text-white ${inter.className}`}>
+      
+      {/* Left Column - Banner Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
           <Image
-            src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=1200&fit=crop"
-            alt="Fashion model"
+            src={getRandomBannerImage()}
+            alt="Fashion banner"
             fill
-            className="object-cover opacity-80"
+            className="object-cover"
+            priority
           />
         </div>
-        <div className="relative z-10 flex flex-col justify-between p-12 text-white">
-          <div className="text-4xl font-bold tracking-wide">
-            BUTTERFLY
+
+        {/* Text Layout - Same as Login */}
+        <div className="relative z-10 flex flex-col justify-between h-full p-12 text-white w-full">
+          {/* Top Header - Discreet */}
+          <div className="flex justify-between items-center tracking-[0.1em] text-xs font-bold drop-shadow-lg">
+            <div className="border-b-2 border-white pb-1 relative">
+             Butterfly couture
+            </div>
+            <div className="opacity-50 hidden xl:block">
+              A/W 2024
+            </div>
           </div>
-          <div className="space-y-4">
-            <h1 className="text-5xl font-light">
-              Join Our Community
+
+          {/* Bottom Content - Massive Headline */}
+          <div className="flex flex-col justify-end mb-8">
+            {/* Using vw units for responsive massive text */}
+            <h1 className="text-[7vw] font-birds leading-[0.85] tracking-[0.1em] text-white drop-shadow-xl">
+              Define <br />
+              your <br />
+              essence.
             </h1>
-            <p className="text-xl opacity-90 max-w-md">
-              Create your account and discover a world of exclusive fashion designs tailored just for you.
-            </p>
-          </div>
-          <div className="text-sm opacity-75">
-            © 2024 Butterfly Couture. All rights reserved.
+            <div className="mt-8 flex items-center gap-4">
+              <div className="h-px w-16 bg-white"></div>
+              <p className="text-zinc-300 text-lg font-light tracking-wide uppercase">
+                Sophistication in monochrome.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -118,15 +153,15 @@ export default function SignupPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-white p-8 lg:p-16">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="text-3xl font-bold text-amber-800 mb-2">
+          <div className="lg:hidden text-center mb-12">
+            <div className="text-2xl font-bold text-amber-800 mb-2">
               BUTTERFLY
             </div>
           </div>
 
           <div className="space-y-8">
             <div>
-              <h2 className="text-4xl font-light text-gray-900 mb-2">
+              <h2 className="text-3xl font-light text-gray-900 mb-2">
                 SIGN UP
               </h2>
               <p className="text-gray-600">
@@ -142,9 +177,12 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-gray-700">
-                  FULL NAME
-                </Label>
+                <Label 
+                    htmlFor="name" 
+                    className="text-xs font-bold text-black tracking-widest uppercase"
+                  >
+                    Full Name
+                  </Label>
                 <Input
                   id="name"
                   type="text"
@@ -153,62 +191,76 @@ export default function SignupPage() {
                   placeholder="Enter your full name"
                   required
                   disabled={isSubmitting}
-                  className="h-12 border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+                  className="h-12 rounded-none border-zinc-200 bg-transparent px-0 border-b border-t-0 border-x-0 focus:border-black focus:ring-0 placeholder:text-zinc-300 transition-all duration-300 pl-1"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  EMAIL
-                </Label>
+                <Label 
+                    htmlFor="email" 
+                    className="text-xs font-bold text-black tracking-widest uppercase"
+                  >
+                    Email Address
+                  </Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="example@mail.com"
+                  placeholder="name@example.com"
                   required
                   disabled={isSubmitting}
-                  className="h-12 border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+                  className="h-12 rounded-none border-zinc-200 bg-transparent px-0 pr-12 border-b border-t-0 border-x-0 focus:border-black focus:ring-0 transition-all duration-300 pl-1"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                  PASSWORD
-                </Label>
+                <div className="flex justify-between items-center">
+                    <Label 
+                      htmlFor="password" 
+                      className="text-xs font-bold text-black tracking-widest uppercase"
+                    >
+                      Password
+                    </Label>
+                    <Link 
+                        href="/forgot-password" 
+                        className="text-xs text-zinc-400 hover:text-black hover:underline transition-colors"
+                    >
+                        Forgot?
+                    </Link>
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Create a password"
                     required
                     disabled={isSubmitting}
-                    className="h-12 pr-12 border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+                    className="h-12 rounded-none border-zinc-200 bg-transparent px-0 pr-12 border-b border-t-0 border-x-0 focus:border-black focus:ring-0 transition-all duration-300 pl-1"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent text-zinc-400 hover:text-black rounded-none"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isSubmitting}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-500" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4 text-gray-500" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
-                
-                {/* Password Requirements */}
-                {password && (
-                  <div className="mt-2 space-y-1">
-                    {passwordRequirements.map((req, index) => (
-                      <div key={index} className="flex items-center text-xs">
+              </div>
+
+              {/* Password Requirements */}
+              {password && (
+                <div className="mt-2 space-y-1">
+                  {passwordRequirements.map((req, index) => (
+                    <div key={index} className="flex items-center text-xs">
                         {req.test ? (
                           <Check className="h-3 w-3 text-green-500 mr-2" />
                         ) : (
@@ -219,14 +271,16 @@ export default function SignupPage() {
                         </span>
                       </div>
                     ))}
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-                  CONFIRM PASSWORD
-                </Label>
+                <Label 
+                    htmlFor="confirmPassword" 
+                    className="text-xs font-bold text-black tracking-widest uppercase"
+                  >
+                  Confirm Password
+                  </Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
@@ -236,20 +290,20 @@ export default function SignupPage() {
                     placeholder="Confirm your password"
                     required
                     disabled={isSubmitting}
-                    className="h-12 pr-12 border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+                    className="h-12 rounded-none border-zinc-200 bg-transparent px-0 pr-12 border-b border-t-0 border-x-0 focus:border-black focus:ring-0 transition-all duration-300 pl-1"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent text-zinc-400 hover:text-black rounded-none"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     disabled={isSubmitting}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-500" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      <Eye className="h-4 w-4 text-gray-500" />
+                      <Eye className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
@@ -257,29 +311,25 @@ export default function SignupPage() {
 
               <Button
                 type="submit"
-                className="w-full h-12 bg-amber-700 hover:bg-amber-800 text-white font-medium"
+                className="w-full h-14 bg-black hover:bg-zinc-800 text-white rounded-none tracking-[0.15em] font-medium text-xs uppercase transition-all duration-300"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <>
-                    CREATE ACCOUNT
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
+                  <span className="flex items-center justify-center gap-2">
+                    Create Account <ArrowRight className="h-3 w-3" />
+                  </span>
                 )}
               </Button>
             </form>
 
-            <div className="text-center">
-              <p className="text-gray-600">
+            <div className="text-center pt-4 border-t border-zinc-100">
+              <p className="text-zinc-500 text-sm">
                 Already have account?{" "}
                 <Link
                   href="/login"
-                  className="font-medium text-amber-700 hover:text-amber-800"
+                  className="font-bold text-black hover:underline underline-offset-4 tracking-wide"
                 >
                   Sign in here
                 </Link>
