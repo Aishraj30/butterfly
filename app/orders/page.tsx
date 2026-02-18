@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Inter } from "next/font/google";
-import { 
+import {
   Loader2, Package, User, Heart, MapPin, Settings, LogOut, Star
 } from "lucide-react";
 import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
@@ -127,186 +127,185 @@ export default function OrdersPage() {
 
   return (
     <div className={`min-h-screen bg-white flex ${inter.className}`}>
-      
+
       {/* --- Sidebar (Left Navigation) --- */}
       <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
-        <div className="px-8 mb-12">
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">User Profile</h1>
+        <div className="px-8 mb-8 flex items-center gap-4">
+          <BackToHomeButton variant="elegant" className="h-12 w-12 p-0 justify-center rounded-full border-2 border-black shadow-none bg-white hover:bg-gray-100 text-black" />
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Profile</h1>
         </div>
 
         <nav className="flex-1 space-y-1">
-            {/* User Info Section */}
-            <div className="mb-6">
-                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-                    Account
-                </div>
-                <Link href="/profile" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-                    <User className="w-5 h-5" />
-                    <span className="font-medium text-sm">User Info</span>
-                </Link>
+          {/* User Info Section */}
+          <div className="mb-6">
+            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+              Account
+            </div>
+            <Link href="/profile" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+              <User className="w-5 h-5" />
+              <span className="font-medium text-sm">User Info</span>
+            </Link>
+          </div>
+
+          {/* Orders Section */}
+          <div className="mb-6">
+            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+              Shopping
+            </div>
+            {/* Active Link: Orders */}
+            <div className="flex items-center gap-4 px-8 py-3 text-black relative bg-gray-100">
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-black rounded-r-md" />
+              <Package className="w-5 h-5" />
+              <span className="font-medium text-sm">Orders</span>
             </div>
 
-            {/* Orders Section */}
-            <div className="mb-6">
-                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-                    Shopping
-                </div>
-                {/* Active Link: Orders */}
-                <div className="flex items-center gap-4 px-8 py-3 text-black relative bg-gray-100">
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-black rounded-r-md" />
-                    <Package className="w-5 h-5" />
-                    <span className="font-medium text-sm">Orders</span>
-                </div>
+            <Link href="/wishlist" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+              <Heart className="w-5 h-5" />
+              <span className="font-medium text-sm">Wishlist</span>
+            </Link>
+          </div>
 
-                <Link href="/wishlist" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-                    <Heart className="w-5 h-5" />
-                    <span className="font-medium text-sm">Wishlist</span>
-                </Link>
+          {/* Settings Section */}
+          <div>
+            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+              Settings
             </div>
+            <Link href="/addresses" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+              <MapPin className="w-5 h-5" />
+              <span className="font-medium text-sm">Addresses</span>
+            </Link>
 
-            {/* Settings Section */}
-            <div>
-                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-                    Settings
-                </div>
-                <Link href="/addresses" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-                    <MapPin className="w-5 h-5" />
-                    <span className="font-medium text-sm">Addresses</span>
-                </Link>
-
-                <Link href="/settings" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-                    <Settings className="w-5 h-5" />
-                    <span className="font-medium text-sm">Settings</span>
-                </Link>
-            </div>
+            <Link href="/settings" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+              <Settings className="w-5 h-5" />
+              <span className="font-medium text-sm">Settings</span>
+            </Link>
+          </div>
         </nav>
 
         <div className="px-8 mt-auto">
-             <button 
-                onClick={handleLogout}
-                className="flex items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors w-full"
-             >
-                <LogOut className="w-5 h-5" />
-                <span className="font-medium text-sm">Log out</span>
-            </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors w-full"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium text-sm">Log out</span>
+          </button>
         </div>
       </aside>
 
       {/* --- Main Content Area --- */}
-      <main className="flex-1 p-6 lg:p-12 overflow-y-auto">
-        
+      <main className="flex-1 p-6 lg:px-10 lg:py-8 overflow-y-auto">
+
         {/* Mobile Header */}
         <div className="lg:hidden flex justify-between items-center mb-8">
-            <span className="font-bold text-lg">My Orders</span>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="h-5 w-5 text-gray-500" />
-            </Button>
+          <span className="font-bold text-lg">My Orders</span>
+          <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <LogOut className="h-5 w-5 text-gray-500" />
+          </Button>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-            {/* Orders List */}
-            <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm">
-              <CardHeader className="pb-6">
-                <CardTitle className="text-xl font-bold text-gray-900">Order History</CardTitle>
-                <CardDescription className="mt-2 text-gray-500">View and track your recent orders</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                {loading ? (
-                  <div className="flex justify-center py-16">
-                    <Loader2 className="h-10 w-10 animate-spin text-gray-400" />
+        <div className="max-w-6xl">
+          {/* Orders List */}
+          <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+            <CardHeader className="pb-6">
+              <CardTitle className="text-xl font-bold text-gray-900">Order History</CardTitle>
+              <CardDescription className="mt-2 text-gray-500">View and track your recent orders</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              {loading ? (
+                <div className="flex justify-center py-16">
+                  <Loader2 className="h-10 w-10 animate-spin text-gray-400" />
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
+                    <Package className="h-10 w-10 text-gray-400" />
                   </div>
-                ) : orders.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
-                      <Package className="h-10 w-10 text-gray-400" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3">No orders yet</h3>
-                    <p className="text-gray-500 mb-8 font-medium">Start shopping to see your order history here.</p>
-                    <Button asChild className="bg-black hover:bg-gray-800 text-white rounded-2xl shadow-lg shadow-gray-500/20 font-medium transition-all transform active:scale-95">
-                      <Link href="/" className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        Start Shopping
-                      </Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {orders.map((order) => (
-                      <div key={order.orderId} className="border border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-all duration-300">
-                        <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <h3 className="font-bold text-xl text-gray-900">{order.orderId}</h3>
-                              <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${
-                                order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                                order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                  'bg-blue-100 text-blue-800'
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">No orders yet</h3>
+                  <p className="text-gray-500 mb-8 font-medium">Start shopping to see your order history here.</p>
+                  <Button asChild className="bg-black hover:bg-gray-800 text-white rounded-2xl shadow-lg shadow-gray-500/20 font-medium transition-all transform active:scale-95">
+                    <Link href="/" className="flex items-center gap-2">
+                      <Package className="h-4 w-4" />
+                      Start Shopping
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {orders.map((order) => (
+                    <div key={order.orderId} className="border border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-all duration-300">
+                      <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
+                        <div>
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-bold text-xl text-gray-900">{order.orderId}</h3>
+                            <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                              order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                'bg-blue-100 text-blue-800'
+                              }`}>
+                              {order.status}
+                            </span>
+                            {order.deliveryStatus && (
+                              <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${order.deliveryStatus === 'delivered' ? 'bg-green-100 text-green-800' :
+                                order.deliveryStatus === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                                  'bg-gray-100 text-gray-800'
                                 }`}>
-                                {order.status}
+                                Delivery: {order.deliveryStatus}
                               </span>
-                              {order.deliveryStatus && (
-                                <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${
-                                  order.deliveryStatus === 'delivered' ? 'bg-green-100 text-green-800' :
-                                  order.deliveryStatus === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                                    'bg-gray-100 text-gray-800'
-                                  }`}>
-                                  Delivery: {order.deliveryStatus}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-500 mt-2 font-medium">
-                              Placed on {new Date(order.createdAt).toLocaleDateString()}
-                            </p>
+                            )}
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold text-2xl text-gray-900">Rp {order.total.toLocaleString()}</p>
-                            <p className="text-xs text-gray-500 font-medium">{order.items.length} items</p>
-                          </div>
+                          <p className="text-sm text-gray-500 mt-2 font-medium">
+                            Placed on {new Date(order.createdAt).toLocaleDateString()}
+                          </p>
                         </div>
-                        <Separator className="my-6 bg-gray-200" />
-                        <div className="space-y-4">
-                          {order.items.map((item: any, idx: number) => (
-                            <div key={idx} className="flex justify-between items-center text-sm">
-                              <div>
-                                <span className="font-semibold text-gray-900">{item.name}</span>
-                                <span className="text-gray-500 ml-2 font-medium">x{item.quantity}</span>
-                                {(item.size || item.color) && (
-                                  <div className="text-xs text-gray-400 mt-1">
-                                    {item.size && `Size: ${item.size}`}
-                                    {item.size && item.color && ' | '}
-                                    {item.color && `Color: ${item.color}`}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="text-right">
-                                <span className="block text-gray-700 font-semibold">Rp {item.price.toLocaleString()}</span>
-                                {((order.deliveryStatus === 'delivered') || (order.status === 'delivered')) && (
-                                  <Button
-                                    variant="link"
-                                    size="sm"
-                                    className="text-xs h-auto p-0 text-black mt-2 font-semibold hover:text-gray-700 transition-colors"
-                                    onClick={() => openReviewModal(item)}
-                                  >
-                                    Rate Product
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-6 pt-6 flex justify-end">
-                          <Button variant="outline" size="sm" asChild className="border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium">
-                            <Link href={`/orders/${order._id}`}>
-                              View Details
-                            </Link>
-                          </Button>
+                        <div className="text-right">
+                          <p className="font-bold text-2xl text-gray-900">Rp {order.total.toLocaleString()}</p>
+                          <p className="text-xs text-gray-500 font-medium">{order.items.length} items</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      <Separator className="my-6 bg-gray-200" />
+                      <div className="space-y-4">
+                        {order.items.map((item: any, idx: number) => (
+                          <div key={idx} className="flex justify-between items-center text-sm">
+                            <div>
+                              <span className="font-semibold text-gray-900">{item.name}</span>
+                              <span className="text-gray-500 ml-2 font-medium">x{item.quantity}</span>
+                              {(item.size || item.color) && (
+                                <div className="text-xs text-gray-400 mt-1">
+                                  {item.size && `Size: ${item.size}`}
+                                  {item.size && item.color && ' | '}
+                                  {item.color && `Color: ${item.color}`}
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <span className="block text-gray-700 font-semibold">Rp {item.price.toLocaleString()}</span>
+                              {((order.deliveryStatus === 'delivered') || (order.status === 'delivered')) && (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="text-xs h-auto p-0 text-black mt-2 font-semibold hover:text-gray-700 transition-colors"
+                                  onClick={() => openReviewModal(item)}
+                                >
+                                  Rate Product
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-6 pt-6 flex justify-end">
+                        <Button variant="outline" size="sm" asChild className="border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium">
+                          <Link href={`/orders/${order._id}`}>
+                            View Details
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </main>
 

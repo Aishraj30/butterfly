@@ -1,20 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
 import { ButterflyLoader } from '@/components/ui/ButterflyLoader'
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
-  const [isInitialLoad, setIsInitialLoad] = useState(true)
-  const pathname = usePathname()
 
   // Handle initial page load
   useEffect(() => {
     // Initial load - show loader for minimum duration
     const timer = setTimeout(() => {
       setIsLoading(false)
-      setIsInitialLoad(false)
     }, 2500) // Slightly increased for a better feel of the animation
 
     // Also hide when page is fully loaded
@@ -22,7 +18,6 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
       const handleLoad = () => {
         setTimeout(() => {
           setIsLoading(false)
-          setIsInitialLoad(false)
         }, 800)
       }
 
@@ -40,17 +35,8 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timer)
   }, [])
 
-  // Handle route changes
-  useEffect(() => {
-    if (!isInitialLoad) {
-      setIsLoading(true)
-      const timer = setTimeout(() => {
-        setIsLoading(false)
-      }, 1000)
-
-      return () => clearTimeout(timer)
-    }
-  }, [pathname, isInitialLoad])
+  // Route change listener removed to prevent loading animation on every page navigation.
+  // The initial load animation is handled by the useEffect above.
 
   // Handle body scroll locking while loading
   useEffect(() => {

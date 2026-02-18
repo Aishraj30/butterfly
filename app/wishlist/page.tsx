@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-  ShoppingBag, X, Heart, Package, MapPin, User, LogOut, 
-  Loader2, Settings, Menu 
+import {
+    ShoppingBag, X, Heart, Package, MapPin, User, LogOut,
+    Loader2, Settings, Menu
 } from 'lucide-react';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Inter } from "next/font/google";
+
+import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -86,11 +88,12 @@ export default function WishlistPage() {
 
     return (
         <div className={`min-h-screen bg-white flex ${inter.className}`}>
-            
+
             {/* --- Desktop Sidebar (Left Navigation) --- */}
             <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
-                <div className="px-8 mb-12">
-                    <h1 className="text-xl font-bold text-gray-900 tracking-tight">User Profile</h1>
+                <div className="px-8 mb-8 flex items-center gap-4">
+                    <BackToHomeButton variant="elegant" className="h-12 w-12 p-0 justify-center rounded-full border-2 border-black shadow-none bg-white hover:bg-gray-100 text-black" />
+                    <h1 className="text-xl font-bold text-gray-900 tracking-tight">Profile</h1>
                 </div>
 
                 <nav className="flex-1 space-y-1">
@@ -141,10 +144,10 @@ export default function WishlistPage() {
                 </nav>
 
                 <div className="px-8 mt-auto">
-                     <button 
+                    <button
                         onClick={handleLogout}
                         className="flex items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors w-full"
-                     >
+                    >
                         <LogOut className="w-5 h-5" />
                         <span className="font-medium text-sm">Log out</span>
                     </button>
@@ -152,8 +155,8 @@ export default function WishlistPage() {
             </aside>
 
             {/* --- Main Content Area --- */}
-            <main className="flex-1 p-6 lg:p-12 overflow-y-auto">
-                
+            <main className="flex-1 p-6 lg:px-10 lg:py-8 overflow-y-auto">
+
                 {/* Mobile Header with Drawer Trigger */}
                 <div className="lg:hidden flex justify-between items-center mb-8">
                     <div className="flex items-center gap-3">
@@ -167,7 +170,7 @@ export default function WishlistPage() {
                     </Link>
                 </div>
 
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-6xl">
                     {/* Main Content Area */}
                     <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm">
                         <CardHeader className="pb-6">
@@ -197,7 +200,7 @@ export default function WishlistPage() {
                                 <div className="space-y-6">
                                     {wishlistItems.map((item) => (
                                         <div key={item._id} className="group relative flex gap-4 md:gap-6 p-4 md:p-6 border border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all duration-300">
-                                            
+
                                             {/* Product Image */}
                                             <div className="relative w-24 h-32 md:w-36 md:h-48 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 border border-gray-200">
                                                 {item.product.images?.[0] ? (
@@ -352,11 +355,10 @@ export default function WishlistPage() {
                                             key={link.label}
                                             href={link.href}
                                             onClick={() => setIsAccountDrawerOpen(false)}
-                                            className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${
-                                                link.active
-                                                    ? 'bg-black text-white shadow-md'
-                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                            }`}
+                                            className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${link.active
+                                                ? 'bg-black text-white shadow-md'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                }`}
                                         >
                                             <link.icon className="h-5 w-5" strokeWidth={link.active ? 2.5 : 2} />
                                             <span className="text-xs font-bold uppercase tracking-[0.2em]">{link.label}</span>
