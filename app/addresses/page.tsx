@@ -128,8 +128,8 @@ export default function AddressesPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-gray-500">Loading...</div>
       </div>
     );
   }
@@ -147,33 +147,51 @@ export default function AddressesPage() {
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">User Profile</h1>
         </div>
 
-        <nav className="flex-1 space-y-2">
-            <Link href="/profile" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-                <User className="w-5 h-5" />
-                <span className="font-medium text-sm">User Info</span>
-            </Link>
-
-            <Link href="/orders" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-                <Package className="w-5 h-5" />
-                <span className="font-medium text-sm">Orders</span>
-            </Link>
-
-            <Link href="/wishlist" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-                <Heart className="w-5 h-5" />
-                <span className="font-medium text-sm">Wishlist</span>
-            </Link>
-
-             {/* Active Link: Addresses */}
-             <div className="flex items-center gap-4 px-8 py-3 text-black relative bg-gray-100">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-black rounded-r-md" />
-                <MapPin className="w-5 h-5" />
-                <span className="font-medium text-sm">Addresses</span>
+        <nav className="flex-1 space-y-1">
+            {/* User Info Section */}
+            <div className="mb-6">
+                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+                    Account
+                </div>
+                <Link href="/profile" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                    <User className="w-5 h-5" />
+                    <span className="font-medium text-sm">User Info</span>
+                </Link>
             </div>
 
-            <Link href="/settings" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-                <Settings className="w-5 h-5" />
-                <span className="font-medium text-sm">Settings</span>
-            </Link>
+            {/* Orders Section */}
+            <div className="mb-6">
+                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+                    Shopping
+                </div>
+                <Link href="/orders" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                    <Package className="w-5 h-5" />
+                    <span className="font-medium text-sm">Orders</span>
+                </Link>
+
+                <Link href="/wishlist" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                    <Heart className="w-5 h-5" />
+                    <span className="font-medium text-sm">Wishlist</span>
+                </Link>
+            </div>
+
+            {/* Settings Section */}
+            <div>
+                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+                    Settings
+                </div>
+                {/* Active Link: Addresses */}
+                <div className="flex items-center gap-4 px-8 py-3 text-black relative bg-gray-100">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-black rounded-r-md" />
+                    <MapPin className="w-5 h-5" />
+                    <span className="font-medium text-sm">Addresses</span>
+                </div>
+
+                <Link href="/settings" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                    <Settings className="w-5 h-5" />
+                    <span className="font-medium text-sm">Settings</span>
+                </Link>
+            </div>
         </nav>
 
         <div className="px-8 mt-auto">
