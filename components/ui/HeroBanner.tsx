@@ -108,8 +108,6 @@ export function HeroBanner({
               className="object-cover object-top w-full h-full"
               style={{ objectPosition: 'top center' }}
             />
-            {/* Darker overlay to ensure text visibility */}
-            <div className="absolute inset-0 bg-black/30" />
           </>
         )}
         <div className={`absolute inset-0 ${overlayColor}`} />
