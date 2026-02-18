@@ -94,181 +94,177 @@ export default function AdminCategoriesPage() {
   )
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <AdminSidebar />
+    <div className="min-h-full bg-background">
+      <div className="bg-secondary border-b border-border sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="font-serif text-3xl font-bold text-primary">
+                Categories
+              </h1>
+              <p className="text-foreground/60 text-sm mt-1">
+                Manage product categories
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setShowForm(true)
+                setEditingCategory(null)
+                setFormData({ name: '', description: '' })
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary/90 transition-colors"
+            >
+              <Plus size={18} />
+              New Category
+            </button>
+          </div>
+        </div>
+      </div>
 
-      <main className="flex-1 lg:ml-0">
-        <div className="bg-secondary border-b border-border sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:ml-0">
-            <div className="flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {showForm && (
+          <div className="bg-background border border-border rounded-sm p-6 mb-6">
+            <h2 className="font-semibold text-lg text-foreground mb-4">
+              {editingCategory ? 'Edit Category' : 'Create New Category'}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <h1 className="font-serif text-3xl font-bold text-primary">
-                  Categories
-                </h1>
-                <p className="text-foreground/60 text-sm mt-1">
-                  Manage product categories
-                </p>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Category Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
+                />
               </div>
-              <button
-                onClick={() => {
-                  setShowForm(true)
-                  setEditingCategory(null)
-                  setFormData({ name: '', description: '' })
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary/90 transition-colors"
-              >
-                <Plus size={18} />
-                New Category
-              </button>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  rows={3}
+                  className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground resize-none"
+                />
+              </div>
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary/90 transition-colors"
+                >
+                  {editingCategory ? 'Update' : 'Create'} Category
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false)
+                    setEditingCategory(null)
+                    setFormData({ name: '', description: '' })
+                  }}
+                  className="px-4 py-2 border border-border text-foreground hover:bg-secondary rounded-sm transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        <div className="bg-background border border-border rounded-sm p-4 mb-6">
+          <div className="relative">
+            <Search
+              size={18}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40"
+            />
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:ml-0">
-          {showForm && (
-            <div className="bg-background border border-border rounded-sm p-6 mb-6">
-              <h2 className="font-semibold text-lg text-foreground mb-4">
-                {editingCategory ? 'Edit Category' : 'Create New Category'}
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Category Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Description (Optional)
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    rows={3}
-                    className="w-full px-3 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground resize-none"
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <button
-                    type="submit"
-                    className="px-6 py-2 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary/90 transition-colors"
-                  >
-                    {editingCategory ? 'Update' : 'Create'} Category
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowForm(false)
-                      setEditingCategory(null)
-                      setFormData({ name: '', description: '' })
-                    }}
-                    className="px-4 py-2 border border-border text-foreground hover:bg-secondary rounded-sm transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          <div className="bg-background border border-border rounded-sm p-4 mb-6">
-            <div className="relative">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40"
-              />
-              <input
-                type="text"
-                placeholder="Search categories..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
-
-          <div className="bg-background border border-border rounded-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-secondary border-b border-border">
+        <div className="bg-background border border-border rounded-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-secondary border-b border-border">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
+                    Name
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
+                    Description
+                  </th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-foreground">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">
-                      Description
-                    </th>
-                    <th className="px-6 py-4 text-right text-sm font-semibold text-foreground">
-                      Actions
-                    </th>
+                    <td
+                      colSpan={3}
+                      className="px-6 py-8 text-center text-foreground/60"
+                    >
+                      Loading categories...
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {isLoading ? (
-                    <tr>
-                      <td
-                        colSpan={3}
-                        className="px-6 py-8 text-center text-foreground/60"
-                      >
-                        Loading categories...
+                ) : filteredCategories.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="px-6 py-8 text-center text-foreground/60"
+                    >
+                      No categories found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredCategories.map((category) => (
+                    <tr
+                      key={category.id}
+                      className="border-b border-border hover:bg-secondary/50 transition-colors"
+                    >
+                      <td className="px-6 py-4 font-medium text-foreground">
+                        {category.name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-foreground/60">
+                        {category.description || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleEdit(category)}
+                            className="p-2 text-primary hover:bg-secondary rounded-sm transition-colors"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(category.id)}
+                            className="p-2 text-destructive hover:bg-secondary rounded-sm transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  ) : filteredCategories.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={3}
-                        className="px-6 py-8 text-center text-foreground/60"
-                      >
-                        No categories found.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredCategories.map((category) => (
-                      <tr
-                        key={category.id}
-                        className="border-b border-border hover:bg-secondary/50 transition-colors"
-                      >
-                        <td className="px-6 py-4 font-medium text-foreground">
-                          {category.name}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-foreground/60">
-                          {category.description || '-'}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleEdit(category)}
-                              className="p-2 text-primary hover:bg-secondary rounded-sm transition-colors"
-                            >
-                              <Edit size={18} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(category.id)}
-                              className="p-2 text-destructive hover:bg-secondary rounded-sm transition-colors"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

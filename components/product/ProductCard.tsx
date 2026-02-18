@@ -11,23 +11,11 @@ interface ProductCardProps {
 
 export function ProductCard({ product, layout = '4' }: ProductCardProps) {
     const [videoLoaded, setVideoLoaded] = useState(false);
-    const [timerFinished, setTimerFinished] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
     const productId = product._id || product.id;
     const imageUrl = product.images?.[0] || product.image || product.imageUrl;
     const price = product.salePrice || product.price;
-
-    useEffect(() => {
-        if (product.videoUrl) {
-            setVideoLoaded(false);
-            setTimerFinished(false);
-            const timer = setTimeout(() => {
-                setTimerFinished(true);
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [product.videoUrl]);
 
     return (
         <Link
@@ -45,7 +33,7 @@ export function ProductCard({ product, layout = '4' }: ProductCardProps) {
                             src={imageUrl}
                             alt={product.name}
                             className={`w-full h-full object-cover object-center transition-all duration-700 ${isHovered ? 'scale-105' : 'scale-100'
-                                } ${videoLoaded && timerFinished ? 'opacity-0' : 'opacity-100'}`}
+                                } ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}
                         />
                     ) : (
                         <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
@@ -54,7 +42,7 @@ export function ProductCard({ product, layout = '4' }: ProductCardProps) {
 
                 {/* Product Video (Portrait) */}
                 {product.videoUrl && (
-                    <div className={`absolute inset-0 z-10 transition-opacity duration-1000 ${videoLoaded && timerFinished ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className={`absolute inset-0 z-10 transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}>
                         <video
                             src={product.videoUrl}
                             autoPlay
@@ -64,15 +52,6 @@ export function ProductCard({ product, layout = '4' }: ProductCardProps) {
                             onCanPlay={() => setVideoLoaded(true)}
                             className="w-full h-full object-cover"
                         />
-                    </div>
-                )}
-
-                {/* Experience Loading Overlay */}
-                {product.videoUrl && !timerFinished && (
-                    <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="px-3 py-1 bg-black/40 backdrop-blur-sm text-white text-[8px] font-bold tracking-widest rounded-full uppercase">
-                            Video Loading...
-                        </div>
                     </div>
                 )}
 
