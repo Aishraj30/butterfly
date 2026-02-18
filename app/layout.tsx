@@ -58,9 +58,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${birds.variable}`} suppressHydrationWarning>
       <body className={`font-sans antialiased bg-background text-foreground`}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <AuthProvider>
-            <LoadingProvider>
+        <LoadingProvider>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            <AuthProvider>
               <SmoothScroll>
                 <ConditionalHeader />
                 {children}
@@ -68,9 +68,9 @@ export default function RootLayout({
                 <ChatBot />
                 <Analytics />
               </SmoothScroll>
-            </LoadingProvider>
-          </AuthProvider>
-        </ThemeProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </LoadingProvider>
       </body>
     </html>
   )

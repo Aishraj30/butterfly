@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-// import { ButterflyLoader } from '@/components/ui/ButterflyLoader'
+import { ButterflyLoader } from '@/components/ui/ButterflyLoader'
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
@@ -15,7 +15,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
     const timer = setTimeout(() => {
       setIsLoading(false)
       setIsInitialLoad(false)
-    }, 2000) // Minimum 2 seconds for animation
+    }, 2500) // Slightly increased for a better feel of the animation
 
     // Also hide when page is fully loaded
     if (typeof window !== 'undefined') {
@@ -23,7 +23,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
         setTimeout(() => {
           setIsLoading(false)
           setIsInitialLoad(false)
-        }, 500) // Small delay to ensure smooth transition
+        }, 800)
       }
 
       if (document.readyState === 'complete') {
@@ -40,22 +40,33 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timer)
   }, [])
 
-  // Handle route changes (optional - can be enabled for page transitions)
+  // Handle route changes
   useEffect(() => {
     if (!isInitialLoad) {
-      // Show loader briefly on route change
       setIsLoading(true)
       const timer = setTimeout(() => {
         setIsLoading(false)
-      }, 800) // Shorter duration for route changes
+      }, 1000)
 
       return () => clearTimeout(timer)
     }
   }, [pathname, isInitialLoad])
 
+  // Handle body scroll locking while loading
+  useEffect(() => {
+    if (isLoading) {
+      document.documentElement.classList.add('loading-active')
+    } else {
+      document.documentElement.classList.remove('loading-active')
+    }
+    return () => {
+      document.documentElement.classList.remove('loading-active')
+    }
+  }, [isLoading])
+
   return (
     <>
-      {/* <ButterflyLoader isLoading={isLoading} /> */}
+      <ButterflyLoader isLoading={isLoading} />
       {children}
     </>
   )

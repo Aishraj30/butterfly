@@ -197,7 +197,8 @@ body {
 
 @layer base {
   html {
-    scrollbar-gutter: stable;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   * {
@@ -208,29 +209,31 @@ body {
     @apply bg-background text-foreground;
   }
 
-  /* Custom scrollbar styles */
+  /* Custom scrollbar styles - Hidden for premium look */
   ::-webkit-scrollbar {
-    width: 6px;
+    display: none;
+    width: 0;
   }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #e5e5e5;
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #d4d4d4;
-  }
-
-  /* Firefox scrollbar */
+  /* Firefox scrollbar - Hidden */
   * {
-    scrollbar-width: thin;
-    scrollbar-color: #e5e5e5 transparent;
+    scrollbar-width: none;
   }
+}
+
+/* Hide scrollbar completely when loading */
+.loading-active {
+  overflow: hidden !important;
+  scrollbar-gutter: auto !important;
+}
+
+.loading-active body {
+  overflow: hidden !important;
+}
+
+.loading-active ::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
 }
 
 @keyframes marquee {
