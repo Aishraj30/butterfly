@@ -56,7 +56,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             bodyElement.style.top = `-${scrollY}px`
             bodyElement.style.left = `-${scrollX}px`
             bodyElement.style.width = `calc(100vw - ${scrollbarWidth}px)`
-            bodyElement.style.height = '100vh'
             bodyElement.style.overflow = 'hidden'
             bodyElement.style.touchAction = 'none'
             bodyElement.style.webkitUserSelect = 'none'

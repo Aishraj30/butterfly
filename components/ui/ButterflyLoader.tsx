@@ -10,6 +10,11 @@ interface ButterflyLoaderProps {
 
 export function ButterflyLoader({ isLoading }: ButterflyLoaderProps) {
     const [show, setShow] = useState(isLoading)
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
 
     useEffect(() => {
         if (isLoading) {
@@ -19,6 +24,8 @@ export function ButterflyLoader({ isLoading }: ButterflyLoaderProps) {
             return () => clearTimeout(timer)
         }
     }, [isLoading])
+
+    if (!isMounted) return null
 
     return (
         <AnimatePresence>
