@@ -106,13 +106,15 @@ export default function SubcategoryPage() {
 
         // Filter by price range
         if (filters.priceRange.min !== null) {
+            const minPrice = typeof filters.priceRange.min === 'string' ? parseFloat(filters.priceRange.min) : filters.priceRange.min
             filtered = filtered.filter(product => 
-                (product.salePrice || product.price) >= filters.priceRange.min!
+                (product.salePrice || product.price) >= (minPrice ?? 0)
             )
         }
         if (filters.priceRange.max !== null) {
+            const maxPrice = typeof filters.priceRange.max === 'string' ? parseFloat(filters.priceRange.max) : filters.priceRange.max
             filtered = filtered.filter(product => 
-                (product.salePrice || product.price) <= filters.priceRange.max!
+                (product.salePrice || product.price) <= (maxPrice ?? Infinity)
             )
         }
 
