@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,17 +9,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Eye, EyeOff, User, LogIn, UserPlus, HelpCircle, LogOut } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowRight } from "lucide-react";
 import Image from "next/image";
 
-// Using Inter as requested, it fits the clean dashboard look perfectly
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "800", "900"],
 });
 
-// Using the provided banner images for the "Avatar" profile picture
-const AVATAR_IMAGE = "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg";
+// Banner images array
+const bannerImages = [
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400106/butterfly-couture/1771400105742-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400121/butterfly-couture/1771400121271-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400157/butterfly-couture/1771400156846-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400180/butterfly-couture/1771400180246-blob.jpg"
+];
+
+// Function to get random banner image
+const getRandomBannerImage = () => {
+  return bannerImages[Math.floor(Math.random() * bannerImages.length)];
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -28,14 +38,20 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { login, user, isLoading: authLoading } = useAuth();
+  const { login, user, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
 
   useEffect(() => {
     if (user && !authLoading) {
-      router.push("/");
+      if (callbackUrl) {
+        logout();
+      } else {
+        router.push("/");
+      }
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, callbackUrl, logout]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,9 +60,9 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push("/");
+      router.push(callbackUrl || "/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -54,171 +70,174 @@ export default function LoginPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen bg-white flex ${inter.className}`}>
-      
-      {/* --- Sidebar (Left Navigation) --- */}
-      <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-100">
-        <div className="px-8 mb-12">
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">User Profile</h1>
+    <div className={`min-h-screen flex selection:bg-black selection:text-white ${inter.className}`}>
+
+      {/* Left Column - Banner Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src={getRandomBannerImage()}
+            alt="Fashion banner"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
 
-        <nav className="flex-1 space-y-2">
-            {/* Active State: Orange border left, orange icon/text */}
-            <div className="flex items-center gap-4 px-8 py-3 text-orange-600 relative bg-orange-50/10">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-orange-500 rounded-r-md" />
-                <LogIn className="w-5 h-5" />
-                <span className="font-medium text-sm">Sign In</span>
+        {/* Text Layout */}
+        <div className="relative z-10 flex flex-col justify-between h-full p-12 text-white w-full">
+          {/* Top Header */}
+          <div className="flex justify-between items-center tracking-[0.1em] text-xs font-bold drop-shadow-lg">
+            <div className="border-b-2 border-white pb-1 relative">
+              Butterfly couture
+            </div>
+            <div className="opacity-50 hidden xl:block">
+              A/W 2024
+            </div>
+          </div>
+
+          {/* Bottom Content - Massive Headline */}
+          <div className="flex flex-col justify-end mb-8">
+            <h1 className="text-[7vw] font-birds leading-[0.85] tracking-[0.1em] text-white drop-shadow-xl">
+              Define <br />
+              your <br />
+              essence.
+            </h1>
+            <div className="mt-8 flex items-center gap-4">
+              <div className="h-px w-16 bg-white"></div>
+              <p className="text-zinc-300 text-lg font-light tracking-wide uppercase">
+                Sophistication in monochrome.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white p-8 lg:p-16">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-12">
+            <div className="text-2xl font-bold text-amber-800 mb-2">
+              BUTTERFLY
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-3xl font-light text-gray-900 mb-2">
+                SIGN IN
+              </h2>
+              <p className="text-gray-600">
+                Welcome back. Please enter your details.
+              </p>
             </div>
 
-            {/* Inactive Links */}
-            <Link href="/signup" className="flex items-center gap-4 px-8 py-3 text-gray-400 hover:text-gray-600 transition-colors">
-                <UserPlus className="w-5 h-5" />
-                <span className="font-medium text-sm">Register</span>
-            </Link>
-
-            <Link href="/forgot-password" className="flex items-center gap-4 px-8 py-3 text-gray-400 hover:text-gray-600 transition-colors">
-                <HelpCircle className="w-5 h-5" />
-                <span className="font-medium text-sm">Forgot Password?</span>
-            </Link>
-        </nav>
-
-        <div className="px-8 mt-auto">
-             <Link href="/" className="flex items-center gap-4 text-red-500 hover:text-red-600 transition-colors">
-                <LogOut className="w-5 h-5" />
-                <span className="font-medium text-sm">Back to Home</span>
-            </Link>
-        </div>
-      </aside>
-
-      {/* --- Main Content Area --- */}
-      <main className="flex-1 p-6 lg:p-12 overflow-y-auto">
-        
-        {/* Mobile Header (visible only on small screens) */}
-        <div className="lg:hidden flex justify-between items-center mb-8">
-            <span className="font-bold text-lg">Butterfly Couture</span>
-            <Link href="/signup" className="text-orange-500 text-sm font-medium">Register</Link>
-        </div>
-
-        <div className="max-w-4xl mx-auto">
-            {/* Profile Header Section */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12">
-                <div className="relative">
-                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shadow-orange-100">
-                        <Image 
-                            src={AVATAR_IMAGE}
-                            alt="Profile"
-                            fill
-                            className="object-cover"
-                        />
-                    </div>
-                    {/* Orange edit dot (decorative) */}
-                    <div className="absolute bottom-1 right-1 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center border-2 border-white text-white">
-                        <User className="w-3 h-3" />
-                    </div>
-                </div>
-                
-                <div className="text-center md:text-left pt-2">
-                    <h2 className="text-2xl font-semibold text-gray-900">Welcome Back</h2>
-                    <p className="text-gray-400 text-sm mt-1">Butterfly Couture Member</p>
-                </div>
-            </div>
-
-            {/* Form Section */}
             {error && (
-              <Alert variant="destructive" className="mb-6 bg-red-50 text-red-600 border-red-100 rounded-xl">
+              <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
-                    
-                    {/* Email Input */}
-                    <div className="space-y-3">
-                        <Label htmlFor="email" className="text-xs text-gray-400 font-medium ml-1">
-                            Email Address
-                        </Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="sara.tancredi@gmail.com"
-                            required
-                            disabled={isSubmitting}
-                            // Styling matches the image: Light gray bg, rounded corners, no harsh borders
-                            className="h-12 bg-gray-50 border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-100 focus:border-orange-200 transition-all text-gray-700 placeholder:text-gray-400"
-                        />
-                    </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
 
-                     {/* Password Input */}
-                    <div className="space-y-3">
-                        <Label htmlFor="password" className="text-xs text-gray-400 font-medium ml-1">
-                            Password
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter your password"
-                                required
-                                disabled={isSubmitting}
-                                className="h-12 bg-gray-50 border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-100 focus:border-orange-200 transition-all text-gray-700 pr-12 placeholder:text-gray-400"
-                            />
-                             <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent text-gray-400 hover:text-orange-500"
-                                onClick={() => setShowPassword(!showPassword)}
-                            >
-                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </Button>
-                        </div>
-                    </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="text-xs font-bold text-black tracking-widest uppercase"
+                >
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  required
+                  disabled={isSubmitting}
+                  className="h-12 rounded-none border-zinc-200 bg-transparent px-0 pr-12 border-b border-t-0 border-x-0 focus:border-black focus:ring-0 transition-all duration-300 pl-1"
+                />
+              </div>
 
-                    {/* Spacer for grid alignment if needed, or additional fields */}
-                    <div className="hidden md:block"></div> 
-
-                    {/* Submit Button Area */}
-                     <div className="md:col-span-2 flex justify-end mt-8">
-                         {/* Pill shaped orange button with shadow */}
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="h-12 px-10 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl shadow-lg shadow-orange-500/20 font-medium transition-all transform active:scale-95"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Signing In...
-                                </>
-                            ) : (
-                                "Sign In"
-                            )}
-                        </Button>
-                    </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label
+                    htmlFor="password"
+                    className="text-xs font-bold text-black tracking-widest uppercase"
+                  >
+                    Password
+                  </Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-zinc-400 hover:text-black hover:underline transition-colors"
+                  >
+                    Forgot?
+                  </Link>
                 </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    className="h-12 rounded-none border-zinc-200 bg-transparent px-0 pr-12 border-b border-t-0 border-x-0 focus:border-black focus:ring-0 transition-all duration-300 pl-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent text-zinc-400 hover:text-black rounded-none"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={isSubmitting}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-14 bg-black hover:bg-zinc-800 text-white rounded-none tracking-[0.15em] font-medium text-xs uppercase transition-all duration-300"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    Sign In <ArrowRight className="h-3 w-3" />
+                  </span>
+                )}
+              </Button>
             </form>
-        </div>
 
-        {/* Floating Action Button (Mobile only) visual mimicry */}
-        <div className="fixed bottom-8 right-8 lg:hidden">
-             <Button size="icon" className="h-14 w-14 rounded-full bg-white text-black shadow-xl border border-gray-100">
-                <LogIn className="h-6 w-6" />
-             </Button>
+            <div className="text-center pt-4 border-t border-zinc-100">
+              <p className="text-zinc-500 text-sm">
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="font-bold text-black hover:underline underline-offset-4 tracking-wide"
+                >
+                  Sign up here
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
-
-      </main>
+      </div>
     </div>
   );
 }

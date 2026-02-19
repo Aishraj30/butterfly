@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CheckCircle, Loader2 } from 'lucide-react';
@@ -13,12 +13,19 @@ const steps = ['Information', 'Shipping', 'Payment', 'Success'];
 
 export default function CheckoutPage() {
   const { cart, clearCart, isLoading: isCartLoading } = useCart();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderData, setOrderData] = useState<any>(null);
   const [cardData, setCardData] = useState({ number: '', expiry: '', cvc: '' });
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push(`/login?callbackUrl=/checkout`);
+    }
+  }, [user, isLoading, router]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -58,6 +65,14 @@ export default function CheckoutPage() {
 
     setCardData(prev => ({ ...prev, [name]: value }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-black" />
+      </div>
+    )
+  }
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
 
