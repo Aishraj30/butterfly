@@ -16,7 +16,7 @@ function MetricCard({ title, value, change, changeText, icon, color }: MetricCar
   const isNegative = change < 0
 
   return (
-    <div className="bg-white border border-[#D7C69D]/30 rounded-xl p-4 lg:p-6 shadow-sm">
+    <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-4 lg:p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <span className="text-gray-600 text-sm font-medium">
           {title}
@@ -27,7 +27,7 @@ function MetricCard({ title, value, change, changeText, icon, color }: MetricCar
       </div>
 
       <div className="space-y-2">
-        <p className="text-2xl font-bold text-[#003300]">
+        <p className="text-2xl font-bold text-black dark:text-white">
           {value}
         </p>
 
@@ -53,24 +53,24 @@ export function MetricsCards() {
       value: '45,000',
       change: 7,
       changeText: 'vs. previous month',
-      icon: <Users size={20} className="text-[#D7C69D]" />,
-      color: 'bg-[#F7E6CA]/50'
+      icon: <Users size={20} className="text-black dark:text-white" />,
+      color: 'bg-gray-100 dark:bg-gray-800'
     },
     {
       title: 'Total Sales',
       value: '₹45,000',
       change: 7,
       changeText: 'vs. previous month',
-      icon: <DollarSign size={20} className="text-[#D7C69D]" />,
-      color: 'bg-[#F7E6CA]/50'
+      icon: <DollarSign size={20} className="text-black dark:text-white" />,
+      color: 'bg-gray-100 dark:bg-gray-800'
     },
     {
       title: 'Total Order',
       value: '65,000',
       change: -3.5,
       changeText: 'vs. previous month',
-      icon: <ShoppingCart size={20} className="text-[#D7C69D]" />,
-      color: 'bg-[#F7E6CA]/50'
+      icon: <ShoppingCart size={20} className="text-black dark:text-white" />,
+      color: 'bg-gray-100 dark:bg-gray-800'
     }
   ]
 

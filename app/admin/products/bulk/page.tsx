@@ -325,17 +325,17 @@ export default function BulkProductAddPage() {
                                         </td>
                                         <td className="px-2 py-2">
                                             <input list={`cat-${product.tempId}`} value={product.category} onChange={(e) => updateProduct(product.tempId, 'category', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Category" />
-                                            <datalist id={`cat-${product.tempId}`}>{categories.map(c => <option key={c.id} value={c.name} />)}</datalist>
+                                            <datalist id={`cat-${product.tempId}`}>{categories.map(c => <option key={`cat-${c.id || c.name}-${product.tempId}`} value={c.name} />)}</datalist>
                                         </td>
                                         <td className="px-2 py-2">
                                             <input list={`sub-${product.tempId}`} value={product.subCategory} onChange={(e) => updateProduct(product.tempId, 'subCategory', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Sub-Cat" />
                                             <datalist id={`sub-${product.tempId}`}>
-                                                {categories.find(c => c.name === product.category)?.subCategories?.map((s: string) => <option key={s} value={s} />)}
+                                                {categories.find(c => c.name === product.category)?.subCategories?.map((s: string) => <option key={`sub-${s}-${product.tempId}`} value={s} />)}
                                             </datalist>
                                         </td>
                                         <td className="px-2 py-2">
                                             <input list={`col-${product.tempId}`} value={product.collectionName} onChange={(e) => updateProduct(product.tempId, 'collectionName', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Collection" />
-                                            <datalist id={`col-${product.tempId}`}>{collections.map(c => <option key={c.id} value={c.name} />)}</datalist>
+                                            <datalist id={`col-${product.tempId}`}>{collections.map(c => <option key={`col-${c.id || c.name}-${product.tempId}`} value={c.name} />)}</datalist>
                                         </td>
                                         <td className="px-2 py-2">
                                             <select value={product.gender} onChange={(e) => updateProduct(product.tempId, 'gender', e.target.value)} className="w-full px-2 py-1 border rounded-sm">

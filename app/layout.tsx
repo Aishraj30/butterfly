@@ -11,6 +11,7 @@ import './globals.css'
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader"
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter"
 import { LoadingProvider } from "@/components/LoadingProvider"
+import { Toaster } from "@/components/ui/toaster"
 
 import localFont from 'next/font/local'
 
@@ -68,6 +69,7 @@ export default function RootLayout({
                 <ChatBot />
                 <Analytics />
               </SmoothScroll>
+              <Toaster />
             </AuthProvider>
           </ThemeProvider>
         </LoadingProvider>

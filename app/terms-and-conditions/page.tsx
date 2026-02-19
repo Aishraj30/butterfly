@@ -7,14 +7,9 @@ export default function TermsAndConditionsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-black text-white py-4">
-        <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm">Back to Home</span>
-          </Link>
-          <h1 className="text-xl font-light tracking-wider">TERMS AND CONDITIONS</h1>
-          <div className="w-20"></div>
+      <div className="bg-gray-50 border-b border-gray-200 py-6">
+        <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-center">
+          <h1 className="text-2xl font-light tracking-wide text-gray-900">TERMS AND CONDITIONS</h1>
         </div>
       </div>
 

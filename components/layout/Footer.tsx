@@ -153,7 +153,6 @@ export function Footer() {
         {/* Bottom Section: Copyright & Payments */}
         <div className="flex flex-col-reverse md:flex-row justify-between items-center md:items-end gap-6 pt-6 border-t border-white/10">
           <div className="space-y-2 text-[10px] md:text-xs text-center md:text-left text-gray-500 w-full md:w-auto">
-            <p className="uppercase tracking-wider text-white mb-1">USD / EN</p>
             <p>Copyright © 2026, Butterfly. All rights reserved. <br className="hidden md:block" /> 
               <Link href="/privacy-policy" className="underline hover:text-white transition-colors">Privacy Policy</Link> • 
               <Link href="/terms-and-conditions" className="underline hover:text-white transition-colors">Terms of Use</Link>

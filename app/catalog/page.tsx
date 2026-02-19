@@ -12,11 +12,11 @@ import { Pagination } from '@/components/ui/PaginationComponent';
 const ITEMS_PER_PAGE = 12;
 
 const bannerImages = [
-  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
-  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400106/butterfly-couture/1771400105742-blob.jpg",
-  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400121/butterfly-couture/1771400121271-blob.jpg",
-  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400157/butterfly-couture/1771400156846-blob.jpg",
-  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400180/butterfly-couture/1771400180246-blob.jpg"
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400106/butterfly-couture/1771400105742-blob.jpg",
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400121/butterfly-couture/1771400121271-blob.jpg",
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400157/butterfly-couture/1771400156846-blob.jpg",
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400180/butterfly-couture/1771400180246-blob.jpg"
 ];
 
 const SingleColumnIcon = ({ active }: { active: boolean }) => (
@@ -212,7 +212,7 @@ function CatalogContent() {
                     <div className="flex justify-center items-center py-12">
                         <p className="text-gray-600">Loading...</p>
                     </div>
-                ) : (collectionParam || searchParams.get('category') || searchParams.get('subCategory')) ? (
+                ) : (
                     <div className="space-y-4">
                         {/* --- MOBILE FILTER BAR (Top Sticky) --- */}
                         <div className="sticky top-[72px] md:top-[88px] lg:top-[104px] z-30 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between md:hidden shadow-sm -mx-5 mb-6">
@@ -340,47 +340,6 @@ function CatalogContent() {
                                 />
                             </>
                         )}
-                    </div>
-                ) : collections.length === 0 ? (
-                    <div className="flex justify-center items-center py-12">
-                        <p className="text-gray-600">No categories found.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {collections.map((collection: Collection) => (
-                            <div
-                                key={collection.id}
-                                className="group relative overflow-hidden rounded-lg border border-gray-200 hover:border-[#8D7B68] transition-colors cursor-pointer"
-                            >
-                                <Link href={`/catalog?collection=${encodeURIComponent(collection.name)}`}>
-                                    {/* Category Image Placeholder */}
-                                    <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
-                                        <div className={`w-full h-full ${getPlaceholderImage(collection.name)} flex items-center justify-center`}>
-                                            <div className="text-center">
-                                                <div className="text-4xl font-serif text-gray-400 mb-2">
-                                                    {collection.name.charAt(0)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Category Info */}
-                                    <div className="p-6 bg-white">
-                                        <h3 className="text-xl font-serif font-bold text-black mb-2 group-hover:text-[#8D7B68] transition-colors">
-                                            {collection.name}
-                                        </h3>
-                                        {collection.description && (
-                                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                                                {collection.description}
-                                            </p>
-                                        )}
-                                        <p className="text-sm text-gray-500">
-                                            {collection.productCount || 0} Products
-                                        </p>
-                                    </div>
-                                </Link>
-                            </div>
-                        ))}
                     </div>
                 )}
             </div>
