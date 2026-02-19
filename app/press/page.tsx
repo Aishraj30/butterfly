@@ -1,111 +1,123 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Newspaper, Calendar } from 'lucide-react'
+import { ArrowLeft, Play } from 'lucide-react'
 
-export default function PressPage() {
-  const pressReleases = [
-    {
-      date: 'January 15, 2026',
-      title: 'Butterfly Couture Launches Spring 2024 Collection',
-      excerpt: 'The new collection celebrates rebirth and transformation through innovative designs and sustainable materials.',
-      category: 'Collection Launch'
-    },
-    {
-      date: 'December 1, 2025',
-      title: 'Butterfly Couture Named Sustainable Brand of the Year',
-      excerpt: 'Recognition for our commitment to ethical fashion and environmental responsibility in luxury design.',
-      category: 'Awards'
-    },
-    {
-      date: 'October 20, 2025',
-      title: 'Founder Interview: Redefining Luxury Fashion',
-      excerpt: 'Our founder discusses the vision behind Butterfly Couture and the future of sustainable luxury.',
-      category: 'Interview'
-    }
-  ]
+// Mock data for the lookbook collections
+const collections = [
+  {
+    id: 1,
+    title: 'The Chrysalis Collection',
+    season: 'Autumn/Winter 2026',
+    image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1974&auto=format&fit=crop',
+    size: 'large', // to control grid spanning
+  },
+  {
+    id: 2,
+    title: 'Midnight Monarch',
+    season: 'Evening Wear',
+    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1962&auto=format&fit=crop',
+    size: 'small',
+  },
+  {
+    id: 3,
+    title: 'Silk & Stone',
+    season: 'Resort 2026',
+    image: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?q=80&w=2070&auto=format&fit=crop',
+    size: 'small',
+  },
+  {
+    id: 4,
+    title: 'Ethereal Armor',
+    season: 'Spring/Summer 2026',
+    image: 'https://images.unsplash.com/photo-1495385794356-15371f348c31?q=80&w=1998&auto=format&fit=crop',
+    size: 'large',
+  },
+]
 
+export default function LookbookPage() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-gray-50 border-b border-gray-200 py-6">
-        <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-center">
-          <h1 className="text-2xl font-light tracking-wide text-gray-900">PRESS</h1>
-        </div>
-      </div>
+    <div className="min-h-screen bg-stone-50 text-stone-800 selection:bg-stone-200 pb-24">
+      
+      {/* Minimalist Navigation */}
+      <nav className="absolute top-0 left-0 w-full p-6 z-20 flex justify-between items-center mix-blend-difference text-white">
+        <Link 
+          href="/about-us" 
+          className="flex items-center gap-2 text-sm uppercase tracking-widest hover:opacity-70 transition-opacity"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to About
+        </Link>
+        <span className="text-sm uppercase tracking-widest font-medium">Lookbook</span>
+      </nav>
 
-      {/* Content */}
-      <div className="max-w-[1400px] mx-auto px-6 py-16">
-        <div className="max-w-4xl mx-auto">
-          {/* Press Kit Info */}
-          <div className="bg-gray-50 p-8 rounded-lg mb-12">
-            <div className="flex items-center gap-4 mb-6">
-              <Newspaper className="w-8 h-8 text-black" />
-              <div>
-                <h2 className="text-2xl font-light">Press Kit & Media Resources</h2>
-                <p className="text-gray-600 mt-2">
-                  Download our official press kit for high-resolution images, brand assets, and company information.
+      {/* Hero Section */}
+      <section className="pt-32 pb-16 px-6 text-center max-w-4xl mx-auto">
+        <h1 className="text-5xl md:text-7xl font-serif text-stone-900 mb-6 uppercase tracking-wider">
+          Campaigns
+        </h1>
+        <p className="text-lg md:text-xl font-light text-stone-500 tracking-wide">
+          Explore the visual narratives behind our latest collections. A study in form, fabric, and metamorphosis.
+        </p>
+      </section>
+
+      {/* Featured Video/Hero Image Banner */}
+      <section className="px-6 max-w-[1400px] mx-auto mb-24">
+        <div className="relative aspect-video w-full overflow-hidden bg-stone-900 group cursor-pointer">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat opacity-80 group-hover:scale-105 transition-transform duration-700" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-colors">
+              <Play className="w-8 h-8 text-white ml-1" />
+            </div>
+          </div>
+          <div className="absolute bottom-8 left-8 text-white">
+            <p className="text-sm tracking-[0.2em] uppercase mb-2">Behind the Scenes</p>
+            <h2 className="text-3xl font-serif">The Making of Chrysalis</h2>
+          </div>
+        </div>
+      </section>
+
+      {/* Editorial Grid */}
+      <section className="px-6 max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
+          {collections.map((item, index) => (
+            <div 
+              key={item.id} 
+              className={`group relative overflow-hidden bg-stone-200 cursor-pointer ${
+                item.size === 'large' ? 'aspect-[3/4] md:aspect-square' : 'aspect-[3/4]'
+              }`}
+            >
+              <div 
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105"
+                style={{ backgroundImage: `url(${item.image})` }}
+              />
+              {/* Gradient Overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Text Content */}
+              <div className="absolute bottom-0 left-0 w-full p-8 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                <p className="text-stone-300 text-sm uppercase tracking-widest mb-2">
+                  {item.season}
                 </p>
+                <h3 className="text-white text-3xl font-serif">
+                  {item.title}
+                </h3>
               </div>
             </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition-colors">
-                Download Press Kit
-              </button>
-              <Link href="/contact-us" className="border border-black text-black px-6 py-3 rounded hover:bg-black hover:text-white transition-colors">
-                Contact PR Team
-              </Link>
-            </div>
-          </div>
-
-          {/* Press Releases */}
-          <div className="space-y-12">
-            <h2 className="text-3xl font-light tracking-wide mb-8">Latest Press Releases</h2>
-            
-            {pressReleases.map((release, index) => (
-              <article key={index} className="border-b border-gray-200 pb-8 last:border-b-0">
-                <div className="flex flex-col sm:flex-row gap-6 mb-4">
-                  <div className="flex items-center gap-2 text-gray-500">
-                    <Calendar className="w-4 h-4" />
-                    <time className="text-sm">{release.date}</time>
-                  </div>
-                  <span className="bg-black text-white text-xs px-2 py-1 rounded">
-                    {release.category}
-                  </span>
-                </div>
-                
-                <h3 className="text-2xl font-light mb-4">{release.title}</h3>
-                <p className="text-gray-600 leading-relaxed mb-6">{release.excerpt}</p>
-                
-                <Link href="#" className="inline-flex items-center gap-2 text-black hover:opacity-80 transition-opacity">
-                  Read Full Article →
-                </Link>
-              </article>
-            ))}
-          </div>
-
-          {/* Media Contact */}
-          <div className="bg-black text-white p-8 rounded-lg mt-12">
-            <h3 className="text-xl font-light mb-4 text-center">Media Inquiries</h3>
-            <div className="text-center">
-              <p className="text-gray-300 mb-6">
-                For press inquiries, interview requests, or media partnerships, please contact our PR team.
-              </p>
-              <div className="space-y-2">
-                <p><span className="font-medium">Email:</span> press@butterflycouture.com</p>
-                <p><span className="font-medium">Phone:</span> 1-555-PRESS-01</p>
-                <p><span className="font-medium">Response Time:</span> Within 24 hours</p>
-              </div>
-              <div className="flex justify-center mt-6">
-                <Link href="/contact-us" className="bg-white text-black px-6 py-3 rounded hover:bg-gray-100 transition-colors">
-                  Contact PR Team
-                </Link>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
-      </div>
+      </section>
+
+      {/* Bottom Call to Action */}
+      <section className="mt-32 text-center px-6">
+        <h2 className="text-3xl font-serif text-stone-900 mb-8">Experience the Collection</h2>
+        <Link 
+          href="/contact-us" 
+          className="inline-block border border-stone-900 px-10 py-4 text-sm tracking-widest uppercase hover:bg-stone-900 hover:text-white transition-colors"
+        >
+          Book a Private Fitting
+        </Link>
+      </section>
+
     </div>
   )
 }
