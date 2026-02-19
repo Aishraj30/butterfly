@@ -31,6 +31,7 @@ const menuItems = [
   { label: 'Collections', href: '/admin/collections', icon: Layers },
   { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { label: 'Customers', href: '/admin/customers', icon: Users },
+  { label: 'Returns', href: '/admin/returns', icon: ShoppingCart },
   { label: 'Income', href: '/admin/income', icon: TrendingUp },
 ]
 
@@ -48,23 +49,23 @@ export function AdminSidebar() {
       {/* Mobile Toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-primary text-primary-foreground rounded-sm"
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-black text-white rounded-sm"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 overflow-y-auto lg:static lg:translate-x-0 z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed left-0 top-0 h-screen w-64 bg-white dark:bg-black text-black dark:text-white border-r border-gray-300 dark:border-gray-700 overflow-y-auto lg:static lg:translate-x-0 z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
       >
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-300 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#D7C69D] to-[#F7E6CA] rounded-lg flex items-center justify-center border border-[#D7C69D]/20">
-              <Sparkles size={20} className="text-[#003300]" />
+            <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center border border-gray-300">
+              <Sparkles size={20} className="text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-[#003300]">Butterfly-Couture</h1>
+              <h1 className="text-xl font-bold text-black dark:text-white">Butterfly-Couture</h1>
             </div>
           </div>
         </div>
@@ -79,8 +80,8 @@ export function AdminSidebar() {
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${isActive
-                  ? 'bg-[#F7E6CA] text-[#003300] border border-[#D7C69D]/30'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-[#F7E6CA]/50 hover:text-[#003300]'
+                  ? 'bg-black text-white border border-gray-300'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white'
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -97,13 +98,13 @@ export function AdminSidebar() {
           })}
 
           {/* Divider */}
-          <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+          <div className="border-t border-gray-300 dark:border-gray-700 my-4"></div>
 
           {/* Other Menu Items */}
           <Link
             href="/admin/settings"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-[#F7E6CA]/50 hover:text-[#003300]"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
           >
             <Settings size={20} />
             <span className="font-medium">Settings</span>
@@ -112,7 +113,7 @@ export function AdminSidebar() {
           <Link
             href="/admin/help"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-[#F7E6CA]/50 hover:text-[#003300]"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
           >
             <HelpCircle size={20} />
             <span className="font-medium">Help & Privacy</span>
@@ -121,7 +122,7 @@ export function AdminSidebar() {
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 w-full text-left text-gray-600 dark:text-gray-300 hover:bg-[#F7E6CA]/50 hover:text-[#003300]"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 w-full text-left text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white"
           >
             <LogOut size={20} />
             <span className="font-medium">Logout</span>
@@ -129,7 +130,7 @@ export function AdminSidebar() {
         </nav>
 
         {/* Theme Toggle */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-4 border-t border-gray-300 dark:border-gray-700">
           <ThemeToggle />
         </div>
       </aside>

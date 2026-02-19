@@ -14,7 +14,7 @@ export default function AdminDashboard() {
       <DashboardHeader />
       <div className="p-4 lg:p-6">
         <div className="mb-4 lg:mb-6">
-          <h1 className="text-2xl font-bold text-[#005500]">
+          <h1 className="text-2xl font-bold text-black dark:text-white">
             Dashboard
           </h1>
         </div>

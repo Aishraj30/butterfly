@@ -16,11 +16,13 @@ import {
   Loader2, Package, User, Heart, MapPin, Settings, LogOut, Star, ChevronLeft
 } from "lucide-react";
 import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
+import { useToast } from "@/hooks/use-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function OrdersPage() {
   const { user, token, logout, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,77 @@ export default function OrdersPage() {
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  // Return Modal State
+  const [returnOpen, setReturnOpen] = useState(false);
+  const [selectedOrderForReturn, setSelectedOrderForReturn] = useState<any>(null);
+  const [returnItem, setReturnItem] = useState<any>(null);
+  const [returnReason, setReturnReason] = useState("");
+  const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
+
+  const openReturnModal = (order: any, item: any) => {
+    setSelectedOrderForReturn(order);
+    setReturnItem(item);
+    setReturnReason("");
+    setReturnOpen(true);
+  };
+
+  const handleReturnSubmit = async () => {
+    if (!selectedOrderForReturn || !returnItem) return;
+
+    setIsSubmittingReturn(true);
+    try {
+      const userId = user?.id || (user as any)?._id;
+      if (!userId) return;
+
+      const response = await fetch("/api/returns", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          orderId: selectedOrderForReturn.orderId,
+          orderObjectId: selectedOrderForReturn._id,
+          userId: userId,
+          items: [{
+            productId: typeof returnItem.productId === 'object' ? returnItem.productId._id : returnItem.productId,
+            name: returnItem.name,
+            quantity: returnItem.quantity,
+            price: returnItem.price,
+            size: returnItem.size,
+            color: returnItem.color,
+            reason: returnReason
+          }],
+          customerReason: returnReason
+        })
+      });
+
+      if (response.ok) {
+        setReturnOpen(false);
+        toast({
+          title: "Return Request Submitted",
+          description: "We will review your request and get back to you shortly.",
+        });
+      } else {
+        const errData = await response.json();
+        toast({
+          title: "Return Request Failed",
+          description: errData.error || "Unknown error occurred",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting return request:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while submitting your return.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingReturn(false);
+    }
+  };
 
   const openReviewModal = (item: any) => {
     const pId = typeof item.productId === 'object' ? (item.productId as any)._id : item.productId;
@@ -60,14 +133,25 @@ export default function OrdersPage() {
 
       if (response.ok) {
         setReviewOpen(false);
-        alert("Review submitted successfully!");
+        toast({
+          title: "Review Submitted",
+          description: "Thank you for your feedback!",
+        });
       } else {
         const errData = await response.json();
-        alert("Failed to submit review: " + (errData.error || "Unknown error"));
+        toast({
+          title: "Review Failed",
+          description: errData.error || "Unknown error occurred",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error submitting review:", error);
-      alert("Error submitting review");
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while submitting your review.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmittingReview(false);
     }
@@ -131,12 +215,12 @@ export default function OrdersPage() {
       {/* --- Sidebar (Left Navigation) --- */}
       <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
         <div className="px-8 mb-8 flex items-center gap-4">
-          <button 
+          <button
             onClick={() => window.location.href = '/'}
             className="flex items-center justify-center rounded-full border-2 border-black bg-white hover:bg-gray-100 transition-all duration-200"
-            style={{ 
-              width: '20px', 
-              height: '20px', 
+            style={{
+              width: '20px',
+              height: '20px',
               padding: '0',
               margin: '0',
               minWidth: '20px',
@@ -295,7 +379,7 @@ export default function OrdersPage() {
                             </div>
                             <div className="text-right">
                               <span className="block text-gray-700 font-semibold">Rp {item.price.toLocaleString()}</span>
-                              {((order.deliveryStatus === 'delivered') || (order.status === 'delivered')) && (
+                              {(order.status !== 'cancelled') && (
                                 <Button
                                   variant="link"
                                   size="sm"
@@ -309,7 +393,17 @@ export default function OrdersPage() {
                           </div>
                         ))}
                       </div>
-                      <div className="mt-6 pt-6 flex justify-end">
+                      <div className="mt-6 pt-6 flex justify-end gap-3">
+                        {order.status !== 'cancelled' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openReturnModal(order, order.items[0])}
+                            className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-300 font-medium"
+                          >
+                            Return Order
+                          </Button>
+                        )}
                         <Button variant="outline" size="sm" asChild className="border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium">
                           <Link href={`/orders/${order._id}`}>
                             View Details
@@ -380,6 +474,46 @@ export default function OrdersPage() {
             >
               {isSubmittingReview && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Submit Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Return Modal */}
+      <Dialog open={returnOpen} onOpenChange={setReturnOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-white border border-gray-200 rounded-2xl shadow-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">Return Product</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <p className="text-sm font-bold text-gray-900">{returnItem?.name}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {returnItem?.size && `Size: ${returnItem.size}`}
+                {returnItem?.size && returnItem?.color && ' | '}
+                {returnItem?.color && `Color: ${returnItem.color}`}
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="return-reason" className="text-sm font-semibold text-gray-700">Reason for Return</Label>
+              <Textarea
+                id="return-reason"
+                value={returnReason}
+                onChange={(e: any) => setReturnReason(e.target.value)}
+                placeholder="Please tell us why you want to return this item..."
+                className="bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-100 transition-all duration-300 min-h-[120px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="submit"
+              onClick={handleReturnSubmit}
+              disabled={isSubmittingReturn || !returnReason.trim()}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-2xl shadow-lg shadow-red-500/20 font-medium transition-all transform active:scale-95"
+            >
+              {isSubmittingReturn && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Submit Return Request
             </Button>
           </DialogFooter>
         </DialogContent>
