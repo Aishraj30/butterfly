@@ -299,7 +299,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     if (loading) {
         return (
             <main className="w-full bg-white min-h-screen">
-                <div className="max-w-[1400px] mx-auto px-6">
+                <div className="max-w-[1400px] mx-auto px-6 pt-24">
                     <div className="flex items-center justify-center py-20">
                         <div className="animate-pulse">
                             <p className="text-gray-500">Loading product details...</p>
@@ -313,7 +313,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     if (!product) {
         return (
             <main className="w-full bg-white min-h-screen">
-                <div className="max-w-[1400px] mx-auto px-6">
+                <div className="max-w-[1400px] mx-auto px-6 pt-24">
                     <div className="flex flex-col items-center justify-center py-20">
                         <p className="text-gray-600 text-lg mb-4">Product not found</p>
                         <Link href="/catalog" className="text-primary hover:underline">
@@ -333,7 +333,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
     return (
         <main className="w-full bg-white min-h-screen">
-            <div className="max-w-[1400px] mx-auto px-6 pt-12">
+            <div className="max-w-[1400px] mx-auto px-6 pt-24">
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Left: Images */}
                     <div className="lg:w-1/2">
