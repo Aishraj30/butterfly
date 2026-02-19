@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Loader2, MapPin, Pencil, Plus, User, Package,
-  Heart, Settings, LogOut, Menu, X
+  Heart, Settings, LogOut, Menu, X, ChevronLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Inter } from "next/font/google";
@@ -146,7 +146,23 @@ export default function AddressesPage() {
       {/* --- Desktop Sidebar --- */}
       <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
         <div className="px-8 mb-8 flex items-center gap-4">
-          <BackToHomeButton variant="elegant" className="h-12 w-12 p-0 justify-center rounded-full border-2 border-black shadow-none bg-white hover:bg-gray-100 text-black" />
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="flex items-center justify-center rounded-full border-2 border-black bg-white hover:bg-gray-100 transition-all duration-200"
+            style={{ 
+              width: '20px', 
+              height: '20px', 
+              padding: '0',
+              margin: '0',
+              minWidth: '20px',
+              minHeight: '20px',
+              maxWidth: '20px',
+              maxHeight: '20px',
+              boxSizing: 'border-box'
+            }}
+          >
+            <ChevronLeft className="w-2.5 h-2.5 text-black" strokeWidth={3} />
+          </button>
           <h1 className="text-xl font-bold text-gray-900 tracking-tight">Profile</h1>
         </div>
 
