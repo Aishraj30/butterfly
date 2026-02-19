@@ -1,0 +1,7 @@
+﻿[dotenv@17.2.4] injecting env (10) from .env -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+Testing Replicate token: Present
+Token length: 40
+Token start: r8_M6
+Replicate Error: Request to https://api.replicate.com/v1/models/cuuupid/idm-vton failed with status 401 Unauthorized: {"title":"Unauthenticated","detail":"You did not pass a valid authentication token","status":401}
+.
+Status: 401

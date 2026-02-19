@@ -36,6 +36,7 @@ interface Collection {
 
 const navigation = [
   { name: 'Catalog', href: '/catalog', hasDropdown: true },
+  { name: 'Try On', href: '/try-on', hasDropdown: false },
   { name: 'Featured', href: '/featured', hasDropdown: true },
 ]
 
