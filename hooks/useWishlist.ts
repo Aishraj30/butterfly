@@ -115,7 +115,7 @@ export function useWishlist() {
 
   // Check if product is in wishlist
   const isInWishlist = (productId: string) => {
-    return wishlistItems.some(item => item.product._id === productId);
+    return wishlistItems.some(item => item.product?._id === productId);
   };
 
   // Load wishlist on mount
