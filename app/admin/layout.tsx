@@ -8,11 +8,11 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar'
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-black">
+    <div className="flex h-screen bg-white dark:bg-black" data-lenis-prevent="true">
       <AdminSidebar />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col min-h-0">
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {children}
         </div>

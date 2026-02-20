@@ -6,7 +6,7 @@ const outfits = [
     {
         id: 1,
         name: 'Purple Gown Series',
-        price: 'IDR 1.200.000',
+        price: 'INR 1,200,000',
         image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=2524&auto=format&fit=crop',
         tag: 'SET',
         tagColor: 'bg-indigo-600'
@@ -14,7 +14,7 @@ const outfits = [
     {
         id: 2,
         name: 'Black Velvet Suit',
-        price: 'IDR 850.000',
+        price: 'INR 850,000',
         image: 'https://images.unsplash.com/photo-1505022610485-0249ba5b3675?q=80&w=2670&auto=format&fit=crop',
         tag: 'HOT',
         tagColor: 'bg-red-500'
@@ -22,7 +22,7 @@ const outfits = [
     {
         id: 3,
         name: 'Red Ruffle Dress',
-        price: 'IDR 950.000',
+        price: 'INR 950,000',
         image: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?q=80&w=2524&auto=format&fit=crop',
         tag: 'NEW',
         tagColor: 'bg-green-600'
@@ -30,7 +30,7 @@ const outfits = [
     {
         id: 4,
         name: 'Floral Mens Shirt',
-        price: 'IDR 350.000',
+        price: 'INR 350,000',
         image: 'https://images.unsplash.com/photo-1559582798-678dfc71ccd8?q=80&w=2668&auto=format&fit=crop',
         tag: 'SALE',
         tagColor: 'bg-orange-500'

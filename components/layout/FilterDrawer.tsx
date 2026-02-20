@@ -8,6 +8,7 @@ interface FilterDrawerProps {
     isOpen: boolean
     onClose: () => void
     onApplyFilters: (filters: FilterState) => void
+    onClearFilters?: () => void
     initialFilters?: FilterState
 }
 
@@ -19,7 +20,7 @@ export interface FilterState {
     sortBy: 'name' | 'price-low' | 'price-high' | 'rating'
 }
 
-export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }: FilterDrawerProps) {
+export function FilterDrawer({ isOpen, onClose, onApplyFilters, onClearFilters, initialFilters }: FilterDrawerProps) {
     const drawerRef = useRef<HTMLDivElement>(null)
 
     // State
@@ -157,6 +158,7 @@ export function FilterDrawer({ isOpen, onClose, onApplyFilters, initialFilters }
         setSelectedColors([])
         setPriceRange({ min: '', max: '' })
         setSortBy('name')
+        onClearFilters?.()
     }
 
     const applyFilters = () => {
