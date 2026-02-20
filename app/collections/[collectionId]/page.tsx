@@ -412,10 +412,10 @@ export default function CollectionPage() {
             </div>
 
             {/* --- MOBILE FILTER BUTTON (Fixed Bottom - Just Button) --- */}
-            <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center md:hidden pointer-events-none">
+            <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center md:hidden pointer-events-none">
                 <button
                     onClick={() => setIsFilterOpen(true)}
-                    className="pointer-events-auto bg-black text-white px-8 py-3 shadow-lg text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors"
+                    className="pointer-events-auto bg-white text-black px-10 py-4 shadow-lg border border-gray-300 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors"
                 >
                     Filter & Sort
                 </button>
