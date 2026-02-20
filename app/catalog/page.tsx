@@ -7,7 +7,7 @@ import { FilterDrawer, FilterState } from '@/components/layout/FilterDrawer';
 import { filterAndSortProducts, FilterOptions, getAllProducts, Product } from '@/lib/products';
 import { Sliders } from 'lucide-react';
 import { ProductCard } from '@/components/product/ProductCard';
-import { Pagination } from '@/components/ui/PaginationComponent';
+import { LoadMore } from '@/components/ui/LoadMoreComponent';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -52,7 +52,7 @@ function CatalogContent() {
     const [mobileLayout, setMobileLayout] = useState<'1' | '2'>('2');
     const [activeGender, setActiveGender] = useState<string | null>(null);
     const [gridView, setGridView] = useState<'3' | '4'>('4');
-    const [currentPage, setCurrentPage] = useState(1);
+    const [displayedItemCount, setDisplayedItemCount] = useState(ITEMS_PER_PAGE);
     const searchParams = useSearchParams();
     const collectionParam = searchParams.get('collection');
 
@@ -65,42 +65,103 @@ function CatalogContent() {
 
         if (!categoryParam && !subCategoryParam && !collectionParam && !activeFilters) return products;
 
-        const options: FilterOptions = {};
+        let filtered = [...products];
 
+        // Category filter
         if (categoryParam) {
-            options.categories = [decodeURIComponent(categoryParam)];
+            const category = decodeURIComponent(categoryParam);
+            filtered = filtered.filter(p => 
+                p.category === category || 
+                p.subCategory === category
+            );
         }
+
+        // Sub-Category filter
         if (subCategoryParam) {
-            options.subCategories = [decodeURIComponent(subCategoryParam)];
+            const subCategory = decodeURIComponent(subCategoryParam);
+            filtered = filtered.filter(p => p.subCategory === subCategory);
         }
+
+        // Collection filter
         if (collectionParam) {
-            options.collectionNames = [decodeURIComponent(collectionParam)];
+            const collection = decodeURIComponent(collectionParam);
+            filtered = filtered.filter(p => p.collectionName === collection);
         }
 
+        // Apply active filters from FilterDrawer
         if (activeFilters) {
-            options.sizes = activeFilters.sizes;
-            options.colors = activeFilters.colors;
-            options.genders = activeFilters.genders;
-            options.priceRange = [
-                Number(activeFilters.priceRange.min) || 0,
-                Number(activeFilters.priceRange.max) || 10000000
-            ];
-            options.sortBy = activeFilters.sortBy;
+            // Gender filter
+            if (activeFilters.genders && activeFilters.genders.length > 0) {
+                filtered = filtered.filter(p => 
+                    p.gender && activeFilters.genders.includes(p.gender)
+                );
+            }
+
+            // Size filter
+            if (activeFilters.sizes && activeFilters.sizes.length > 0) {
+                filtered = filtered.filter(p => 
+                    p.size && activeFilters.sizes.some(size => p.size.includes(size))
+                );
+            }
+
+            // Color filter
+            if (activeFilters.colors && activeFilters.colors.length > 0) {
+                filtered = filtered.filter(p => 
+                    p.color && activeFilters.colors.some(color => 
+                        p.color.toLowerCase() === color.toLowerCase()
+                    )
+                );
+            }
+
+            // Price range filter
+            if (activeFilters.priceRange.min !== null || activeFilters.priceRange.max !== null) {
+                const min = typeof activeFilters.priceRange.min === 'number' ? activeFilters.priceRange.min : (activeFilters.priceRange.min ? parseInt(activeFilters.priceRange.min) : 0);
+                const max = typeof activeFilters.priceRange.max === 'number' ? activeFilters.priceRange.max : (activeFilters.priceRange.max ? parseInt(activeFilters.priceRange.max) : Infinity);
+                filtered = filtered.filter(p => {
+                    const price = p.onSale && p.salePrice ? p.salePrice : p.price;
+                    return price >= min && price <= max;
+                });
+            }
+
+            // Sorting
+            const sortBy = activeFilters.sortBy || 'name';
+            switch (sortBy) {
+                case 'price-low':
+                    filtered.sort((a, b) => {
+                        const priceA = a.onSale && a.salePrice ? a.salePrice : a.price;
+                        const priceB = b.onSale && b.salePrice ? b.salePrice : b.price;
+                        return priceA - priceB;
+                    });
+                    break;
+                case 'price-high':
+                    filtered.sort((a, b) => {
+                        const priceA = a.onSale && a.salePrice ? a.salePrice : a.price;
+                        const priceB = b.onSale && b.salePrice ? b.salePrice : b.price;
+                        return priceB - priceA;
+                    });
+                    break;
+                case 'rating':
+                    filtered.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'name':
+                default:
+                    filtered.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+            }
         }
 
-        return filterAndSortProducts(products, options);
+        return filtered;
     }, [searchParams, activeFilters, products]);
 
-    // Reset to first page when filters/search changes
+    // Reset displayed items when filters/search changes
     useEffect(() => {
-        setCurrentPage(1);
+        setDisplayedItemCount(ITEMS_PER_PAGE);
     }, [searchParams, activeFilters]);
 
-    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-    const paginatedProducts = useMemo(() => {
-        const start = (currentPage - 1) * ITEMS_PER_PAGE;
-        return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-    }, [filteredProducts, currentPage]);
+    const hasMoreItems = displayedItemCount < filteredProducts.length;
+    const displayedProducts = useMemo(() => {
+        return filteredProducts.slice(0, displayedItemCount);
+    }, [filteredProducts, displayedItemCount]);
 
     useEffect(() => {
         const loadPageData = async () => {
@@ -144,6 +205,10 @@ function CatalogContent() {
             ...prev || { genders: [], sizes: [], colors: [], priceRange: { min: null, max: null }, sortBy: 'name' },
             sizes: newSizes
         }));
+    };
+
+    const handleLoadMore = () => {
+        setDisplayedItemCount(prev => Math.min(prev + ITEMS_PER_PAGE, filteredProducts.length));
     };
 
     const toggleMobileGender = (gender: string) => {
@@ -313,6 +378,7 @@ function CatalogContent() {
                                             setActiveFilters(null);
                                             setSelectedSizes([]);
                                             setActiveGender(null);
+                                            setDisplayedItemCount(ITEMS_PER_PAGE); // Reset to initial items count
                                         }}
                                         className="inline-flex items-center justify-center px-8 py-3 bg-black text-white hover:bg-gray-800 transition-all text-[10px] font-bold uppercase tracking-[0.2em]"
                                     >
@@ -324,18 +390,15 @@ function CatalogContent() {
                             <>
                                 <div className={`grid ${mobileLayout === '1' ? 'grid-cols-1' : 'grid-cols-2'
                                     } ${gridView === '3' ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-x-6 gap-y-12`}>
-                                    {paginatedProducts.map((product: Product) => (
+                                    {displayedProducts.map((product: Product) => (
                                         <ProductCard key={(product as any)._id || product.id} product={product} />
                                     ))}
                                 </div>
 
-                                <Pagination
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    onPageChange={(page) => {
-                                        setCurrentPage(page);
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                    }}
+                                <LoadMore
+                                    onLoadMore={handleLoadMore}
+                                    isLoading={false}
+                                    hasMore={hasMoreItems}
                                     className="mt-12"
                                 />
                             </>
@@ -397,6 +460,12 @@ function CatalogContent() {
                         setActiveGender(null)
                     }
                     setIsFilterOpen(false)
+                }}
+                onClearFilters={() => {
+                    setActiveFilters(null);
+                    setSelectedSizes([]);
+                    setActiveGender(null);
+                    setDisplayedItemCount(ITEMS_PER_PAGE);
                 }}
                 initialFilters={activeFilters || undefined}
             />

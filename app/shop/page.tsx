@@ -199,7 +199,7 @@ export default function ShopPage() {
                             {product.name}
                           </h3>
                           <span className="text-xs font-bold text-black whitespace-nowrap">
-                            IDR {product.price.toLocaleString('id-ID')}
+                            INR {product.price.toLocaleString('en-IN')}
                           </span>
                         </div>
                         <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400">

@@ -350,8 +350,9 @@ export default function CollectionPage() {
                             <p className="text-gray-600 text-lg mb-4">No products found matching your filters</p>
                             <button
                                 onClick={() => {
-                                    setFilteredProducts(products)
-                                    setIsFilterOpen(true)
+                                    setFilteredProducts(products);
+                                    setSelectedSizes([]);
+                                    setCurrentPage(1);
                                 }}
                                 className="inline-flex items-center justify-center px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors duration-300 text-sm tracking-wide uppercase"
                             >
@@ -425,6 +426,18 @@ export default function CollectionPage() {
                 isOpen={isFilterOpen}
                 onClose={() => setIsFilterOpen(false)}
                 onApplyFilters={handleFilterApply}
+                onClearFilters={() => {
+                    setFilteredProducts(products);
+                    setSelectedSizes([]);
+                    setIsFilterOpen(false);
+                }}
+                initialFilters={{
+                    sizes: selectedSizes,
+                    colors: [],
+                    genders: [],
+                    priceRange: { min: null, max: null },
+                    sortBy: 'name'
+                }}
             />
         </main>
     )
