@@ -271,7 +271,7 @@ function CatalogContent() {
                 backgroundImage={getDeterministicBannerImage(categoryParam, subCategoryParam, collectionParam)}
             />
 
-            <div className="max-w-[1400px] mx-auto px-5 py-12">
+            <div className="max-w-[1400px] mx-auto px-5 py-12 pb-20 md:pb-12">
                 {/* Categories/Products Section */}
                 {isLoading ? (
                     <div className="flex justify-center items-center py-12">
@@ -279,8 +279,8 @@ function CatalogContent() {
                     </div>
                 ) : (collectionParam || searchParams.get('category') || searchParams.get('subCategory')) ? (
                     <div className="space-y-4">
-                        {/* --- MOBILE FILTER BAR (Top Sticky) --- */}
-                        <div className="sticky top-[72px] md:top-[88px] lg:top-[104px] z-30 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between md:hidden shadow-sm -mx-5 mb-6">
+                        {/* --- MOBILE FILTER BAR (Non-Sticky) --- */}
+                        <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between md:hidden shadow-sm -mx-5 mb-6">
                             {/* Item Count */}
                             <span className="text-[10px] font-bold uppercase tracking-widest text-black">
                                 {filteredProducts.length} Items
@@ -446,8 +446,19 @@ function CatalogContent() {
                         ))}
                     </div>
                 )}
+
+                {/* --- MOBILE FILTER BUTTON (Fixed Bottom) --- */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center md:hidden bg-white border-t border-gray-200 p-4">
+                <button
+                    onClick={() => setIsFilterOpen(true)}
+                    className="bg-black text-white px-8 py-3 shadow-lg text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors"
+                >
+                    Filter & Sort
+                </button>
+            </div>
             </div>
 
+            {/* Filter Drawer */}
             <FilterDrawer
                 isOpen={isFilterOpen}
                 onClose={() => setIsFilterOpen(false)}
