@@ -1,6 +1,5 @@
 'use client'
 
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Search, Plus, Edit, Trash2 } from 'lucide-react'
@@ -94,15 +93,15 @@ export default function AdminCategoriesPage() {
   )
 
   return (
-    <div className="min-h-full bg-background">
-      <div className="bg-secondary border-b border-border sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <>
+      <div className="bg-white border-b border-gray-200">
+        <div className="px-6 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="font-serif text-3xl font-bold text-primary">
+              <h1 className="font-serif text-3xl font-bold text-black">
                 Categories
               </h1>
-              <p className="text-foreground/60 text-sm mt-1">
+              <p className="text-gray-600 text-sm mt-1">
                 Manage product categories
               </p>
             </div>
@@ -112,7 +111,7 @@ export default function AdminCategoriesPage() {
                 setEditingCategory(null)
                 setFormData({ name: '', description: '' })
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary/90 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-black text-white font-medium rounded-sm hover:bg-gray-800 transition-colors"
             >
               <Plus size={18} />
               New Category
@@ -121,15 +120,15 @@ export default function AdminCategoriesPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="p-6">
         {showForm && (
-          <div className="bg-background border border-border rounded-sm p-6 mb-6">
-            <h2 className="font-semibold text-lg text-foreground mb-4">
+          <div className="bg-white border border-gray-200 rounded-sm p-6 mb-6">
+            <h2 className="font-semibold text-lg text-black mb-4">
               {editingCategory ? 'Edit Category' : 'Create New Category'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium text-black mb-2">
                   Category Name
                 </label>
                 <input
@@ -265,7 +264,7 @@ export default function AdminCategoriesPage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

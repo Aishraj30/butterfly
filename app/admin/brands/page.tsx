@@ -1,6 +1,5 @@
 'use client'
 
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { useState, useEffect } from 'react'
 import { Search, Plus, Edit, Trash2 } from 'lucide-react'
 import { Brand } from '@/lib/brands'
