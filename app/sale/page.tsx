@@ -7,6 +7,14 @@ import { Pagination } from '@/components/ui/PaginationComponent'
 
 const ITEMS_PER_PAGE = 12
 
+const bannerImages = [
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400106/butterfly-couture/1771400105742-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400121/butterfly-couture/1771400121271-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400157/butterfly-couture/1771400156846-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400180/butterfly-couture/1771400180246-blob.jpg"
+]
+
 interface Product {
     id: number;
     name: string;
@@ -61,7 +69,7 @@ export default function SalePage() {
             <CatalogBanner
                 title="SALE"
                 subtitle="Limited time offers on premium items"
-                backgroundImage="/banners/b3.jpg"
+                backgroundImage={bannerImages[2]}
             />
 
             <div className="max-w-[1400px] mx-auto px-5 py-8">

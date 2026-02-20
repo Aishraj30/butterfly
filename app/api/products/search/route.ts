@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       size: product.sizes || [], // Map sizes field
       reviews: product.reviewsCount || 0, // Map reviewsCount to reviews
       imageUrl: product.images?.[0] || '', // Use first image for backward compatibility
-      image: product.imageGradient || '', // Map imageGradient to image
+      image: product.images?.[0] || product.image || '', // Use first image from images array or fallback to image field
     }));
 
     return NextResponse.json({
