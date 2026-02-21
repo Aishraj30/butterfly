@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { getAllProducts } from '@/lib/products'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
+const GPT_MODEL = process.env.GPT_MODEL || "gpt-3.5-turbo"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { message } = body
+    const { message, history = [] } = body
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -18,7 +16,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
       console.error('[API] OpenAI API Key is missing')
       return NextResponse.json(
         { success: false, error: 'AI Assistant currently unavailable' },
@@ -26,12 +25,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const openai = new OpenAI({ apiKey })
+
     // Get current products for context
     const products = getAllProducts()
     const productsContext = products.map(p => `- ${p.name}: ${p.category} ($${p.price})`).join('\n')
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: GPT_MODEL,
       messages: [
         {
           role: "system",
@@ -48,6 +49,10 @@ export async function POST(request: NextRequest) {
           If a user asks about products, recommend something specific from the list above. 
           Keep responses concise but polite and premium.`
         },
+        ...history.map((m: any) => ({
+          role: m.role,
+          content: m.content
+        })),
         {
           role: "user",
           content: message
