@@ -2,19 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import { ButterflyLoader } from '@/components/ui/ButterflyLoader'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
   const pathname = usePathname()
-  const searchParams = useSearchParams()
 
   // Ensure component is mounted and set initial loading state immediately
   useEffect(() => {
     // Set loading state immediately on mount
     setIsMounted(true)
-    
+
     // Add loading class to html element immediately
     if (typeof window !== 'undefined') {
       document.documentElement.classList.add('loading-active')
@@ -24,17 +23,17 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
   // Handle initial page load and route changes
   useEffect(() => {
     if (!isMounted) return
-    
+
     // For product pages, show loader even longer to ensure full animation plays
     const isProductPage = pathname?.startsWith('/product/')
     const loadTime = pathname === '/' ? 3500 : isProductPage ? 4000 : 2500
-    
+
     // Show loader immediately when route changes
     setIsLoading(true)
     if (typeof window !== 'undefined') {
       document.documentElement.classList.add('loading-active')
     }
-    
+
     const timer = setTimeout(() => {
       setIsLoading(false)
       // Remove loading class when done
