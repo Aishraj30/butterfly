@@ -271,15 +271,27 @@ body {
 
 /* Hide scrollbar completely when loading */
 .loading-active,
-.loading-active body {
+.loading-active body,
+.is-loading,
+.is-loading body {
   overflow: hidden !important;
   height: 100vh !important;
   width: 100vw !important;
   scrollbar-gutter: auto !important;
   -ms-overflow-style: none !important;
-  /* IE and Edge */
   scrollbar-width: none !important;
-  /* Firefox */
+}
+
+/* Force black background and hide content while is-loading is active */
+.is-loading body {
+  background-color: black !important;
+}
+
+.is-loading #__next,
+.is-loading main,
+.is-loading .homepage-wrapper {
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 /* Correct selectors without space to target the element itself */

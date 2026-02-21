@@ -45,6 +45,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${birds.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var hasSeen = localStorage.getItem('hasSeenLoader');
+                  if (!hasSeen) {
+                    document.documentElement.classList.add('is-loading');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`font-sans antialiased bg-background text-foreground`}>
         <LoadingProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>

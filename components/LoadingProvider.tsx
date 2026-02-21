@@ -34,6 +34,7 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.classList.add('loading-active')
     } else {
       document.documentElement.classList.remove('loading-active')
+      document.documentElement.classList.remove('is-loading')
     }
   }, [isLoading, hasMounted])
 
