@@ -9,9 +9,13 @@ export function ConditionalFooter() {
     const isCatalog = pathname?.startsWith('/catalog')
     const isSale = pathname?.startsWith('/sale')
     const isNewArrival = pathname?.startsWith('/new-arrival')
-    const isWishlist = pathname?.startsWith('/wishlist')
+    const isUserPage = pathname?.startsWith('/wishlist') || 
+                     pathname?.startsWith('/profile') || 
+                     pathname?.startsWith('/address') ||
+                     pathname?.startsWith('/account') ||
+                     pathname?.startsWith('/orders')
 
-    if (isAdmin || isSale || isNewArrival || isWishlist) {
+    if (isAdmin || isSale || isNewArrival || isUserPage) {
         return null
     }
 

@@ -13,9 +13,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Inter } from "next/font/google";
 import {
-  Loader2, Package, User, Heart, MapPin, Settings, LogOut, Star, ChevronLeft
+  Loader2, Package, User, Heart, MapPin, Settings, LogOut, Star, ChevronLeft, Menu, Home
 } from "lucide-react";
 import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
+import { AccountDrawer } from "@/components/account/AccountDrawer";
+import { AccountSidebar } from "@/components/account/AccountSidebar";
 import { useToast } from "@/hooks/use-toast";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,6 +28,8 @@ export default function OrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [productImages, setProductImages] = useState<{[key: string]: string}>({});
+  const [isAccountDrawerOpen, setIsAccountDrawerOpen] = useState(false);
 
   // Review Modal State
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -176,6 +180,40 @@ export default function OrdersPage() {
           const data = await response.json();
           if (data.success) {
             setOrders(data.data);
+            
+            // After orders are loaded, fetch product images
+            const allProductIds = new Set<string>();
+            data.data.forEach((order: any) => {
+              order.items.forEach((item: any) => {
+                if (item.productId) {
+                  allProductIds.add(item.productId);
+                }
+              });
+            });
+
+            const fetchProductImages = async () => {
+              const imageMap: {[key: string]: string} = {};
+              
+              for (const productId of allProductIds) {
+                try {
+                  const response = await fetch(`/api/products/${productId}`);
+                  if (response.ok) {
+                    const product = await response.json();
+                    // Use imageUrl field from API response (line 175 in productController.js)
+                    const imageUrl = product.data?.imageUrl || product.data?.image || product.imageUrl || product.image;
+                    if (imageUrl) {
+                      imageMap[productId] = imageUrl;
+                    }
+                  }
+                } catch (error) {
+                  console.error(`Failed to fetch product ${productId}:`, error);
+                }
+              }
+              
+              setProductImages(imageMap);
+            };
+
+            fetchProductImages();
           }
         } catch (error) {
           console.error("Failed to fetch orders:", error);
@@ -213,209 +251,161 @@ export default function OrdersPage() {
     <div className={`min-h-screen bg-white flex ${inter.className}`}>
 
       {/* --- Sidebar (Left Navigation) --- */}
-      <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
-        <div className="px-8 mb-8 flex items-center gap-4">
-          <button
-            onClick={() => window.location.href = '/'}
-            className="flex items-center justify-center rounded-full border-2 border-black bg-white hover:bg-gray-100 transition-all duration-200"
-            style={{
-              width: '20px',
-              height: '20px',
-              padding: '0',
-              margin: '0',
-              minWidth: '20px',
-              minHeight: '20px',
-              maxWidth: '20px',
-              maxHeight: '20px',
-              boxSizing: 'border-box'
-            }}
-          >
-            <ChevronLeft className="w-2.5 h-2.5 text-black" strokeWidth={3} />
-          </button>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">User Profile</h1>
-        </div>
-
-        <nav className="flex-1 space-y-1">
-          {/* User Info Section */}
-          <div className="mb-6">
-            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-              Account
-            </div>
-            <Link href="/profile" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-              <User className="w-5 h-5" />
-              <span className="font-medium text-sm">User Info</span>
-            </Link>
-          </div>
-
-          {/* Orders Section */}
-          <div className="mb-6">
-            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-              Shopping
-            </div>
-            {/* Active Link: Orders */}
-            <div className="flex items-center gap-4 px-8 py-3 text-black relative bg-gray-100">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-black rounded-r-md" />
-              <Package className="w-5 h-5" />
-              <span className="font-medium text-sm">Orders</span>
-            </div>
-
-            <Link href="/wishlist" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-              <Heart className="w-5 h-5" />
-              <span className="font-medium text-sm">Wishlist</span>
-            </Link>
-          </div>
-
-          {/* Settings Section */}
-          <div>
-            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-              Settings
-            </div>
-            <Link href="/addresses" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-              <MapPin className="w-5 h-5" />
-              <span className="font-medium text-sm">Addresses</span>
-            </Link>
-
-            <Link href="/settings" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-              <Settings className="w-5 h-5" />
-              <span className="font-medium text-sm">Settings</span>
-            </Link>
-          </div>
-        </nav>
-
-        <div className="px-8 mt-auto">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors w-full"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium text-sm">Log out</span>
-          </button>
-        </div>
-      </aside>
+      <AccountSidebar activePage="orders" />
 
       {/* --- Main Content Area --- */}
       <main className="flex-1 p-6 lg:px-10 lg:py-8 overflow-y-auto">
 
         {/* Mobile Header */}
         <div className="lg:hidden flex justify-between items-center mb-8">
-          <span className="font-bold text-lg">My Orders</span>
-          <Button variant="ghost" size="icon" onClick={handleLogout}>
-            <LogOut className="h-5 w-5 text-gray-500" />
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setIsAccountDrawerOpen(true)}>
+              <Menu className="h-6 w-6 text-gray-900" />
+            </Button>
+            <span className="font-bold text-lg">My Orders</span>
+          </div>
+          <Link href="/">
+            <Home className="h-5 w-5 text-gray-900" />
+          </Link>
         </div>
 
-        <div className="max-w-6xl">
-          {/* Orders List */}
-          <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm">
-            <CardHeader className="pb-6">
-              <CardTitle className="text-xl font-bold text-gray-900">Order History</CardTitle>
-              <CardDescription className="mt-2 text-gray-500">View and track your recent orders</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
-              {loading ? (
-                <div className="flex justify-center py-16">
-                  <Loader2 className="h-10 w-10 animate-spin text-gray-400" />
-                </div>
-              ) : orders.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
-                    <Package className="h-10 w-10 text-gray-400" />
+        <div className="max-w-6xl px-4 sm:px-6">
+          
+          {/* Desktop Header Title */}
+          <div className="hidden lg:flex items-baseline justify-between mb-10 border-b border-gray-100 pb-6">
+            <div>
+              <h1 className="text-2xl font-medium text-gray-900 tracking-tight">Orders</h1>
+              <p className="text-gray-500 mt-1 text-sm">({orders.length} items)</p>
+            </div>
+          </div>
+
+          {/* Orders List - Only Cards */}
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="h-12 w-12 animate-spin text-gray-400" />
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="text-center py-20 px-4">
+              <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
+                <Package className="h-12 w-12 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">No orders yet</h3>
+              <p className="text-gray-500 mb-8 font-medium text-sm px-4">Start shopping to see your order history here.</p>
+              <Button asChild className="bg-black hover:bg-gray-800 text-white rounded-2xl shadow-lg shadow-gray-500/20 font-medium transition-all transform active:scale-95 px-8 py-3">
+                <Link href="/" className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Start Shopping
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <div key={order.orderId} className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all duration-300 relative">
+                  <div className="absolute top-4 right-4 flex flex-wrap gap-2">
+                    <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                      order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                      {order.status}
+                    </span>
+                    {order.deliveryStatus && (
+                      <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${order.deliveryStatus === 'delivered' ? 'bg-green-100 text-green-800' :
+                        order.deliveryStatus === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                        {order.deliveryStatus}
+                      </span>
+                    )}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">No orders yet</h3>
-                  <p className="text-gray-500 mb-8 font-medium">Start shopping to see your order history here.</p>
-                  <Button asChild className="bg-black hover:bg-gray-800 text-white rounded-2xl shadow-lg shadow-gray-500/20 font-medium transition-all transform active:scale-95">
-                    <Link href="/" className="flex items-center gap-2">
-                      <Package className="h-4 w-4" />
-                      Start Shopping
-                    </Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {orders.map((order) => (
-                    <div key={order.orderId} className="border border-gray-200 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 transition-all duration-300">
-                      <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
-                        <div>
-                          <div className="flex items-center gap-3">
-                            <h3 className="font-bold text-xl text-gray-900">{order.orderId}</h3>
-                            <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                              order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                'bg-blue-100 text-blue-800'
-                              }`}>
-                              {order.status}
-                            </span>
-                            {order.deliveryStatus && (
-                              <span className={`px-3 py-1.5 rounded-full text-xs font-bold capitalize ${order.deliveryStatus === 'delivered' ? 'bg-green-100 text-green-800' :
-                                order.deliveryStatus === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                                  'bg-gray-100 text-gray-800'
-                                }`}>
-                                Delivery: {order.deliveryStatus}
+                  <div className="flex flex-col justify-between gap-4 pr-32">
+                    <div className="flex items-start gap-4">
+                      {(() => {
+                        const firstItem = order.items[0];
+                        const productId = typeof firstItem.productId === 'object' ? (firstItem.productId as any)._id : firstItem.productId;
+                        const imageUrl = productImages[productId] || `https://ui-avatars.com/api/?name=${encodeURIComponent(firstItem?.name || 'Product')}&background=000&color=fff&size=64`;
+                        
+                        return (
+                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            <img 
+                              src={imageUrl} 
+                              alt={firstItem?.name || 'Product'}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        );
+                      })()}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg text-gray-900 truncate">{order.items[0]?.name || 'Product'}</h3>
+                        <p className="text-sm text-gray-500 mt-1 font-medium">
+                          {new Date(order.createdAt).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric' 
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <Separator className="my-4 bg-gray-200" />
+                  <div className="space-y-3">
+                    {order.items.slice(0, 2).map((item: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-center">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm text-gray-900 truncate">{item.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-gray-500 font-medium">Qty: {item.quantity}</span>
+                            {(item.size || item.color) && (
+                              <span className="text-xs text-gray-400">
+                                {item.size && `Size: ${item.size}`}
+                                {item.size && item.color && ' | '}
+                                {item.color && `Color: ${item.color}`}
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-500 mt-2 font-medium">
-                            Placed on {new Date(order.createdAt).toLocaleDateString()}
-                          </p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-2xl text-gray-900">Rp {order.total.toLocaleString()}</p>
-                          <p className="text-xs text-gray-500 font-medium">{order.items.length} items</p>
+                        <div className="text-right ml-4">
+                          <span className="block text-sm font-semibold text-gray-900">Rp {item.price.toLocaleString()}</span>
+                          {(order.status !== 'cancelled') && (
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="text-xs h-auto p-0 text-black mt-1 font-semibold hover:text-gray-700 transition-colors"
+                              onClick={() => openReviewModal(item)}
+                            >
+                              Rate
+                            </Button>
+                          )}
                         </div>
                       </div>
-                      <Separator className="my-6 bg-gray-200" />
-                      <div className="space-y-4">
-                        {order.items.map((item: any, idx: number) => (
-                          <div key={idx} className="flex justify-between items-center text-sm">
-                            <div>
-                              <span className="font-semibold text-gray-900">{item.name}</span>
-                              <span className="text-gray-500 ml-2 font-medium">x{item.quantity}</span>
-                              {(item.size || item.color) && (
-                                <div className="text-xs text-gray-400 mt-1">
-                                  {item.size && `Size: ${item.size}`}
-                                  {item.size && item.color && ' | '}
-                                  {item.color && `Color: ${item.color}`}
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <span className="block text-gray-700 font-semibold">Rp {item.price.toLocaleString()}</span>
-                              {(order.status !== 'cancelled') && (
-                                <Button
-                                  variant="link"
-                                  size="sm"
-                                  className="text-xs h-auto p-0 text-black mt-2 font-semibold hover:text-gray-700 transition-colors"
-                                  onClick={() => openReviewModal(item)}
-                                >
-                                  Rate Product
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-6 pt-6 flex justify-end gap-3">
-                        {order.status !== 'cancelled' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openReturnModal(order, order.items[0])}
-                            className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-300 font-medium"
-                          >
-                            Return Order
-                          </Button>
-                        )}
-                        <Button variant="outline" size="sm" asChild className="border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium">
-                          <Link href={`/orders/${order._id}`}>
-                            View Details
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                    {order.items.length > 2 && (
+                      <p className="text-xs text-gray-500 font-medium text-center py-2">
+                        +{order.items.length - 2} more items
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-4 pt-4 flex flex-col sm:flex-row gap-3">
+                    {order.status !== 'cancelled' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openReturnModal(order, order.items[0])}
+                        className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-300 font-medium w-full sm:w-auto"
+                      >
+                        Return Order
+                      </Button>
+                    )}
+                    <Button variant="outline" size="sm" asChild className="border-gray-200 text-gray-600 hover:text-black hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 font-medium w-full sm:w-auto">
+                      <Link href={`/orders/${order._id}`}>
+                        View Details
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
@@ -518,6 +508,8 @@ export default function OrdersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AccountDrawer isOpen={isAccountDrawerOpen} onOpenChange={setIsAccountDrawerOpen} activePage="orders" />
     </div>
   );
 }

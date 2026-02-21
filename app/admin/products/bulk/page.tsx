@@ -397,18 +397,6 @@ export default function BulkProductAddPage() {
                     </div>
                 </div>
             </div>
-
-            {/* Sticky Actions Bar at Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-20 flex justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-                <button
-                    onClick={handleBulkSubmit}
-                    disabled={isSubmitting}
-                    className="flex items-center gap-3 px-12 py-3 bg-black text-white rounded-sm text-base font-bold hover:bg-gray-800 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 shadow-lg"
-                >
-                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save size={20} />}
-                    <span className="ml-2">SAVE ALL PRODUCTS</span>
-                </button>
-            </div>
             <div className="h-24"></div>
         </div>
     )

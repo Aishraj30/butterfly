@@ -7,8 +7,13 @@ export function ConditionalHeader() {
     const pathname = usePathname()
     const isAdmin = pathname?.startsWith('/admin')
     const isAuthPage = pathname === '/login' || pathname === '/signup'
+    const isUserPage = pathname?.startsWith('/wishlist') || 
+                     pathname?.startsWith('/profile') || 
+                     pathname?.startsWith('/address') ||
+                     pathname?.startsWith('/account') ||
+                     pathname?.startsWith('/orders')
 
-    if (isAdmin || isAuthPage) {
+    if (isAdmin || isAuthPage || isUserPage) {
         return null
     }
 

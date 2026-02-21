@@ -40,14 +40,7 @@ export default function LookbookPage() {
     <div className="min-h-screen bg-stone-50 text-stone-800 selection:bg-stone-200 pb-24">
       
       {/* Minimalist Navigation */}
-      <nav className="absolute top-0 left-0 w-full p-6 z-20 flex justify-between items-center mix-blend-difference text-white">
-        <Link 
-          href="/about-us" 
-          className="flex items-center gap-2 text-sm uppercase tracking-widest hover:opacity-70 transition-opacity"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to About
-        </Link>
-        <span className="text-sm uppercase tracking-widest font-medium">Lookbook</span>
+      <nav className="absolute top-0 left-0 w-full p-6 z-20 flex justify-center mix-blend-difference text-white">
       </nav>
 
       {/* Hero Section */}
@@ -105,17 +98,6 @@ export default function LookbookPage() {
             </div>
           ))}
         </div>
-      </section>
-
-      {/* Bottom Call to Action */}
-      <section className="mt-32 text-center px-6">
-        <h2 className="text-3xl font-serif text-stone-900 mb-8">Experience the Collection</h2>
-        <Link 
-          href="/contact-us" 
-          className="inline-block border border-stone-900 px-10 py-4 text-sm tracking-widest uppercase hover:bg-stone-900 hover:text-white transition-colors"
-        >
-          Book a Private Fitting
-        </Link>
       </section>
 
     </div>

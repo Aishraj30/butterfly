@@ -92,14 +92,15 @@ export class ReturnRequestController {
             await connectDB();
             const url = new URL(req.url);
             const userId = url.searchParams.get('userId');
-
             let query = {};
             if (userId && Types.ObjectId.isValid(userId)) {
                 query = { userId: userId };
             }
-
-            const returns = await ReturnRequest.find(query).sort({ createdAt: -1 });
-
+            
+            const returns = await ReturnRequest.find(query)
+                .populate('userId', 'name email')
+                .sort({ createdAt: -1 });
+            
             return NextResponse.json({
                 success: true,
                 data: returns,

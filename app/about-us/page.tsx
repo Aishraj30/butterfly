@@ -25,22 +25,6 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      {/* Our Story Section */}
-      <section className="max-w-4xl mx-auto px-6 py-24 text-center">
-        <h2 className="text-3xl md:text-4xl font-serif mb-10 text-stone-900">Our Story</h2>
-        <div className="space-y-8 text-lg text-stone-600 font-light leading-relaxed">
-          <p>
-            <span className="text-3xl font-serif text-stone-900 mr-2">B</span>utterfly Couture was founded with a singular vision: to create exquisite fashion that transcends time and trends. Our journey began in the heart of the fashion world, where artistry meets innovation.
-          </p>
-          <p>
-            We believe that fashion is not just about clothing—it is about self-expression, confidence, and the art of presenting oneself to the world. Each piece in our collection tells a story, crafted with meticulous attention to detail and an unwavering commitment to quality.
-          </p>
-          <p className="text-stone-900 font-medium italic">
-            "Our name, Butterfly, symbolizes transformation, beauty, and the delicate balance between strength and grace—qualities we embed in every creation."
-          </p>
-        </div>
-      </section>
-
       {/* Philosophy Section */}
       <section className="bg-stone-50 py-24">
         <div className="max-w-7xl mx-auto px-6">
@@ -122,28 +106,6 @@ export default function AboutUsPage() {
                   <p className="text-stone-900">+1 (555) 123-4567</p>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div className="bg-stone-900 text-stone-50 p-12 lg:p-16 flex flex-col justify-center">
-            <h2 className="text-3xl font-serif mb-8 text-white">Explore More</h2>
-            <div className="space-y-4">
-              {[
-                { name: 'View the Lookbook', href: '/lookbook' },
-                { name: 'Contact the Atelier', href: '/contact-us' },
-                { name: 'Careers & Casting', href: '/careers' },
-                { name: 'Press & Media', href: '/press' },
-              ].map((link) => (
-                <Link 
-                  key={link.name}
-                  href={link.href} 
-                  className="flex items-center justify-between group py-3 border-b border-stone-700 hover:border-stone-400 transition-colors"
-                >
-                  <span className="text-lg font-light tracking-wide">{link.name}</span>
-                  <ArrowRight className="w-5 h-5 text-stone-500 group-hover:text-white group-hover:translate-x-2 transition-all duration-300" />
-                </Link>
-              ))}
             </div>
           </div>
 
