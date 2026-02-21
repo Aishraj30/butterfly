@@ -29,13 +29,13 @@ export function SalesRevenueChart() {
   const [selectedFilter, setSelectedFilter] = useState('1y')
 
   return (
-    <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-4 lg:p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-black dark:text-white">
+          <h2 className="text-base sm:text-lg font-semibold text-black dark:text-white">
             Sales Revenue
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Monthly sales overview
           </p>
         </div>
@@ -46,7 +46,7 @@ export function SalesRevenueChart() {
             <button
               key={filter.value}
               onClick={() => setSelectedFilter(filter.value)}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${selectedFilter === filter.value
+              className={`px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-all ${selectedFilter === filter.value
                   ? 'bg-white dark:bg-black text-black dark:text-white shadow-sm border border-gray-300 dark:border-gray-600'
                   : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
                 }`}
@@ -58,17 +58,17 @@ export function SalesRevenueChart() {
       </div>
 
       {/* Chart */}
-      <div className="h-64">
+      <div className="h-48 sm:h-56 lg:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={monthlyData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
             <XAxis
               dataKey="month"
-              tick={{ fill: '#6b7280', fontSize: 12 }}
+              tick={{ fill: '#6b7280', fontSize: 10 }}
               axisLine={{ stroke: '#d1d5db' }}
             />
             <YAxis
-              tick={{ fill: '#6b7280', fontSize: 12 }}
+              tick={{ fill: '#6b7280', fontSize: 10 }}
               axisLine={{ stroke: '#d1d5db' }}
               tickFormatter={(value) => `₹${(value / 1000)}k`}
             />

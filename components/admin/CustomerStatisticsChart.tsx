@@ -44,18 +44,18 @@ export function CustomerStatisticsChart() {
   }
 
   return (
-    <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-4 lg:p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-black dark:text-white">
+    <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-semibold text-black dark:text-white">
           Customers Statistics
         </h2>
-        <p className="text-sm text-gray-600">
+        <p className="text-xs sm:text-sm text-gray-600">
           Gender distribution
         </p>
       </div>
 
       {/* Donut Chart */}
-      <div className="h-64">
+      <div className="h-48 sm:h-56 lg:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

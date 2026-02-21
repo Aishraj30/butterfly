@@ -1,11 +1,12 @@
 'use client'
 
+import { DashboardHeader } from '@/components/admin/DashboardHeader'
 import { useState, useEffect } from 'react'
 import { Search, ChevronDown, Filter, Eye } from 'lucide-react'
 import { Suspense } from 'react'
 import Link from 'next/link'
 
-const Loading = () => <div className="p-8 text-center text-foreground/60">Loading orders...</div>
+const Loading = () => <div className="p-8 text-center text-gray-500">Loading orders...</div>
 
 export default function AdminOrdersPage() {
     const [searchTerm, setSearchTerm] = useState('')
@@ -51,85 +52,84 @@ export default function AdminOrdersPage() {
     )
 
     return (
-        <Suspense fallback={<Loading />}>
-            <main className="flex-1">
-                <div className="bg-secondary border-b border-border sticky top-0 z-10">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:ml-0">
-                        <h1 className="font-serif text-3xl font-bold text-primary">
+        <>
+            <DashboardHeader />
+            <div className="p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-4">
+                    <div>
+                        <h1 className="text-xl sm:text-2xl font-bold text-black dark:text-white">
                             Orders
                         </h1>
-                        <p className="text-foreground/60 text-sm mt-1">
-                            Manage and track customer orders
-                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Manage customer orders</p>
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:ml-0">
-                    {/* Toolbar */}
-                    <div className="bg-background border border-border rounded-sm p-4 mb-6 space-y-4">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="flex-1 relative">
-                                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foreground/40" />
-                                <input
-                                    type="text"
-                                    placeholder="Search by Order ID, Name, or Email..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 border border-border rounded-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
-                            </div>
-                            <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-sm hover:bg-secondary transition-colors">
-                                <Filter size={18} />
-                                Filter
-                            </button>
-                            <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-sm hover:bg-secondary transition-colors">
-                                Sort By
-                                <ChevronDown size={16} />
-                            </button>
-                        </div>
+                {/* Search and Filter */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-6 sm:mb-8">
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search orders..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent text-black dark:text-white placeholder-gray-500"
+                        />
                     </div>
+                </div>
 
-                    <div className="bg-background border border-border rounded-sm overflow-hidden text-black">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-secondary border-b border-border">
+                {/* Orders Table */}
+                <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[800px]">
+                            <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-black dark:text-white">Order ID</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-black dark:text-white">Customer</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-black dark:text-white">Date</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-black dark:text-white">Total</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-black dark:text-white">Status</th>
+                                    <th className="px-6 py-4 text-right text-sm font-semibold text-black dark:text-white">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {isLoading ? (
                                     <tr>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Order ID</th>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Customer</th>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Date</th>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Total</th>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Status</th>
-                                        <th className="px-6 py-4 text-right text-sm font-semibold text-foreground">Actions</th>
+                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                                            Loading orders...
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {isLoading ? (
-                                        <tr key="loading-row"><td colSpan={6} className="px-6 py-8 text-center text-foreground/60">Loading orders...</td></tr>
-                                    ) : filteredOrders.length === 0 ? (
-                                        <tr key="empty-row"><td colSpan={6} className="px-6 py-8 text-center text-foreground/60">No orders found.</td></tr>
-                                    ) : (
+                                ) : filteredOrders.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                                            No orders found.
+                                        </td>
+                                    </tr>
+                                ) : (
                                         filteredOrders.map((order) => (
-                                            <tr key={order._id || order.id} className="border-b border-border hover:bg-secondary/50 transition-colors">
-                                                <td className="px-6 py-4 font-medium text-foreground">{order._id || order.id}</td>
+                                            <tr key={order._id || order.id} className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                                <td className="px-6 py-4 font-medium text-black dark:text-white">{order._id || order.id}</td>
                                                 <td className="px-6 py-4">
-                                                    <p className="font-medium text-foreground">{order.customer?.name}</p>
-                                                    <p className="text-xs text-foreground/60">{order.customer?.email}</p>
+                                                    <p className="font-medium text-black dark:text-white">{order.customer?.name}</p>
+                                                    <p className="text-xs text-gray-500">{order.customer?.email}</p>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-foreground/60">
+                                                <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                                                     {new Date(order.createdAt).toLocaleDateString()}
                                                 </td>
-                                                <td className="px-6 py-4 font-semibold text-foreground">
+                                                <td className="px-6 py-4 font-semibold text-black dark:text-white">
                                                     ${order.total?.toFixed(2)}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <select
                                                         value={order.status}
-                                                        onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
-                                                        className={`px-2 py-1 text-xs font-semibold rounded-full uppercase border-none focus:ring-2 focus:ring-primary cursor-pointer ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                                                            order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                                order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                                                                    'bg-yellow-100 text-yellow-800'
-                                                            }`}
+                                                        onChange={(e) => handleStatusUpdate(order._id || order.id, e.target.value)}
+                                                        className={`px-3 py-1 text-xs font-semibold rounded-lg border-none focus:ring-2 focus:ring-black dark:focus:ring-white cursor-pointer ${
+                                                            order.status === 'delivered' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
+                                                            order.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100' :
+                                                            order.status === 'shipped' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' :
+                                                            order.status === 'processing' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
+                                                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                                                        }`}
                                                     >
                                                         <option value="pending">Pending</option>
                                                         <option value="processing">Processing</option>
@@ -139,19 +139,21 @@ export default function AdminOrdersPage() {
                                                     </select>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <button className="p-2 text-primary hover:bg-secondary rounded-sm transition-colors" title="View Details">
-                                                        <Eye size={18} />
+                                                    <button 
+                                                        className="p-2 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" 
+                                                        title="View Details"
+                                                    >
+                                                        <Eye size={16} />
                                                     </button>
                                                 </td>
                                             </tr>
                                         ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </main>
-        </Suspense>
+            </div>
+        </>
     )
 }
