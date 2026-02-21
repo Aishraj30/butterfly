@@ -56,7 +56,7 @@ export function AdminSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-white dark:bg-black text-black dark:text-white border-r border-gray-300 dark:border-gray-700 overflow-y-auto lg:static lg:translate-x-0 z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed left-0 top-0 h-screen w-64 bg-white dark:bg-black text-black dark:text-white border-r border-gray-300 dark:border-gray-700 overflow-y-auto lg:sticky lg:top-0 lg:translate-x-0 z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
       >
         <div className="p-6 border-b border-gray-300 dark:border-gray-700">

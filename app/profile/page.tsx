@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     Loader2, User, Mail, LogOut, Camera, Settings, MapPin,
-    Heart, ChevronRight, Package, Edit3, Shield, Bell, LogIn, ChevronLeft
+    Heart, ChevronRight, Package, Edit3, Shield, Bell, LogIn, ChevronLeft, Menu, X
 } from "lucide-react";
 import Image from "next/image";
 import { Inter } from "next/font/google";
@@ -29,6 +29,7 @@ export default function ProfilePage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
     const { user, logout, updateUser, isLoading: authLoading } = useAuth();
     const router = useRouter();
@@ -96,26 +97,29 @@ export default function ProfilePage() {
         <div className={`min-h-screen bg-white flex ${inter.className}`}>
 
             {/* --- Sidebar (Left Navigation) --- */}
-            <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
-                <div className="px-8 mb-8 flex items-center gap-4">
-                    <button 
-                        onClick={() => window.location.href = '/'}
-                        className="flex items-center justify-center rounded-full border-2 border-black bg-white hover:bg-gray-100 transition-all duration-200"
-                        style={{ 
-                            width: '20px', 
-                            height: '20px', 
-                            padding: '0',
-                            margin: '0',
-                            minWidth: '20px',
-                            minHeight: '20px',
-                            maxWidth: '20px',
-                            maxHeight: '20px',
-                            boxSizing: 'border-box'
-                        }}
+            <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200 lg:sticky lg:top-0 h-screen">
+                <div className="px-8 mb-8 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+                            className="lg:hidden group relative inline-flex items-center justify-center w-8 h-8 rounded-full border border-black bg-white hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-sm"
+                        >
+                            <Menu className="w-4 h-4 text-black" strokeWidth={2} />
+                        </button>
+                        <button 
+                            onClick={() => window.location.href = '/'}
+                            className="hidden lg:flex group relative inline-flex items-center justify-center w-8 h-8 rounded-full border border-black bg-white hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-sm"
+                        >
+                            <ChevronLeft className="w-4 h-4 text-black transition-transform group-hover:-translate-x-0.5" strokeWidth={2} />
+                        </button>
+                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">Profile</h1>
+                    </div>
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center justify-center w-8 h-8 rounded-full border border-black bg-white hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-sm"
                     >
-                        <ChevronLeft className="w-2.5 h-2.5 text-black" strokeWidth={3} />
+                        <LogOut className="w-4 h-4 text-black" strokeWidth={2} />
                     </button>
-                    <h1 className="text-xl font-bold text-gray-900 tracking-tight">User Profile</h1>
                 </div>
 
                 <nav className="flex-1 space-y-1">
@@ -357,6 +361,86 @@ export default function ProfilePage() {
                 </div>
 
             </main>
+
+            {/* Mobile Sidebar Overlay */}
+            {isMobileSidebarOpen && (
+                <div 
+                    className="fixed inset-0 z-50 lg:hidden"
+                    onClick={() => setIsMobileSidebarOpen(false)}
+                >
+                    <div 
+                        className="absolute left-0 top-0 h-full w-64 bg-white border-r border-gray-200 shadow-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="px-8 mb-8 flex items-center justify-between pt-12">
+                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Profile</h1>
+                            <button
+                                onClick={() => setIsMobileSidebarOpen(false)}
+                                className="flex items-center justify-center w-8 h-8 rounded-full border border-black bg-white hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-sm"
+                            >
+                                <X className="w-4 h-4 text-black" strokeWidth={2} />
+                            </button>
+                        </div>
+
+                        <nav className="flex-1 space-y-1">
+                            {/* User Info Section */}
+                            <div className="mb-6">
+                                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+                                    Account
+                                </div>
+                                {/* Active Link: Profile */}
+                                <div className="flex items-center gap-4 px-8 py-3 text-black relative bg-gray-100">
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-black rounded-r-md" />
+                                    <User className="w-5 h-5" />
+                                    <span className="font-medium text-sm">User Info</span>
+                                </div>
+                            </div>
+
+                            {/* Orders Section */}
+                            <div className="mb-6">
+                                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+                                    Shopping
+                                </div>
+                                <Link href="/orders" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                                    <Package className="w-5 h-5" />
+                                    <span className="font-medium text-sm">Orders</span>
+                                </Link>
+
+                                <Link href="/wishlist" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                                    <Heart className="w-5 h-5" />
+                                    <span className="font-medium text-sm">Wishlist</span>
+                                </Link>
+                            </div>
+
+                            {/* Settings Section */}
+                            <div>
+                                <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
+                                    Settings
+                                </div>
+                                <Link href="/addresses" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                                    <MapPin className="w-5 h-5" />
+                                    <span className="font-medium text-sm">Addresses</span>
+                                </Link>
+
+                                <Link href="/settings" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
+                                    <Settings className="w-5 h-5" />
+                                    <span className="font-medium text-sm">Settings</span>
+                                </Link>
+                            </div>
+                        </nav>
+
+                        <div className="px-8 mt-auto pb-8">
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors w-full"
+                            >
+                                <LogOut className="w-5 h-5" />
+                                <span className="font-medium text-sm">Log out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

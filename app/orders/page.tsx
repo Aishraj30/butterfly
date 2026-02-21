@@ -213,26 +213,15 @@ export default function OrdersPage() {
     <div className={`min-h-screen bg-white flex ${inter.className}`}>
 
       {/* --- Sidebar (Left Navigation) --- */}
-      <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
+      <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200 lg:sticky lg:top-0 h-screen">
         <div className="px-8 mb-8 flex items-center gap-4">
           <button
             onClick={() => window.location.href = '/'}
-            className="flex items-center justify-center rounded-full border-2 border-black bg-white hover:bg-gray-100 transition-all duration-200"
-            style={{
-              width: '20px',
-              height: '20px',
-              padding: '0',
-              margin: '0',
-              minWidth: '20px',
-              minHeight: '20px',
-              maxWidth: '20px',
-              maxHeight: '20px',
-              boxSizing: 'border-box'
-            }}
+            className="group relative inline-flex items-center justify-center w-8 h-8 rounded-full border border-black bg-white hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-sm"
           >
-            <ChevronLeft className="w-2.5 h-2.5 text-black" strokeWidth={3} />
+            <ChevronLeft className="w-4 h-4 text-black transition-transform group-hover:-translate-x-0.5" strokeWidth={2} />
           </button>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">User Profile</h1>
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Profile</h1>
         </div>
 
         <nav className="flex-1 space-y-1">
