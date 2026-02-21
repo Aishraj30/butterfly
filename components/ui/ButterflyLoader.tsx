@@ -12,6 +12,7 @@ interface ButterflyLoaderProps {
 export function ButterflyLoader({ isLoading }: ButterflyLoaderProps) {
     const [show, setShow] = useState(isLoading)
     const [isMounted, setIsMounted] = useState(false)
+    const [isInitialMount, setIsInitialMount] = useState(true)
 
     useEffect(() => {
         setIsMounted(true)
@@ -20,13 +21,17 @@ export function ButterflyLoader({ isLoading }: ButterflyLoaderProps) {
     useEffect(() => {
         if (isLoading) {
             setShow(true)
+            setIsInitialMount(false)
         } else {
-            const timer = setTimeout(() => setShow(false), 1000) // Stay visible briefly after load
-            return () => clearTimeout(timer)
+            // If isLoading is false immediately on mount, don't show at all
+            if (isInitialMount) {
+                setShow(false)
+            } else {
+                const timer = setTimeout(() => setShow(false), 1000) // Stay visible briefly after load for smooth exit
+                return () => clearTimeout(timer)
+            }
         }
-    }, [isLoading])
-
-    if (!isMounted) return null
+    }, [isLoading, isInitialMount])
 
     return (
         <AnimatePresence>
@@ -55,12 +60,14 @@ export function ButterflyLoader({ isLoading }: ButterflyLoaderProps) {
                             className="relative z-10 flex items-center justify-center"
                         >
                             <div className="w-48 h-48 flex items-center justify-center">
-                                <Lottie 
-                                    animationData={animationData}
-                                    loop={true}
-                                    autoplay={true}
-                                    style={{ width: '100%', height: '100%' }}
-                                />
+                                {isMounted && (
+                                    <Lottie
+                                        animationData={animationData}
+                                        loop={true}
+                                        autoplay={true}
+                                        style={{ width: '100%', height: '100%' }}
+                                    />
+                                )}
                             </div>
                         </motion.div>
                     </div>

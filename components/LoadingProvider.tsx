@@ -5,55 +5,55 @@ import { ButterflyLoader } from '@/components/ui/ButterflyLoader'
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
+  const [showContent, setShowContent] = useState(false)
+  const [hasMounted, setHasMounted] = useState(false)
 
-  // Handle initial page load
   useEffect(() => {
-    // Initial load - show loader for minimum duration
+    setHasMounted(true)
+    const hasSeenLoader = localStorage.getItem('hasSeenLoader')
+
+    if (hasSeenLoader) {
+      setIsLoading(false)
+      setShowContent(true)
+      return
+    }
+
+    // First time visit flow
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 2500) // Slightly increased for a better feel of the animation
-
-    // Also hide when page is fully loaded
-    if (typeof window !== 'undefined') {
-      const handleLoad = () => {
-        setTimeout(() => {
-          setIsLoading(false)
-        }, 800)
-      }
-
-      if (document.readyState === 'complete') {
-        handleLoad()
-      } else {
-        window.addEventListener('load', handleLoad)
-        return () => {
-          window.removeEventListener('load', handleLoad)
-          clearTimeout(timer)
-        }
-      }
-    }
+      setShowContent(true)
+      localStorage.setItem('hasSeenLoader', 'true')
+    }, 2000)
 
     return () => clearTimeout(timer)
   }, [])
 
-  // Route change listener removed to prevent loading animation on every page navigation.
-  // The initial load animation is handled by the useEffect above.
-
   // Handle body scroll locking while loading
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading && hasMounted) {
       document.documentElement.classList.add('loading-active')
     } else {
       document.documentElement.classList.remove('loading-active')
     }
-    return () => {
-      document.documentElement.classList.remove('loading-active')
-    }
-  }, [isLoading])
+  }, [isLoading, hasMounted])
+
+  if (!hasMounted) {
+    return (
+      <>
+        <ButterflyLoader isLoading={true} />
+        <div style={{ opacity: 0 }}>
+          {children}
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
       <ButterflyLoader isLoading={isLoading} />
-      {children}
+      <div className={showContent ? 'opacity-100 transition-opacity duration-1000' : 'opacity-0'}>
+        {showContent && children}
+      </div>
     </>
   )
 }
