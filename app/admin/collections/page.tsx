@@ -13,11 +13,14 @@ import {
   Check,
   Loader2,
   LayoutGrid,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
+import { AIBannerEnhancer } from '@/components/admin/AIBannerEnhancer'
+import { AIVariant, BannerEnhancement } from '@/lib/ai-enhancement'
 
 interface Product {
   _id: string
@@ -35,6 +38,9 @@ interface Collection {
   description?: string
   products: Product[]
   bannerImage?: string
+  aiVariants?: AIVariant[]
+  selectedVariant?: string | null
+  aiEnhanced?: boolean
   isFeatured: boolean
   isActive: boolean
 }
@@ -55,6 +61,9 @@ export default function AdminCollectionsPage() {
     slug: '',
     description: '',
     bannerImage: '',
+    aiVariants: [] as AIVariant[],
+    selectedVariant: null as string | null,
+    aiEnhanced: false,
     isFeatured: false,
     isActive: true,
     products: [] as string[]
@@ -67,6 +76,7 @@ export default function AdminCollectionsPage() {
   // Image Upload State
   const [uploadingImage, setUploadingImage] = useState(false)
   const [compressionInfo, setCompressionInfo] = useState('')
+  const [showAIEnhancer, setShowAIEnhancer] = useState(false)
 
   useEffect(() => {
     if (token) {
@@ -155,8 +165,13 @@ export default function AdminCollectionsPage() {
       if (data.success) {
         setFormData(prev => ({
           ...prev,
-          bannerImage: data.url
+          bannerImage: data.url,
+          selectedVariant: null, // Reset selected variant when new image is uploaded
+          aiEnhanced: false,
+          aiVariants: []
         }))
+        // Automatically open AI Enhancer after successful upload
+        setShowAIEnhancer(true)
       } else {
         alert(data.error || 'Failed to upload image')
       }
@@ -206,6 +221,9 @@ export default function AdminCollectionsPage() {
       slug: col.slug,
       description: col.description || '',
       bannerImage: col.bannerImage || '',
+      aiVariants: col.aiVariants || [],
+      selectedVariant: col.selectedVariant || null,
+      aiEnhanced: col.aiEnhanced || false,
       isFeatured: col.isFeatured,
       isActive: col.isActive,
       products: col.products.map(p => p._id)
@@ -236,10 +254,32 @@ export default function AdminCollectionsPage() {
       slug: '',
       description: '',
       bannerImage: '',
+      aiVariants: [],
+      selectedVariant: null,
+      aiEnhanced: false,
       isFeatured: false,
       isActive: true,
       products: []
     })
+  }
+
+  const handleAIVariantSelect = (variant: AIVariant) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedVariant: variant.url,
+      aiEnhanced: true
+    }))
+  }
+
+  const handleAIEnhancementComplete = (enhancement: BannerEnhancement) => {
+    setFormData(prev => ({
+      ...prev,
+      aiVariants: enhancement.variants,
+      aiEnhanced: true
+    }))
+    // Keep the enhancer open so they can see variants, 
+    // or close it if they already selected one.
+    // For now, let's keep it open to allow selection.
   }
 
   const toggleProduct = (productId: string) => {
@@ -317,11 +357,16 @@ export default function AdminCollectionsPage() {
 
               <div className="flex gap-6 items-center">
                 <div className="w-24 h-24 rounded-2xl bg-gray-100 overflow-hidden relative border border-gray-50">
-                  {col.bannerImage ? (
-                    <Image src={col.bannerImage} alt={col.name} fill className="object-cover" />
+                  {col.bannerImage || col.selectedVariant ? (
+                    <Image src={col.selectedVariant || col.bannerImage || ''} alt={col.name} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">
                       <ImageIcon size={32} />
+                    </div>
+                  )}
+                  {col.aiEnhanced && (
+                    <div className="absolute top-2 right-2 bg-white/90 p-1 rounded-full shadow-sm">
+                      <Sparkles size={12} className="text-purple-600" />
                     </div>
                   )}
                 </div>
@@ -448,6 +493,16 @@ export default function AdminCollectionsPage() {
                       Remove
                     </button>
                   )}
+                  {formData.bannerImage && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAIEnhancer(true)}
+                      className="px-4 py-2 bg-purple-600 text-white hover:bg-purple-700 rounded-xl transition-colors text-sm font-bold flex items-center gap-2"
+                    >
+                      <Sparkles size={16} />
+                      AI Enhance
+                    </button>
+                  )}
                 </div>
 
                 {compressionInfo && (
@@ -457,8 +512,19 @@ export default function AdminCollectionsPage() {
                 )}
 
                 {formData.bannerImage && (
-                  <div className="relative w-full h-40 rounded-2xl bg-gray-100 overflow-hidden border border-gray-50">
-                    <Image src={formData.bannerImage} alt="Banner Preview" fill className="object-cover" />
+                  <div className="relative w-full h-40 rounded-2xl bg-gray-100 overflow-hidden border border-gray-50 group">
+                    <Image
+                      src={formData.selectedVariant || formData.bannerImage}
+                      alt="Banner Preview"
+                      fill
+                      className="object-cover transition-all"
+                    />
+                    {formData.aiEnhanced && (
+                      <div className="absolute top-3 right-3 bg-white/90 px-2 py-1 rounded-full shadow-lg flex items-center gap-1">
+                        <Sparkles size={12} className="text-purple-600" />
+                        <span className="text-[10px] font-bold text-purple-600 uppercase">AI Enhanced</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -583,8 +649,45 @@ export default function AdminCollectionsPage() {
             </div>
           </div>
         </div>
-      )
-      }
+      )}
+
+      {/* AI Enhancement Modal */}
+      {showAIEnhancer && formData.bannerImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <button
+              onClick={() => setShowAIEnhancer(false)}
+              className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-all"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="mb-6">
+              <h2 className="text-2xl font-serif font-bold text-[#003300] flex items-center gap-2">
+                <Sparkles className="text-purple-600" />
+                AI Banner Enhancement
+              </h2>
+              <p className="text-gray-500 text-sm">Transform your collection banner with high-end AI styling</p>
+            </div>
+
+            <AIBannerEnhancer
+              originalImage={formData.bannerImage}
+              collectionName={formData.name}
+              onVariantSelect={handleAIVariantSelect}
+              onEnhancementComplete={handleAIEnhancementComplete}
+            />
+
+            <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
+              <button
+                onClick={() => setShowAIEnhancer(false)}
+                className="px-8 py-3 bg-[#003300] text-white rounded-xl font-bold hover:shadow-lg transition-all"
+              >
+                Apply Selection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx global>{`
       .custom-scrollbar::-webkit-scrollbar {

@@ -77,7 +77,7 @@ export default async function Home() {
               subtitle={col.description || "Discover our latest premium collection"}
               buttonText="Explore Collection"
               buttonLink={`/collections/${col.slug}`}
-              backgroundImage={col.bannerImage || "/pic1.jpg"}
+              backgroundImage={col.displayImage || col.bannerImage || "/pic1.jpg"}
               showScrollIndicator={index < collections.length - 1}
               isFirst={index === 0}
             />
