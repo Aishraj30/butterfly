@@ -253,8 +253,8 @@ export default function CollectionPage() {
                 backgroundImage={collectionDetails?.bannerImage || collectionInfo.image}
             />
 
-            {/* --- MOBILE FILTER BAR (Top Sticky) --- */}
-            <div className="sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between md:hidden shadow-sm">
+            {/* --- MOBILE FILTER BAR (Non-Sticky) --- */}
+            <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between md:hidden shadow-sm">
                 {/* Item Count */}
                 <span className="text-xs font-medium text-black">
                     {filteredProducts.length} Items
@@ -350,8 +350,9 @@ export default function CollectionPage() {
                             <p className="text-gray-600 text-lg mb-4">No products found matching your filters</p>
                             <button
                                 onClick={() => {
-                                    setFilteredProducts(products)
-                                    setIsFilterOpen(true)
+                                    setFilteredProducts(products);
+                                    setSelectedSizes([]);
+                                    setCurrentPage(1);
                                 }}
                                 className="inline-flex items-center justify-center px-6 py-2 bg-black text-white hover:bg-gray-800 transition-colors duration-300 text-sm tracking-wide uppercase"
                             >
@@ -410,21 +411,36 @@ export default function CollectionPage() {
                 )}
             </div>
 
-            {/* --- MOBILE FLOATING FILTER BUTTON (Bottom Sticky) --- */}
-            <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center md:hidden pointer-events-none">
+            {/* --- MOBILE FILTER BUTTON (Fixed Bottom - Just Button) --- */}
+            <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center md:hidden pointer-events-none">
                 <button
                     onClick={() => setIsFilterOpen(true)}
-                    className="pointer-events-auto bg-white text-black px-8 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-gray-100 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors"
+                    className="pointer-events-auto bg-white text-black px-10 py-4 shadow-lg border border-gray-300 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors"
                 >
                     Filter & Sort
                 </button>
             </div>
+
+            {/* Add padding to prevent content from being hidden behind fixed button */}
+            <div className="pb-20 md:pb-0"></div>
 
             {/* Filter Drawer */}
             <FilterDrawer
                 isOpen={isFilterOpen}
                 onClose={() => setIsFilterOpen(false)}
                 onApplyFilters={handleFilterApply}
+                onClearFilters={() => {
+                    setFilteredProducts(products);
+                    setSelectedSizes([]);
+                    setIsFilterOpen(false);
+                }}
+                initialFilters={{
+                    sizes: selectedSizes,
+                    colors: [],
+                    genders: [],
+                    priceRange: { min: null, max: null },
+                    sortBy: 'name'
+                }}
             />
         </main>
     )

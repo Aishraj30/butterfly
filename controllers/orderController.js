@@ -103,7 +103,7 @@ export class OrderController {
                 name: customer.name,
                 email: customer.email,
                 subject: `Order Confirmation: ${order.orderId}`,
-                message: `Your order has been received. Order ID: ${order.orderId}. Total: IDR ${order.total.toLocaleString()}`,
+                message: `Your order has been received. Order ID: ${order.orderId}. Total: INR ${order.total.toLocaleString()}`,
             });
 
             return NextResponse.json({

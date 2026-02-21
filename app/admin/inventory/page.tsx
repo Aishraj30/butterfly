@@ -232,7 +232,7 @@ export default function InventoryPage() {
                                         <TableCell>
                                             <div className="space-y-1">
                                                 <div className="text-[13px] font-black text-gray-900 tabular-nums">
-                                                    IDR {item.costPrice?.toLocaleString() || '0'}
+                                                    INR {item.costPrice?.toLocaleString() || '0'}
                                                 </div>
                                                 <div className="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Cost Price</div>
                                             </div>

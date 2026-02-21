@@ -1,11 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Trash2, Save, ArrowLeft, Loader2, Upload, ImageIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { compressImage, isValidImageFile } from '@/lib/imageCompression'
+
+// Stable ID generator
+let idCounter = 0
+const generateStableId = () => {
+    idCounter += 1
+    return `temp-${idCounter}-${idCounter.toString(36).padStart(4, '0')}`
+}
 
 interface BulkProduct {
     tempId: string
@@ -47,7 +54,7 @@ export default function BulkProductAddPage() {
 
     const [products, setProducts] = useState<BulkProduct[]>([
         {
-            tempId: Math.random().toString(36).substr(2, 9),
+            tempId: generateStableId(),
             name: '',
             brand: 'Butterfly Couture',
             price: 0,
@@ -94,7 +101,7 @@ export default function BulkProductAddPage() {
         setProducts([
             ...products,
             {
-                tempId: Math.random().toString(36).substr(2, 9),
+                tempId: generateStableId(),
                 name: '',
                 brand: 'Butterfly Couture',
                 price: 0,

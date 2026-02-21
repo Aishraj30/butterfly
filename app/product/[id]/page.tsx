@@ -413,7 +413,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             </div>
 
                             <div className="mb-6">
-                                <p className="text-2xl font-bold text-black">IDR {(product.salePrice || product.price).toLocaleString()}</p>
+                                <p className="text-2xl font-bold text-black">INR {(product.salePrice || product.price).toLocaleString()}</p>
                             </div>
 
                             <div className="flex items-center gap-2">
@@ -622,7 +622,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                                 {recProduct.name}
                                             </h3>
                                             <p className="font-sans text-sm font-bold text-black">
-                                                IDR {(recProduct.salePrice || recProduct.price).toLocaleString()}
+                                                INR {(recProduct.salePrice || recProduct.price).toLocaleString()}
                                             </p>
                                         </div>
                                     </div>

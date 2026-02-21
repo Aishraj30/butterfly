@@ -17,6 +17,10 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
                 wheelMultiplier: 1,
                 touchMultiplier: 2,
                 infinite: false,
+                prevent: (node) => {
+                    // Prevent Lenis from handling scroll on elements with data-lenis-prevent
+                    return node?.hasAttribute?.('data-lenis-prevent') || false;
+                },
             }}
         >
             {children}

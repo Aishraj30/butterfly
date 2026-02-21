@@ -77,7 +77,7 @@ export function ProductCard({ product, layout = '4' }: ProductCardProps) {
                         {product.name}
                     </h3>
                     <span className="text-[11px] font-bold text-black whitespace-nowrap">
-                        IDR {price.toLocaleString()}
+                        INR {price.toLocaleString()}
                     </span>
                 </div>
                 <div className="flex items-center justify-between">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { CatalogBanner } from '@/components/catalog/CatalogBanner'
-import { Pagination } from '@/components/ui/PaginationComponent'
+import { LoadMore } from '@/components/ui/LoadMoreComponent'
 
 const ITEMS_PER_PAGE = 12
 
@@ -36,11 +36,18 @@ interface Product {
 export default function NewArrivalsPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
-    const [currentPage, setCurrentPage] = useState(1)
+    const [displayedItemCount, setDisplayedItemCount] = useState(ITEMS_PER_PAGE)
 
     useEffect(() => {
         fetchNewArrivals()
     }, [])
+
+    const hasMoreItems = displayedItemCount < products.length
+    const displayedProducts = products.slice(0, displayedItemCount)
+
+    const handleLoadMore = () => {
+        setDisplayedItemCount(prev => Math.min(prev + ITEMS_PER_PAGE, products.length))
+    }
 
     const fetchNewArrivals = async () => {
         try {
@@ -84,7 +91,7 @@ export default function NewArrivalsPage() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {products.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((product) => (
+                            {displayedProducts.map((product) => (
                                 <Link
                                     key={product.id}
                                     href={`/product/${product.id}`}
@@ -136,13 +143,10 @@ export default function NewArrivalsPage() {
                             ))}
                         </div>
 
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={Math.ceil(products.length / ITEMS_PER_PAGE)}
-                            onPageChange={(page) => {
-                                setCurrentPage(page)
-                                window.scrollTo({ top: 0, behavior: 'smooth' })
-                            }}
+                        <LoadMore
+                            onLoadMore={handleLoadMore}
+                            isLoading={false}
+                            hasMore={hasMoreItems}
                             className="mt-12"
                         />
                     </>

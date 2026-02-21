@@ -76,7 +76,7 @@ export default function CartPage() {
                 <div className="mt-auto flex justify-between items-end">
                   <div className="space-y-2">
                     <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Price</p>
-                    <p className="text-xl font-medium text-gray-900">IDR {typeof item.price === 'string' ? parseFloat(item.price).toLocaleString() : item.price?.toLocaleString()}</p>
+                    <p className="text-xl font-medium text-gray-900">INR {typeof item.price === 'string' ? parseFloat(item.price).toLocaleString() : item.price?.toLocaleString()}</p>
                   </div>
 
                   <div className="flex items-center border border-gray-200 bg-white rounded-sm overflow-hidden">
@@ -112,20 +112,20 @@ export default function CartPage() {
             <div className="space-y-6 mb-10 text-sm">
               <div className="flex justify-between text-gray-500">
                 <span className="uppercase tracking-widest font-bold text-xs">Subtotal</span>
-                <span className="font-medium">IDR {cart.subtotal.toLocaleString()}</span>
+                <span className="font-medium">INR {cart.subtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-gray-500">
                 <span className="uppercase tracking-widest font-bold text-xs">Shipping</span>
-                <span className="font-medium">IDR {cart.shipping.toLocaleString()}</span>
+                <span className="font-medium">INR {cart.shipping.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-gray-500">
                 <span className="uppercase tracking-widest font-bold text-xs">Tax</span>
-                <span className="font-medium">IDR {cart.tax.toLocaleString()}</span>
+                <span className="font-medium">INR {cart.tax.toLocaleString()}</span>
               </div>
 
               <div className="pt-6 border-t border-gray-100 flex justify-between items-end">
                 <span className="font-sans text-3xl text-gray-900">TOTAL</span>
-                <span className="text-3xl font-bold text-black">IDR {cart.total.toLocaleString()}</span>
+                <span className="font-bold text-xl">INR {cart.total.toLocaleString()}</span>
               </div>
             </div>
 
