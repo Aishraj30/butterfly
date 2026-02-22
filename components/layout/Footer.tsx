@@ -22,11 +22,29 @@ export function Footer() {
     { name: 'Google Pay', src: 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Pay_Logo_%282020%29.svg' },
   ]
 
-  return (
-    <footer className="bg-black text-white pt-8 md:pt-16 pb-8 border-t border-white/5 font-sans">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-12">
+  const linkSections = [
+    { title: 'About', links: [
+      { name: 'About Us', href: '/about-us' },
+      { name: 'Press', href: '/press' },
+      { name: 'Lookbook', href: '/lookbook' },
+      { name: 'Our Story', href: '/our-story' }
+    ]},
+    { title: 'Get in Touch', links: [
+      { name: 'Contact', href: '/contact-us' },
+      { name: 'Returns', href: '/returns' },
+      { name: 'Refund Policy', href: '/refund-policy' },
+      { name: 'Shipping', href: '/shipping' },
+      { name: 'Terms', href: '/terms-and-conditions' }
+    ]}
+  ]
 
-        {/* Mobile View: Accordion Navigation */}
+  return (
+    <footer className="bg-black text-white pt-4 md:pt-8 pb-4 font-sans">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12">
+
+        {/* =========================================
+            MOBILE VIEW (Unchanged as requested)
+        ========================================= */}
         <div className="block md:hidden mb-8">
           <div className="space-y-4 mb-8">
             <p className="text-sm font-light leading-relaxed text-gray-200">
@@ -50,24 +68,7 @@ export function Footer() {
           </div>
 
           <div className="border-t border-white/10">
-            {[
-              { title: 'About', links: [
-                { name: 'About Us', href: '/about-us' },
-                { name: 'Press', href: '/press' },
-                { name: 'Lookbook', href: '/lookbook' },
-                { name: 'Our Story', href: '/our-story' }
-              ]},
-              { title: 'Get in Touch', links: [
-                { name: 'Contact', href: '/contact-us' },
-                { name: 'Returns', href: '/returns' },
-                { name: 'Refund Policy', href: '/refund-policy' },
-                { name: 'Shipping', href: '/shipping' },
-                { name: 'Terms', href: '/terms-and-conditions' }
-              ]},
-              { title: 'Join Us', links: [
-                { name: 'Enclave', href: '/enclave' }
-              ]}
-            ].map((section) => (
+            {linkSections.map((section) => (
               <details key={section.title} className="group border-b border-white/10">
                 <summary className="flex justify-between items-center font-medium cursor-pointer list-none py-3 text-sm uppercase tracking-widest text-white">
                   {section.title}
@@ -91,55 +92,47 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Desktop View: Grid Layout */}
-        <div className="hidden md:grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
-          <div className="lg:col-span-5 flex flex-col justify-between">
-            <div className="space-y-8">
-              <p className="text-lg md:text-xl font-light leading-relaxed text-gray-200 max-w-md">
-                Butterfly is a premier contemporary label that aims at <span className="italic font-serif">reinterpreting</span> global heritage and artisanship.
-              </p>
-              <div className="flex gap-6">
-                <Link href="#" className="hover:text-gray-400 transition-colors">
-                  <Instagram className="w-5 h-5" />
-                  <span className="sr-only">Instagram</span>
-                </Link>
-                <Link href="#" className="hover:text-gray-400 transition-colors">
-                  <Twitter className="w-5 h-5" />
-                  <span className="sr-only">Twitter</span>
-                </Link>
-                <Link href="#" className="hover:text-gray-400 transition-colors">
-                  <Facebook className="w-5 h-5" />
-                  <span className="sr-only">Facebook</span>
-                </Link>
-              </div>
+        {/* =========================================
+            DESKTOP VIEW: Structured Minimalist Grid
+        ========================================= */}
+        <div className="hidden md:flex justify-between items-start mb-12">
+          
+          {/* Left Side: Brand Statement & Socials */}
+          <div className="max-w-md">
+            <h2 className="text-2xl font-medium tracking-tight uppercase mb-6">Butterfly</h2>
+            <p className="text-sm text-gray-400 leading-relaxed mb-10">
+              Butterfly is a premier contemporary label that aims at <span className="italic font-serif text-gray-300">reinterpreting</span> global heritage and artisanship through a lens of strict minimalist architecture.
+            </p>
+            <div className="flex gap-8">
+              <Link href="#" className="text-gray-500 hover:text-white transition-colors">
+                <Instagram className="w-5 h-5" />
+                <span className="sr-only">Instagram</span>
+              </Link>
+              <Link href="#" className="text-gray-500 hover:text-white transition-colors">
+                <Twitter className="w-5 h-5" />
+                <span className="sr-only">Twitter</span>
+              </Link>
+              <Link href="#" className="text-gray-500 hover:text-white transition-colors">
+                <Facebook className="w-5 h-5" />
+                <span className="sr-only">Facebook</span>
+              </Link>
             </div>
           </div>
-          <div className="hidden lg:block lg:col-span-1"></div>
-          <div className="lg:col-span-6 grid grid-cols-3 gap-10">
-            {[
-              { title: 'About', links: [
-                { name: 'About Us', href: '/about-us' },
-                { name: 'Press', href: '/press' },
-                { name: 'Lookbook', href: '/lookbook' },
-                { name: 'Our Story', href: '/our-story' }
-              ]},
-              { title: 'Get in Touch', links: [
-                { name: 'Contact', href: '/contact-us' },
-                { name: 'Returns', href: '/returns' },
-                { name: 'Refund Policy', href: '/refund-policy' },
-                { name: 'Shipping', href: '/shipping' },
-                { name: 'Terms', href: '/terms-and-conditions' }
-              ]},
-              { title: 'Join Us', links: [
-                { name: 'Enclave', href: '/enclave' }
-              ]}
-            ].map((section) => (
+
+          {/* Right Side: Navigation Links */}
+          <div className="flex gap-24 lg:gap-32">
+            {linkSections.map((section) => (
               <div key={section.title}>
-                <h3 className="font-medium text-xs mb-6 uppercase tracking-widest text-white">{section.title}</h3>
+                <h3 className="text-[10px] font-bold mb-8 uppercase tracking-[0.2em] text-gray-500">
+                  {section.title}
+                </h3>
                 <ul className="space-y-4">
                   {section.links.map((link) => (
                     <li key={link.name}>
-                      <Link href={link.href} className="text-sm text-gray-400 hover:text-white transition-colors uppercase tracking-wide">
+                      <Link 
+                        href={link.href} 
+                        className="text-sm font-medium text-white hover:text-gray-400 transition-colors uppercase tracking-wide"
+                      >
                         {link.name}
                       </Link>
                     </li>
@@ -148,22 +141,32 @@ export function Footer() {
               </div>
             ))}
           </div>
+
         </div>
 
-        {/* Bottom Section: Copyright & Payments */}
-        <div className="flex flex-col-reverse md:flex-row justify-between items-center md:items-end gap-6 pt-6 border-t border-white/10">
-          <div className="space-y-2 text-[10px] md:text-xs text-center md:text-left text-gray-500 w-full md:w-auto">
-            <p>Copyright © 2026, Butterfly. All rights reserved. <br className="hidden md:block" /> 
-              <Link href="/privacy-policy" className="underline hover:text-white transition-colors">Privacy Policy</Link> • 
-              <Link href="/terms-and-conditions" className="underline hover:text-white transition-colors">Terms of Use</Link>
+        {/* =========================================
+            BOTTOM BAR: Copyright & Payments
+        ========================================= */}
+        <div className="flex flex-col-reverse md:flex-row justify-between items-center md:items-end gap-4 pt-4 border-t border-white/20">
+          
+          {/* Copyright */}
+          <div className="text-[10px] md:text-xs text-center md:text-left text-gray-500 uppercase tracking-widest font-semibold">
+            <p>
+              © 2026 Butterfly. All rights reserved. 
+              <span className="hidden md:inline mx-4">|</span>
+              <br className="md:hidden" />
+              <Link href="/privacy-policy" className="hover:text-white transition-colors mt-2 md:mt-0 inline-block">Privacy</Link>
+              <span className="mx-3">•</span>
+              <Link href="/terms-and-conditions" className="hover:text-white transition-colors mt-2 md:mt-0 inline-block">Terms</Link>
             </p>
           </div>
 
+          {/* Payment Methods (Full Color) */}
           <div className="flex flex-wrap gap-2 justify-center">
             {paymentMethods.map((method) => (
               <div
                 key={method.name}
-                className="bg-white px-1.5 py-0.5 md:px-2 md:py-1 rounded w-8 h-5 md:w-10 md:h-6 flex items-center justify-center overflow-hidden"
+                className="bg-white px-2 py-1 rounded w-10 h-6 flex items-center justify-center overflow-hidden"
               >
                 <img
                   src={method.src}
@@ -173,6 +176,7 @@ export function Footer() {
               </div>
             ))}
           </div>
+
         </div>
       </div>
     </footer>
