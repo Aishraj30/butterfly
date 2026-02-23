@@ -46,7 +46,7 @@ export default function LookbookPage() {
         <p className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400 mb-6">
           Campaigns
         </p>
-        <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-medium tracking-tighter uppercase leading-none">
+        <h1 className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tighter uppercase leading-none">
           Visual Index
         </h1>
       </header>

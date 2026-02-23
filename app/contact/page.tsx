@@ -3,7 +3,7 @@
 import React from "react"
 
 import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
+import Footer from '@/components/layout/Footer'
 import { Mail, Phone, MapPin, Clock } from 'lucide-react'
 import { submitContactForm } from '@/lib/actions'
 import { useState } from 'react'
@@ -165,8 +165,8 @@ export default function ContactPage() {
                   <Phone className="text-primary mt-1 flex-shrink-0" size={24} />
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Phone</h3>
-                    <p className="text-foreground/70">+1 (555) 123-4567</p>
-                    <p className="text-sm text-foreground/60 mt-1">Monday - Friday: 9am - 6pm EST</p>
+                    <p className="text-foreground/70">6009360597</p>
+                    <p className="text-sm text-foreground/60 mt-1">Monday - Friday: 9am - 6pm IST</p>
                   </div>
                 </div>
               </div>
@@ -178,9 +178,10 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Address</h3>
                     <p className="text-foreground/70">
-                      123 Fashion Avenue<br />
-                      New York, NY 10001<br />
-                      United States
+                      Opposite Mattei Building, KFC<br />
+                      Nongthymmai, Nongkhyriem<br />
+                      Shillong (Meghalaya) 793014<br />
+                      India
                     </p>
                   </div>
                 </div>
