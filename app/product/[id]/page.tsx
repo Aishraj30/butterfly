@@ -111,6 +111,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         setTouchEnd(e.targetTouches[0].clientX);
     };
 
+    const allImages = product ? (product.images || [product.imageUrl, product.image].filter(Boolean)) : [];
+    const allMedia = product ? [
+        ...allImages.map(url => ({ type: 'image', url })),
+        ...(product.videoUrl ? [{ type: 'video', url: product.videoUrl }] : [])
+    ] : [];
+
     const onTouchEnd = () => {
         if (!touchStart || !touchEnd) return;
 
@@ -118,7 +124,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         const isLeftSwipe = distance > minSwipeDistance;
         const isRightSwipe = distance < -minSwipeDistance;
 
-        if (isLeftSwipe && selectedImageIndex < (product?.images?.length || 0)) {
+        if (isLeftSwipe && selectedImageIndex < (allMedia.length - 1)) {
             setSelectedImageIndex(prev => prev + 1);
         }
         if (isRightSwipe && selectedImageIndex > 0) {
@@ -325,7 +331,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         );
     }
 
-    const allImages = product.images || [product.imageUrl, product.image].filter(Boolean);
     const displayColors = product.colors && product.colors.length > 0
         ? product.colors.join(', ')
         : product.color || 'N/A';
@@ -345,12 +350,23 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                 onTouchMove={onTouchMove}
                                 onTouchEnd={onTouchEnd}
                             >
-                                {allImages[selectedImageIndex] ? (
-                                    <img
-                                        src={allImages[selectedImageIndex]}
-                                        alt={`${product.name} ${selectedImageIndex + 1}`}
-                                        className="w-full h-full object-cover object-top"
-                                    />
+                                {allMedia[selectedImageIndex] ? (
+                                    allMedia[selectedImageIndex].type === 'image' ? (
+                                        <img
+                                            src={allMedia[selectedImageIndex].url}
+                                            alt={`${product.name} ${selectedImageIndex + 1}`}
+                                            className="w-full h-full object-cover object-top"
+                                        />
+                                    ) : (
+                                        <video
+                                            src={allMedia[selectedImageIndex].url}
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            className="w-full h-full object-cover object-top"
+                                        />
+                                    )
                                 ) : (
                                     <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
                                 )}
@@ -362,9 +378,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                     </div>
                                 )}
 
-                                {allImages.length > 1 && (
+                                {allMedia.length > 1 && (
                                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                                        {allImages.map((_, index) => (
+                                        {allMedia.map((_, index) => (
                                             <button
                                                 key={index}
                                                 onClick={() => setSelectedImageIndex(index)}
@@ -378,12 +394,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
                         {/* Desktop Images */}
                         <div className="hidden lg:block space-y-0">
-                            {allImages.map((image, index) => (
+                            {allMedia.map((media, index) => (
                                 <div key={index} className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
-                                    {image ? (
-                                        <img src={image} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover object-top" />
+                                    {media.type === 'image' ? (
+                                        <img src={media.url} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover object-top" />
                                     ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
+                                        <video
+                                            src={media.url}
+                                            autoPlay
+                                            muted
+                                            loop
+                                            playsInline
+                                            className="w-full h-full object-cover object-top"
+                                        />
                                     )}
                                     {index === 0 && (product.isNew || product.onSale) && (
                                         <div className="absolute top-4 left-4 z-10">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Product } from '@/lib/products';
 
@@ -12,10 +12,22 @@ interface ProductCardProps {
 export function ProductCard({ product, layout = '4' }: ProductCardProps) {
     const [videoLoaded, setVideoLoaded] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     const productId = product._id || product.id;
     const imageUrl = product.images?.[0] || product.image || product.imageUrl;
     const price = product.salePrice || product.price;
+
+    useEffect(() => {
+        if (videoRef.current) {
+            if (isHovered) {
+                videoRef.current.play().catch(() => { });
+            } else {
+                videoRef.current.pause();
+                videoRef.current.currentTime = 0;
+            }
+        }
+    }, [isHovered]);
 
     return (
         <Link
@@ -33,7 +45,7 @@ export function ProductCard({ product, layout = '4' }: ProductCardProps) {
                             src={imageUrl}
                             alt={product.name}
                             className={`w-full h-full object-cover object-center transition-all duration-700 ${isHovered ? 'scale-105' : 'scale-100'
-                                } ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}
+                                } ${isHovered && videoLoaded ? 'opacity-0' : 'opacity-100'}`}
                         />
                     ) : (
                         <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100" />
@@ -42,13 +54,14 @@ export function ProductCard({ product, layout = '4' }: ProductCardProps) {
 
                 {/* Product Video (Portrait) */}
                 {product.videoUrl && (
-                    <div className={`absolute inset-0 z-10 transition-opacity duration-1000 ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className={`absolute inset-0 z-10 transition-opacity duration-300 ${isHovered && videoLoaded ? 'opacity-100' : 'opacity-0'}`}>
                         <video
+                            ref={videoRef}
                             src={product.videoUrl}
-                            autoPlay
                             muted
                             loop
                             playsInline
+                            preload="auto"
                             onCanPlay={() => setVideoLoaded(true)}
                             className="w-full h-full object-cover"
                         />
