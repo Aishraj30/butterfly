@@ -11,12 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Loader2, MapPin, Pencil, Plus, User, Package,
-  Heart, Settings, LogOut, Menu, X
+  Heart, Settings, LogOut, Menu, ChevronLeft, Home
 } from "lucide-react";
-import { motion, AnimatePresence } from 'framer-motion';
 import { Inter } from "next/font/google";
 
 import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
+import { AccountDrawer } from "@/components/account/AccountDrawer";
+import { AccountSidebar } from "@/components/account/AccountSidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,7 +38,6 @@ export default function AddressesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAccountDrawerOpen, setIsAccountDrawerOpen] = useState(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
 
   // Initialize form
   const [form, setForm] = useState<AddressForm>({
@@ -72,14 +72,6 @@ export default function AddressesPage() {
     }
   }, [user, authLoading, router]);
 
-  // Body Scroll Lock for Mobile Drawer
-  useEffect(() => {
-    if (isAccountDrawerOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-  }, [isAccountDrawerOpen]);
 
   const handleLogout = () => {
     logout();
@@ -144,69 +136,7 @@ export default function AddressesPage() {
     <div className={`min-h-screen bg-white flex ${inter.className}`}>
 
       {/* --- Desktop Sidebar --- */}
-      <aside className="hidden lg:flex flex-col w-64 pt-12 pb-8 px-0 border-r border-gray-200">
-        <div className="px-8 mb-8 flex items-center gap-4">
-          <BackToHomeButton variant="elegant" className="h-12 w-12 p-0 justify-center rounded-full border-2 border-black shadow-none bg-white hover:bg-gray-100 text-black" />
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Profile</h1>
-        </div>
-
-        <nav className="flex-1 space-y-1">
-          {/* User Info Section */}
-          <div className="mb-6">
-            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-              Account
-            </div>
-            <Link href="/profile" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-              <User className="w-5 h-5" />
-              <span className="font-medium text-sm">User Info</span>
-            </Link>
-          </div>
-
-          {/* Orders Section */}
-          <div className="mb-6">
-            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-              Shopping
-            </div>
-            <Link href="/orders" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-              <Package className="w-5 h-5" />
-              <span className="font-medium text-sm">Orders</span>
-            </Link>
-
-            <Link href="/wishlist" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-              <Heart className="w-5 h-5" />
-              <span className="font-medium text-sm">Wishlist</span>
-            </Link>
-          </div>
-
-          {/* Settings Section */}
-          <div>
-            <div className="px-8 py-2 text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-2">
-              Settings
-            </div>
-            {/* Active Link: Addresses */}
-            <div className="flex items-center gap-4 px-8 py-3 text-black relative bg-gray-100">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-black rounded-r-md" />
-              <MapPin className="w-5 h-5" />
-              <span className="font-medium text-sm">Addresses</span>
-            </div>
-
-            <Link href="/settings" className="flex items-center gap-4 px-8 py-3 text-gray-500 hover:text-gray-700 transition-colors">
-              <Settings className="w-5 h-5" />
-              <span className="font-medium text-sm">Settings</span>
-            </Link>
-          </div>
-        </nav>
-
-        <div className="px-8 mt-auto">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-4 text-gray-500 hover:text-gray-700 transition-colors w-full"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium text-sm">Log out</span>
-          </button>
-        </div>
-      </aside>
+      <AccountSidebar activePage="addresses" />
 
       {/* --- Main Content Area --- */}
       <main className="flex-1 p-6 lg:px-10 lg:py-8 overflow-y-auto">
@@ -219,9 +149,9 @@ export default function AddressesPage() {
             </Button>
             <span className="font-bold text-lg">My Addresses</span>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleLogout}>
-            <LogOut className="h-5 w-5 text-gray-500" />
-          </Button>
+          <Link href="/">
+            <Home className="h-5 w-5 text-gray-900" />
+          </Link>
         </div>
 
         <div className="max-w-6xl">
@@ -407,76 +337,7 @@ export default function AddressesPage() {
         </div>
       </main>
 
-      {/* Account Management Drawer (Mobile) */}
-      <AnimatePresence>
-        {isAccountDrawerOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsAccountDrawerOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] lg:hidden"
-            />
-
-            {/* Drawer Panel */}
-            <motion.div
-              ref={drawerRef}
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 h-full w-full max-w-sm bg-white/95 backdrop-blur-xl border-r border-gray-200 shadow-2xl z-[101] flex flex-col lg:hidden"
-            >
-              <div className="p-6 flex items-center justify-between border-b border-gray-100">
-                <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent uppercase tracking-widest">Account</h2>
-                <button
-                  onClick={() => setIsAccountDrawerOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-all duration-300"
-                >
-                  <X className="h-6 w-6 text-gray-500" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6">
-                <nav className="space-y-2">
-                  {[
-                    { href: '/profile', icon: User, label: 'Profile' },
-                    { href: '/orders', icon: Package, label: 'Orders' },
-                    { href: '/wishlist', icon: Heart, label: 'Wishlist' },
-                    { href: '/addresses', icon: MapPin, label: 'Addresses', active: true },
-                    { href: '/settings', icon: Settings, label: 'Settings' }
-                  ].map((link) => (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      onClick={() => setIsAccountDrawerOpen(false)}
-                      className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${link.active
-                        ? 'bg-black text-white shadow-md'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                    >
-                      <link.icon className="h-5 w-5" strokeWidth={link.active ? 2.5 : 2} />
-                      <span className="text-xs font-bold uppercase tracking-[0.2em]">{link.label}</span>
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-
-              <div className="p-6 border-t border-gray-100">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-3 bg-red-50 text-red-600 py-4 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-100 transition-all duration-300"
-                >
-                  <LogOut size={16} strokeWidth={2.5} />
-                  Sign Out
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <AccountDrawer isOpen={isAccountDrawerOpen} onOpenChange={setIsAccountDrawerOpen} activePage="addresses" />
     </div>
   );
 }

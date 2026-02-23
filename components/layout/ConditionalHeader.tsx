@@ -6,15 +6,14 @@ import { Header } from './Header'
 export function ConditionalHeader() {
     const pathname = usePathname()
     const isAdmin = pathname?.startsWith('/admin')
+    const isAuthPage = pathname === '/login' || pathname === '/signup'
+    const isUserPage = pathname?.startsWith('/wishlist') || 
+                     pathname?.startsWith('/profile') || 
+                     pathname?.startsWith('/address') ||
+                     pathname?.startsWith('/account') ||
+                     pathname?.startsWith('/orders')
 
-    const isOrders = pathname?.startsWith('/orders')
-    const isWishlist = pathname?.startsWith('/wishlist')
-    const isProfile = pathname?.startsWith('/profile')
-    const isAddresses = pathname?.startsWith('/addresses')
-    const isCheckout = pathname?.startsWith('/checkout')
-    const isHeader = pathname?.startsWith('/header')
-
-    if (isAdmin || isOrders || isWishlist || isProfile || isAddresses || isCheckout || isHeader) {
+    if (isAdmin || isAuthPage || isUserPage) {
         return null
     }
 

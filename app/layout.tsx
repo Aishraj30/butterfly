@@ -11,6 +11,7 @@ import './globals.css'
 import { ConditionalHeader } from "@/components/layout/ConditionalHeader"
 import { ConditionalFooter } from "@/components/layout/ConditionalFooter"
 import { LoadingProvider } from "@/components/LoadingProvider"
+import { Toaster } from "@/components/ui/toaster"
 
 import localFont from 'next/font/local'
 
@@ -32,20 +33,7 @@ export const metadata: Metadata = {
   description: 'Discover exquisite butterfly-inspired luxury fashion collection. Premium couture pieces crafted with elegance and sophistication.',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
+    icon: '/icon.svg',
     apple: '/apple-icon.png',
   },
 }
@@ -57,6 +45,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${birds.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var hasSeen = localStorage.getItem('hasSeenLoader');
+                  if (!hasSeen) {
+                    document.documentElement.classList.add('is-loading');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`font-sans antialiased bg-background text-foreground`}>
         <LoadingProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
@@ -68,6 +72,7 @@ export default function RootLayout({
                 <ChatBot />
                 <Analytics />
               </SmoothScroll>
+              <Toaster />
             </AuthProvider>
           </ThemeProvider>
         </LoadingProvider>

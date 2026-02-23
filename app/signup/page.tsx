@@ -90,7 +90,7 @@ export default function SignupPage() {
       await signup(name, email, password);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed");
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -106,7 +106,7 @@ export default function SignupPage() {
 
   return (
     <div className={`min-h-screen flex selection:bg-black selection:text-white ${inter.className}`}>
-      
+
       {/* Left Column - Banner Image */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -124,7 +124,7 @@ export default function SignupPage() {
           {/* Top Header - Discreet */}
           <div className="flex justify-between items-center tracking-[0.1em] text-xs font-bold drop-shadow-lg">
             <div className="border-b-2 border-white pb-1 relative">
-             Butterfly couture
+              Butterfly couture
             </div>
             <div className="opacity-50 hidden xl:block">
               A/W 2024
@@ -177,12 +177,12 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label 
-                    htmlFor="name" 
-                    className="text-xs font-bold text-black tracking-widest uppercase"
-                  >
-                    Full Name
-                  </Label>
+                <Label
+                  htmlFor="name"
+                  className="text-xs font-bold text-black tracking-widest uppercase"
+                >
+                  Full Name
+                </Label>
                 <Input
                   id="name"
                   type="text"
@@ -196,12 +196,12 @@ export default function SignupPage() {
               </div>
 
               <div className="space-y-2">
-                <Label 
-                    htmlFor="email" 
-                    className="text-xs font-bold text-black tracking-widest uppercase"
-                  >
-                    Email Address
-                  </Label>
+                <Label
+                  htmlFor="email"
+                  className="text-xs font-bold text-black tracking-widest uppercase"
+                >
+                  Email Address
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -216,18 +216,18 @@ export default function SignupPage() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                    <Label 
-                      htmlFor="password" 
-                      className="text-xs font-bold text-black tracking-widest uppercase"
-                    >
-                      Password
-                    </Label>
-                    <Link 
-                        href="/forgot-password" 
-                        className="text-xs text-zinc-400 hover:text-black hover:underline transition-colors"
-                    >
-                        Forgot?
-                    </Link>
+                  <Label
+                    htmlFor="password"
+                    className="text-xs font-bold text-black tracking-widest uppercase"
+                  >
+                    Password
+                  </Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-zinc-400 hover:text-black hover:underline transition-colors"
+                  >
+                    Forgot?
+                  </Link>
                 </div>
                 <div className="relative">
                   <Input
@@ -261,26 +261,26 @@ export default function SignupPage() {
                 <div className="mt-2 space-y-1">
                   {passwordRequirements.map((req, index) => (
                     <div key={index} className="flex items-center text-xs">
-                        {req.test ? (
-                          <Check className="h-3 w-3 text-green-500 mr-2" />
-                        ) : (
-                          <X className="h-3 w-3 text-red-500 mr-2" />
-                        )}
-                        <span className={req.test ? "text-green-600" : "text-red-600"}>
-                          {req.text}
-                        </span>
-                      </div>
-                    ))}
+                      {req.test ? (
+                        <Check className="h-3 w-3 text-green-500 mr-2" />
+                      ) : (
+                        <X className="h-3 w-3 text-red-500 mr-2" />
+                      )}
+                      <span className={req.test ? "text-green-600" : "text-red-600"}>
+                        {req.text}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label 
-                    htmlFor="confirmPassword" 
-                    className="text-xs font-bold text-black tracking-widest uppercase"
-                  >
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-xs font-bold text-black tracking-widest uppercase"
+                >
                   Confirm Password
-                  </Label>
+                </Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"

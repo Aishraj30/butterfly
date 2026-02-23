@@ -6,12 +6,16 @@ import { Footer } from './Footer'
 export function ConditionalFooter() {
     const pathname = usePathname()
     const isAdmin = pathname?.startsWith('/admin')
-    const isCatalog = pathname === '/catalog'
+    const isCatalog = pathname?.startsWith('/catalog')
     const isSale = pathname?.startsWith('/sale')
     const isNewArrival = pathname?.startsWith('/new-arrival')
-    const isWishlist = pathname?.startsWith('/wishlist')
+    const isUserPage = pathname?.startsWith('/wishlist') || 
+                     pathname?.startsWith('/profile') || 
+                     pathname?.startsWith('/address') ||
+                     pathname?.startsWith('/account') ||
+                     pathname?.startsWith('/orders')
 
-    if (isAdmin || isCatalog || isSale || isNewArrival || isWishlist) {
+    if (isAdmin || isSale || isNewArrival || isUserPage) {
         return null
     }
 

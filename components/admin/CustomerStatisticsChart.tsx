@@ -7,7 +7,7 @@ const customerData = [
   { name: 'Female', value: 2452, percentage: 72.3 },
 ]
 
-const COLORS = ['#D7C69D', '#003300']
+const COLORS = ['#000000', '#808080']
 
 export function CustomerStatisticsChart() {
   const totalCustomers = customerData.reduce((sum, item) => sum + item.value, 0)
@@ -37,25 +37,25 @@ export function CustomerStatisticsChart() {
         dominantBaseline="middle"
         className="fill-gray-900 dark:fill-white"
       >
-        <tspan x="50%" dy="-0.5em" className="text-2xl font-bold text-[#005500]">100%</tspan>
+        <tspan x="50%" dy="-0.5em" className="text-2xl font-bold text-black dark:text-white">100%</tspan>
         <tspan x="50%" dy="1.5em" className="text-sm text-gray-600">Total Customers</tspan>
       </text>
     )
   }
 
   return (
-    <div className="bg-white border border-[#D7C69D]/30 rounded-xl p-4 lg:p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-[#005500]">
+    <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-semibold text-black dark:text-white">
           Customers Statistics
         </h2>
-        <p className="text-sm text-gray-600">
+        <p className="text-xs sm:text-sm text-gray-600">
           Gender distribution
         </p>
       </div>
 
       {/* Donut Chart */}
-      <div className="h-64">
+      <div className="h-48 sm:h-56 lg:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

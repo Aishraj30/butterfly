@@ -3,9 +3,17 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { CatalogBanner } from '@/components/catalog/CatalogBanner'
-import { Pagination } from '@/components/ui/PaginationComponent'
+import { LoadMore } from '@/components/ui/LoadMoreComponent'
 
 const ITEMS_PER_PAGE = 12
+
+const bannerImages = [
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400106/butterfly-couture/1771400105742-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400121/butterfly-couture/1771400121271-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400157/butterfly-couture/1771400156846-blob.jpg",
+  "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400180/butterfly-couture/1771400180246-blob.jpg"
+]
 
 interface Product {
     id: number;
@@ -28,11 +36,18 @@ interface Product {
 export default function SalePage() {
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
-    const [currentPage, setCurrentPage] = useState(1)
+    const [displayedItemCount, setDisplayedItemCount] = useState(ITEMS_PER_PAGE)
 
     useEffect(() => {
         fetchSaleProducts()
     }, [])
+
+    const hasMoreItems = displayedItemCount < products.length
+    const displayedProducts = products.slice(0, displayedItemCount)
+
+    const handleLoadMore = () => {
+        setDisplayedItemCount(prev => Math.min(prev + ITEMS_PER_PAGE, products.length))
+    }
 
     const fetchSaleProducts = async () => {
         try {
@@ -61,7 +76,7 @@ export default function SalePage() {
             <CatalogBanner
                 title="SALE"
                 subtitle="Limited time offers on premium items"
-                backgroundImage="/banners/b3.jpg"
+                backgroundImage={bannerImages[2]}
             />
 
             <div className="max-w-[1400px] mx-auto px-5 py-8">
@@ -79,7 +94,7 @@ export default function SalePage() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {products.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((product) => (
+                            {displayedProducts.map((product) => (
                                 <Link
                                     key={product.id}
                                     href={`/product/${product.id}`}
@@ -143,13 +158,10 @@ export default function SalePage() {
                             ))}
                         </div>
 
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={Math.ceil(products.length / ITEMS_PER_PAGE)}
-                            onPageChange={(page) => {
-                                setCurrentPage(page)
-                                window.scrollTo({ top: 0, behavior: 'smooth' })
-                            }}
+                        <LoadMore
+                            onLoadMore={handleLoadMore}
+                            isLoading={false}
+                            hasMore={hasMoreItems}
                             className="mt-12"
                         />
                     </>

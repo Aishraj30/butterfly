@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CheckCircle, Loader2 } from 'lucide-react';
@@ -13,12 +13,19 @@ const steps = ['Information', 'Shipping', 'Payment', 'Success'];
 
 export default function CheckoutPage() {
   const { cart, clearCart, isLoading: isCartLoading } = useCart();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderData, setOrderData] = useState<any>(null);
   const [cardData, setCardData] = useState({ number: '', expiry: '', cvc: '' });
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push(`/login?callbackUrl=/checkout`);
+    }
+  }, [user, isLoading, router]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -58,6 +65,14 @@ export default function CheckoutPage() {
 
     setCardData(prev => ({ ...prev, [name]: value }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin h-8 w-8 text-black" />
+      </div>
+    )
+  }
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
 
@@ -226,12 +241,12 @@ export default function CheckoutPage() {
                 <label className="flex items-center gap-4 bg-white p-4 border border-gray-200 cursor-pointer">
                   <input type="radio" name="shippingMethod" defaultChecked />
                   <span className="font-bold uppercase tracking-widest text-sm">JNE EXPRESS</span>
-                  <span className="ml-auto text-gray-500">IDR 20.000</span>
+                  <span className="ml-auto text-gray-500">INR 20,000</span>
                 </label>
                 <label className="flex items-center gap-4 bg-white p-4 border border-gray-200 cursor-pointer">
                   <input type="radio" name="shippingMethod" />
                   <span className="font-bold uppercase tracking-widest text-sm">J&T PRIORITY</span>
-                  <span className="ml-auto text-gray-500">IDR 22.000</span>
+                  <span className="ml-auto text-gray-500">INR 22,000</span>
                 </label>
               </div>
               <button
@@ -256,7 +271,7 @@ export default function CheckoutPage() {
                 <div className="mb-8">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-400 uppercase tracking-widest font-bold">Total Amount Due</span>
-                    <span className="text-black font-bold">IDR {orderData?.total?.toLocaleString()}</span>
+                    <span className="text-black font-bold">INR {orderData?.total?.toLocaleString()}</span>
                   </div>
                   <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-full bg-black w-full"></div>
@@ -317,7 +332,7 @@ export default function CheckoutPage() {
                     <Loader2 className="animate-spin mr-3" size={20} />
                     PROCESSING TRANSACTION...
                   </>
-                ) : `AUTHORIZE PAYMENT — IDR ${orderData?.total?.toLocaleString()}`}
+                ) : `AUTHORIZE PAYMENT — INR ${orderData?.total?.toLocaleString()}`}
               </button>
             </div>
           )}
@@ -356,7 +371,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-sans text-sm font-bold truncate max-w-[200px]">{item.name}</p>
-                    <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">IDR {typeof item.price === 'string' ? parseFloat(item.price).toLocaleString() : item.price?.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">INR {typeof item.price === 'string' ? parseFloat(item.price).toLocaleString() : item.price?.toLocaleString()}</p>
                     <p className="text-xs text-gray-400 mt-1">Qty: {item.quantity} | Size: {item.size}</p>
                   </div>
                 </div>
@@ -365,19 +380,19 @@ export default function CheckoutPage() {
               <div className="border-t border-gray-200 pt-6 space-y-3 text-sm">
                 <div className="flex justify-between text-gray-500">
                   <span className="uppercase tracking-widest text-xs font-bold">Subtotal</span>
-                  <span className="font-medium">IDR {cart.subtotal.toLocaleString()}</span>
+                  <span className="font-medium">INR {cart.subtotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span className="uppercase tracking-widest text-xs font-bold">Tax</span>
-                  <span className="font-medium">IDR {cart.tax.toLocaleString()}</span>
+                  <span className="font-medium">INR {cart.tax.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span className="uppercase tracking-widest text-xs font-bold">Discount</span>
-                  <span className="font-medium">- IDR 0.00</span>
+                  <span className="font-medium">- INR 0.00</span>
                 </div>
                 <div className="flex justify-between font-bold text-xl pt-4 border-t border-gray-200 text-gray-900">
                   <span className="uppercase tracking-widest text-xs">Total</span>
-                  <span>IDR {cart.total.toLocaleString()}</span>
+                  <span>INR {cart.total.toLocaleString()}</span>
                 </div>
               </div>
             </div>

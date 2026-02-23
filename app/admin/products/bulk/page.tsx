@@ -1,11 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Trash2, Save, ArrowLeft, Loader2, Upload, ImageIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { compressImage, isValidImageFile } from '@/lib/imageCompression'
+
+// Stable ID generator
+let idCounter = 0
+const generateStableId = () => {
+    idCounter += 1
+    return `temp-${idCounter}-${idCounter.toString(36).padStart(4, '0')}`
+}
 
 interface BulkProduct {
     tempId: string
@@ -47,7 +54,7 @@ export default function BulkProductAddPage() {
 
     const [products, setProducts] = useState<BulkProduct[]>([
         {
-            tempId: Math.random().toString(36).substr(2, 9),
+            tempId: generateStableId(),
             name: '',
             brand: 'Butterfly Couture',
             price: 0,
@@ -94,7 +101,7 @@ export default function BulkProductAddPage() {
         setProducts([
             ...products,
             {
-                tempId: Math.random().toString(36).substr(2, 9),
+                tempId: generateStableId(),
                 name: '',
                 brand: 'Butterfly Couture',
                 price: 0,
@@ -325,17 +332,17 @@ export default function BulkProductAddPage() {
                                         </td>
                                         <td className="px-2 py-2">
                                             <input list={`cat-${product.tempId}`} value={product.category} onChange={(e) => updateProduct(product.tempId, 'category', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Category" />
-                                            <datalist id={`cat-${product.tempId}`}>{categories.map(c => <option key={c.id} value={c.name} />)}</datalist>
+                                            <datalist id={`cat-${product.tempId}`}>{categories.map(c => <option key={`cat-${c.id || c.name}-${product.tempId}`} value={c.name} />)}</datalist>
                                         </td>
                                         <td className="px-2 py-2">
                                             <input list={`sub-${product.tempId}`} value={product.subCategory} onChange={(e) => updateProduct(product.tempId, 'subCategory', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Sub-Cat" />
                                             <datalist id={`sub-${product.tempId}`}>
-                                                {categories.find(c => c.name === product.category)?.subCategories?.map((s: string) => <option key={s} value={s} />)}
+                                                {categories.find(c => c.name === product.category)?.subCategories?.map((s: string) => <option key={`sub-${s}-${product.tempId}`} value={s} />)}
                                             </datalist>
                                         </td>
                                         <td className="px-2 py-2">
                                             <input list={`col-${product.tempId}`} value={product.collectionName} onChange={(e) => updateProduct(product.tempId, 'collectionName', e.target.value)} className="w-full px-2 py-1 border rounded-sm" placeholder="Collection" />
-                                            <datalist id={`col-${product.tempId}`}>{collections.map(c => <option key={c.id} value={c.name} />)}</datalist>
+                                            <datalist id={`col-${product.tempId}`}>{collections.map(c => <option key={`col-${c.id || c.name}-${product.tempId}`} value={c.name} />)}</datalist>
                                         </td>
                                         <td className="px-2 py-2">
                                             <select value={product.gender} onChange={(e) => updateProduct(product.tempId, 'gender', e.target.value)} className="w-full px-2 py-1 border rounded-sm">
@@ -389,18 +396,6 @@ export default function BulkProductAddPage() {
                         <button onClick={addRow} className="flex items-center gap-2 text-sm font-semibold"><Plus size={16} /> Add Row</button>
                     </div>
                 </div>
-            </div>
-
-            {/* Sticky Actions Bar at Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-20 flex justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-                <button
-                    onClick={handleBulkSubmit}
-                    disabled={isSubmitting}
-                    className="flex items-center gap-3 px-12 py-3 bg-black text-white rounded-sm text-base font-bold hover:bg-gray-800 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 shadow-lg"
-                >
-                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save size={20} />}
-                    <span className="ml-2">SAVE ALL PRODUCTS</span>
-                </button>
             </div>
             <div className="h-24"></div>
         </div>

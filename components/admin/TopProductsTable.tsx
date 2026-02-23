@@ -44,7 +44,7 @@ function StarRating({ rating }: { rating: number }) {
             key={i}
             size={14}
             className={`${i < Math.floor(rating)
-              ? 'fill-yellow-400 text-yellow-400'
+              ? 'fill-gray-600 text-gray-600'
               : 'text-gray-300 dark:text-gray-600'
               }`}
           />
@@ -59,43 +59,43 @@ function StarRating({ rating }: { rating: number }) {
 
 export function TopProductsTable() {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 lg:p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
             Top Products
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
             Best performing products
           </p>
         </div>
         <Link
           href="/admin/products"
-          className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
+          className="text-xs sm:text-sm text-black dark:text-white hover:underline font-medium"
         >
           See All
         </Link>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[600px]">
+      <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
+        <table className="w-full min-w-[500px] sm:min-w-[600px]">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
-              <th className="text-left py-3 px-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                No
+            <tr className="border-b border-gray-300 dark:border-gray-700">
+              <th className="text-left py-2 sm:py-3 px-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                    No
               </th>
-              <th className="text-left py-3 px-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                Product Name
+              <th className="text-left py-2 sm:py-3 px-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Product Name
               </th>
-              <th className="text-left py-3 px-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                Review
+              <th className="text-left py-2 sm:py-3 px-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Review
               </th>
-              <th className="text-left py-3 px-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                Sold
+              <th className="text-left py-2 sm:py-3 px-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Sold
               </th>
-              <th className="text-left py-3 px-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                Profit
+              <th className="text-left py-2 sm:py-3 px-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Profit
               </th>
             </tr>
           </thead>
@@ -103,23 +103,23 @@ export function TopProductsTable() {
             {topProducts.map((product) => (
               <tr
                 key={product.id}
-                className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <td className="py-3 px-2 text-sm text-gray-900 dark:text-white">
+                <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm text-gray-900 dark:text-white">
                   {product.id}
                 </td>
-                <td className="py-3 px-2">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                <td className="py-2 sm:py-3 px-2">
+                  <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
                     {product.name}
                   </div>
                 </td>
-                <td className="py-3 px-2">
+                <td className="py-2 sm:py-3 px-2">
                   <StarRating rating={product.review} />
                 </td>
-                <td className="py-3 px-2 text-sm text-gray-900 dark:text-white">
+                <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm text-gray-900 dark:text-white">
                   {product.sold}
                 </td>
-                <td className="py-3 px-2 text-sm font-medium text-gray-900 dark:text-white">
+                <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
                   {product.profit}
                 </td>
               </tr>

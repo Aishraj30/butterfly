@@ -75,7 +75,7 @@ export class AuthController {
       // Post-signup hooks
       await authHooks.afterSignup(user, token);
 
-      return NextResponse.json(
+      const response = NextResponse.json(
         {
           message: "User created successfully",
           user: userResponse,
@@ -83,6 +83,16 @@ export class AuthController {
         },
         { status: 201 }
       );
+
+      response.cookies.set("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: "/",
+      });
+
+      return response;
     } catch (error) {
       console.error("Signup error:", error);
 
@@ -122,7 +132,7 @@ export class AuthController {
 
       if (!user) {
         return NextResponse.json(
-          { error: "Invalid email or password" },
+          { error: "Wrong credentials" },
           { status: 401 }
         );
       }
@@ -134,7 +144,7 @@ export class AuthController {
 
       if (!isPasswordValid) {
         return NextResponse.json(
-          { error: "Invalid email or password" },
+          { error: "Wrong credentials" },
           { status: 401 }
         );
       }
@@ -156,7 +166,7 @@ export class AuthController {
       // Post-login hooks
       await authHooks.afterLogin(user, token);
 
-      return NextResponse.json(
+      const response = NextResponse.json(
         {
           message: "Login successful",
           user: userResponse,
@@ -164,6 +174,16 @@ export class AuthController {
         },
         { status: 200 }
       );
+
+      response.cookies.set("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: "/",
+      });
+
+      return response;
     } catch (error) {
       console.error("Login error detail:", error);
 
@@ -193,10 +213,20 @@ export class AuthController {
     try {
       await authHooks.onLogout(request);
 
-      return NextResponse.json(
+      const response = NextResponse.json(
         { message: "Logout successful" },
         { status: 200 }
       );
+
+      response.cookies.set("token", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 0,
+        path: "/",
+      });
+
+      return response;
     } catch (error) {
       console.error("Logout error:", error);
       return NextResponse.json(

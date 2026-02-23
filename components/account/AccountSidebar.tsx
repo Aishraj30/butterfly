@@ -1,193 +1,93 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Package, Heart, MapPin, User, Settings, LogOut, ChevronRight } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import Link from 'next/link';
+import Image from 'next/image';
+import {
+    User, Package, Heart, MapPin, Settings, LogOut, Home
+} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
-export function AccountSidebar() {
+interface AccountSidebarProps {
+    activePage?: 'profile' | 'orders' | 'wishlist' | 'addresses' | 'settings';
+}
+
+export function AccountSidebar({ activePage }: AccountSidebarProps) {
     const { user, logout } = useAuth();
-    const router = useRouter();
-    const pathname = usePathname();
 
     const handleLogout = () => {
         logout();
-        router.push("/");
+        window.location.href = '/';
     };
 
-    if (!user) return null;
-
-    const isActive = (path: string) => pathname?.startsWith(path);
+    const navigationItems = [
+        { href: '/profile', icon: User, label: 'Profile', id: 'profile' },
+        { href: '/orders', icon: Package, label: 'Orders', id: 'orders' },
+        { href: '/wishlist', icon: Heart, label: 'Wishlist', id: 'wishlist' },
+        { href: '/addresses', icon: MapPin, label: 'Addresses', id: 'addresses' },
+    ];
 
     return (
-        <Card className="sticky top-8 bg-white/70 backdrop-blur-xl border border-white/40 shadow-2xl ring-1 ring-black/5">
-            <CardContent className="p-6">
-                {/* Profile Summary */}
-                <div className="text-center mb-6">
-                    <div className="h-24 w-24 rounded-2xl overflow-hidden border-4 border-white/60 shadow-xl mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <Image
-                            src={
-                                user.avatar ||
-                                `https://ui-avatars.com/api/?name=${user.name}&background=000&color=fff`
-                            }
-                            alt={user.name}
-                            width={96}
-                            height={96}
-                            className="object-cover"
-                        />
-                    </div>
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">{user.name}</h3>
-                    <p className="text-sm text-gray-600 font-medium">{user.email}</p>
+        <aside className="hidden lg:flex flex-col w-64 pt-8 pb-6 px-0 border-r border-gray-100 lg:sticky lg:top-0 h-screen bg-white">
+            
+            {/* Header */}
+            <div className="px-6 mb-8 flex justify-between items-center">
+                <h1 className="text-lg font-medium text-gray-900 tracking-tight">Account</h1>
+                <Link href="/" className="p-2 hover:bg-gray-50 rounded-full transition-all duration-200">
+                    <Home className="w-4 h-4 text-gray-500 hover:text-gray-900" strokeWidth={1.5} />
+                </Link>
+            </div>
+            
+            {/* Profile Summary */}
+            <div className="text-center mb-8 px-6">
+                <div className="relative h-16 w-16 mx-auto mb-3">
+                    <Image
+                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=f9fafb&color=111827`}
+                        alt={user?.name || 'User'}
+                        fill
+                        className="rounded-full object-cover border border-gray-100"
+                    />
                 </div>
+                <h3 className="text-sm font-medium text-gray-900 tracking-wide mb-0.5">
+                    {user?.name || 'Guest User'}
+                </h3>
+                <p className="text-xs text-gray-500">
+                    {user?.email || 'Not logged in'}
+                </p>
+            </div>
 
-                <Separator className="mb-6 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+            {/* Navigation */}
+            <nav className="flex-1 px-4">
+                <div className="space-y-1">
+                    {navigationItems.map((link) => {
+                        const isActive = activePage === link.id;
+                        return (
+                            <Link
+                                key={link.id}
+                                href={link.href}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 ${
+                                    isActive
+                                        ? 'bg-gray-50 text-gray-900 font-medium'
+                                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                }`}
+                            >
+                                <link.icon className="h-4 w-4" strokeWidth={isActive ? 2 : 1.5} />
+                                <span className="text-xs uppercase tracking-widest">{link.label}</span>
+                            </Link>
+                        );
+                    })}
+                </div>
+            </nav>
 
-                {/* Navigation Menu */}
-                <nav className="space-y-2">
-                    <Link
-                        href="/orders"
-                        className={`flex items-center justify-between w-full p-4 rounded-xl transition-all duration-300 font-medium group ${
-                            isActive('/orders') 
-                                ? 'bg-gradient-to-r from-black to-gray-800 text-white shadow-lg' 
-                                : 'text-gray-700 hover:bg-white/60 hover:text-gray-900 backdrop-blur-sm'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg transition-colors ${
-                                isActive('/orders') 
-                                    ? 'bg-white/20' 
-                                    : 'bg-gray-100 group-hover:bg-gray-200'
-                            }`}>
-                                <Package className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm">Orders</span>
-                        </div>
-                        <ChevronRight className={`h-4 w-4 transition-colors ${
-                            isActive('/orders') 
-                                ? 'text-white' 
-                                : 'text-gray-400 group-hover:text-gray-600'
-                        }`} />
-                    </Link>
-
-                    <Link
-                        href="/wishlist"
-                        className={`flex items-center justify-between w-full p-4 rounded-xl transition-all duration-300 font-medium group ${
-                            isActive('/wishlist') 
-                                ? 'bg-gradient-to-r from-black to-gray-800 text-white shadow-lg' 
-                                : 'text-gray-700 hover:bg-white/60 hover:text-gray-900 backdrop-blur-sm'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg transition-colors ${
-                                isActive('/wishlist') 
-                                    ? 'bg-white/20' 
-                                    : 'bg-gray-100 group-hover:bg-gray-200'
-                            }`}>
-                                <Heart className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm">Wishlist</span>
-                        </div>
-                        <ChevronRight className={`h-4 w-4 transition-colors ${
-                            isActive('/wishlist') 
-                                ? 'text-white' 
-                                : 'text-gray-400 group-hover:text-gray-600'
-                        }`} />
-                    </Link>
-
-                    <Link
-                        href="/addresses"
-                        className={`flex items-center justify-between w-full p-4 rounded-xl transition-all duration-300 font-medium group ${
-                            isActive('/addresses') 
-                                ? 'bg-gradient-to-r from-black to-gray-800 text-white shadow-lg' 
-                                : 'text-gray-700 hover:bg-white/60 hover:text-gray-900 backdrop-blur-sm'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg transition-colors ${
-                                isActive('/addresses') 
-                                    ? 'bg-white/20' 
-                                    : 'bg-gray-100 group-hover:bg-gray-200'
-                            }`}>
-                                <MapPin className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm">Addresses</span>
-                        </div>
-                        <ChevronRight className={`h-4 w-4 transition-colors ${
-                            isActive('/addresses') 
-                                ? 'text-white' 
-                                : 'text-gray-400 group-hover:text-gray-600'
-                        }`} />
-                    </Link>
-
-                    <Separator className="my-4 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-                    <Link
-                        href="/profile"
-                        className={`flex items-center justify-between w-full p-4 rounded-xl transition-all duration-300 font-medium group ${
-                            isActive('/profile') 
-                                ? 'bg-gradient-to-r from-black to-gray-800 text-white shadow-lg' 
-                                : 'text-gray-700 hover:bg-white/60 hover:text-gray-900 backdrop-blur-sm'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg transition-colors ${
-                                isActive('/profile') 
-                                    ? 'bg-white/20' 
-                                    : 'bg-gray-100 group-hover:bg-gray-200'
-                            }`}>
-                                <User className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm">Profile</span>
-                        </div>
-                        <ChevronRight className={`h-4 w-4 transition-colors ${
-                            isActive('/profile') 
-                                ? 'text-white' 
-                                : 'text-gray-400 group-hover:text-gray-600'
-                        }`} />
-                    </Link>
-
-                    <Link
-                        href="/settings"
-                        className={`flex items-center justify-between w-full p-4 rounded-xl transition-all duration-300 font-medium group ${
-                            isActive('/settings') 
-                                ? 'bg-gradient-to-r from-black to-gray-800 text-white shadow-lg' 
-                                : 'text-gray-700 hover:bg-white/60 hover:text-gray-900 backdrop-blur-sm'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg transition-colors ${
-                                isActive('/settings') 
-                                    ? 'bg-white/20' 
-                                    : 'bg-gray-100 group-hover:bg-gray-200'
-                            }`}>
-                                <Settings className="h-4 w-4" />
-                            </div>
-                            <span className="text-sm">Settings</span>
-                        </div>
-                        <ChevronRight className={`h-4 w-4 transition-colors ${
-                            isActive('/settings') 
-                                ? 'text-white' 
-                                : 'text-gray-400 group-hover:text-gray-600'
-                        }`} />
-                    </Link>
-                </nav>
-
-                <Separator className="my-6 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-
-                {/* Logout Button */}
-                <Button
-                    variant="outline"
+            {/* Logout Button */}
+            <div className="px-4 mt-6">
+                <button
                     onClick={handleLogout}
-                    className="w-full border-red-200/60 bg-red-50/30 text-red-600 hover:bg-red-100/50 hover:text-red-700 hover:border-red-300/80 backdrop-blur-sm transition-all duration-300 font-medium"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 text-xs tracking-widest uppercase transition-all duration-200"
                 >
-                    <LogOut className="h-4 w-4 mr-2" />
+                    <LogOut size={16} strokeWidth={1.5} />
                     Sign Out
-                </Button>
-            </CardContent>
-        </Card>
+                </button>
+            </div>
+        </aside>
     );
 }

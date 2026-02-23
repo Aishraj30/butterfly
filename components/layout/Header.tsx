@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   ShoppingBag,
-  Package
+  Package,
+  User
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { CartDrawer } from './CartDrawer'
@@ -112,24 +113,22 @@ export function Header() {
 
   const isAuthPage = pathname === '/login' || pathname === '/signup'
   const isHome = pathname === '/'
-  const isCatalog = pathname === '/catalog'
   const isAdmin = pathname.startsWith('/admin')
-  const isProductPage = pathname.startsWith('/product/')
 
   if (isAuthPage || isAdmin) {
     return null
   }
 
-  // Header style - transparent on home, solid black on all other pages
-  const headerBg = isHome && !isCatalog
+  // Header style - gradient on all pages except home, transparent on home
+  const headerBg = isHome 
     ? 'bg-transparent'
-    : 'bg-black border-b border-white/10'
+    : 'bg-gradient-to-b from-black/60 via-black/40 to-transparent'
   const textColor = 'text-white'
   const logoColor = 'text-white'
 
   return (
     <header
-      className={`w-full z-[9999] transition-all duration-300 ${headerBg} py-0 ${isHome && !isCatalog ? 'absolute' : 'sticky top-0'} left-0`}
+      className={`w-full z-[9999] transition-all duration-300 ${headerBg} py-0 ${isHome ? 'absolute' : 'absolute'} left-0`}
     >
       <nav className="max-w-[1400px] mx-auto px-6 md:px-8 py-0 flex items-center justify-between">
         {/* Left: Logo */}
@@ -407,6 +406,14 @@ export function Header() {
                   >
                     {user ? (
                       <>
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 py-3 text-white transition-colors"
+                        >
+                          <User size={18} />
+                          <span className="text-sm">Profile</span>
+                        </Link>
                         <Link
                           href="/orders"
                           onClick={() => setIsMobileMenuOpen(false)}

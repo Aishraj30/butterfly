@@ -1,47 +1,47 @@
 'use client'
 
 const regionData = [
-  { name: 'Asia', percentage: 90, color: 'bg-blue-500' },
-  { name: 'America', percentage: 30, color: 'bg-green-500' },
-  { name: 'Europe', percentage: 40, color: 'bg-yellow-500' },
-  { name: 'Others', percentage: 25, color: 'bg-purple-500' },
+  { name: 'Asia', percentage: 90, color: 'bg-black' },
+  { name: 'America', percentage: 30, color: 'bg-gray-600' },
+  { name: 'Europe', percentage: 40, color: 'bg-gray-400' },
+  { name: 'Others', percentage: 25, color: 'bg-gray-300' },
 ]
 
 export function DistributionMap() {
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 lg:p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+    <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
           Distribution Maps
         </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           Geographic distribution
         </p>
       </div>
 
       {/* World Map Placeholder */}
-      <div className="relative h-64 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-6">
+      <div className="relative h-48 sm:h-56 lg:h-64 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4 sm:mb-6">
         {/* Simple world map representation */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative w-full h-full">
             {/* Asia */}
             <div className="absolute top-1/2 right-1/4 transform translate-x-1/2 -translate-y-1/2">
-              <div className="w-24 h-20 bg-blue-500/30 rounded-lg border-2 border-blue-500"></div>
+              <div className="w-16 sm:w-20 sm:w-24 h-12 sm:h-16 sm:h-20 bg-black/30 rounded-lg border-2 border-black"></div>
             </div>
 
             {/* America */}
             <div className="absolute top-1/2 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="w-16 h-24 bg-green-500/30 rounded-lg border-2 border-green-500"></div>
+              <div className="w-12 sm:w-16 h-16 sm:h-24 bg-gray-600/30 rounded-lg border-2 border-gray-600"></div>
             </div>
 
             {/* Europe */}
             <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="w-12 h-8 bg-yellow-500/30 rounded-lg border-2 border-yellow-500"></div>
+              <div className="w-8 sm:w-12 h-6 sm:h-8 bg-gray-400/30 rounded-lg border-2 border-gray-400"></div>
             </div>
 
             {/* Others */}
             <div className="absolute bottom-1/4 left-1/3 transform -translate-x-1/2">
-              <div className="w-8 h-8 bg-purple-500/30 rounded-lg border-2 border-purple-500"></div>
+              <div className="w-6 sm:w-8 h-6 sm:h-8 bg-gray-300/30 rounded-lg border-2 border-gray-300"></div>
             </div>
           </div>
         </div>

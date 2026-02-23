@@ -63,7 +63,13 @@ export function ChatBot() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({
+          message,
+          history: messages.map(m => ({
+            role: m.role,
+            content: m.content
+          }))
+        }),
       })
 
       if (!response.ok) throw new Error('Failed to get response')
@@ -90,27 +96,7 @@ export function ChatBot() {
     }
   }
 
-  const generateResponse = (userMessage: string): string => {
-    const lowerMessage = userMessage.toLowerCase()
 
-    if (lowerMessage.includes('size') || lowerMessage.includes('fit')) {
-      return 'Our sizing guide is available on each product page. We offer XS to XXL. If you need help determining your size, I recommend checking the detailed measurements or contacting our team at hello@butterflycouture.com.'
-    }
-
-    if (lowerMessage.includes('best seller') || lowerMessage.includes('popular')) {
-      return 'Our top sellers are the Silk Butterfly Gown, Crystal Wing Jacket, and Garden Bloom Dress. All are crafted with premium materials and exceptional attention to detail.'
-    }
-
-    if (lowerMessage.includes('ship') || lowerMessage.includes('delivery')) {
-      return 'We offer free worldwide shipping on orders over $500. Standard shipping takes 5-7 business days. Express shipping (2-3 days) is also available for an additional fee.'
-    }
-
-    if (lowerMessage.includes('return') || lowerMessage.includes('exchange')) {
-      return 'We offer hassle-free returns within 30 days of purchase. Items must be unworn with original tags. To start a return, visit your account or contact our support team.'
-    }
-
-    return 'Thank you for your question! For more detailed assistance, please visit our FAQ page or contact our team at hello@butterflycouture.com. We\'re here to help!'
-  }
 
   if (!isOpen) {
     return (
@@ -167,8 +153,8 @@ export function ChatBot() {
               >
                 <div
                   className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm ${message.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-tr-none'
-                      : 'bg-secondary text-foreground rounded-tl-none border border-border/50'
+                    ? 'bg-primary text-primary-foreground rounded-tr-none'
+                    : 'bg-secondary text-foreground rounded-tl-none border border-border/50'
                     }`}
                 >
                   {message.content}

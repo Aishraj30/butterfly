@@ -1,80 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllProducts, searchProducts } from '@/lib/products'
+import OpenAI from 'openai'
+import { getAllProducts } from '@/lib/products'
 
-// AI-like responses for the chatbot
-const chatResponses: { [key: string]: string[] } = {
-  greeting: [
-    'Hello! Welcome to Butterfly Couture. How can I assist you today?',
-    'Hi there! I\'m here to help you find the perfect piece from our collection.',
-    'Welcome! What can I help you with today?',
-  ],
-  products: [
-    'We offer a curated collection of luxury fashion items including dresses, jackets, shoes, bags, and coats.',
-    'Our collection features exquisite butterfly-inspired couture pieces handcrafted with premium materials.',
-    'We have beautiful evening wear, day wear, accessories, and outerwear in our latest collections.',
-  ],
-  shipping: [
-    'We offer free shipping on orders over $500. Standard shipping is $20, and expedited shipping for orders over $200 is $10.',
-    'Free shipping is available for orders exceeding $500. Other shipping options range from $10-$20.',
-  ],
-  returns: [
-    'We accept returns within 30 days of purchase. Items must be unworn and in original condition.',
-    'Our return policy allows 30 days for returns with full refunds for unworn items.',
-  ],
-  payment: [
-    'We accept all major credit cards, digital wallets, and secure payment methods at checkout.',
-    'We securely accept Visa, Mastercard, American Express, and other payment options.',
-  ],
-  help: [
-    'I can help you with product information, sizing, shipping details, and more. What would you like to know?',
-    'Feel free to ask me about our products, collections, policies, or any other questions!',
-  ],
-}
-
-function generateResponse(userMessage: string): string {
-  const lowerMessage = userMessage.toLowerCase()
-
-  // Check for product searches
-  if (lowerMessage.includes('product') || lowerMessage.includes('item') || lowerMessage.includes('dress') || lowerMessage.includes('jacket') || lowerMessage.includes('shoe') || lowerMessage.includes('bag')) {
-    const products = getAllProducts()
-    const randomProduct = products[Math.floor(Math.random() * products.length)]
-    return `I'd recommend checking out our ${randomProduct.category.toLowerCase()} collection. The "${randomProduct.name}" is a bestseller at $${randomProduct.price}. Would you like more details?`
-  }
-
-  // Check for specific keywords
-  if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-    return chatResponses.greeting[Math.floor(Math.random() * chatResponses.greeting.length)]
-  }
-  if (lowerMessage.includes('ship') || lowerMessage.includes('delivery') || lowerMessage.includes('cost')) {
-    return chatResponses.shipping[Math.floor(Math.random() * chatResponses.shipping.length)]
-  }
-  if (lowerMessage.includes('return') || lowerMessage.includes('exchange') || lowerMessage.includes('refund')) {
-    return chatResponses.returns[Math.floor(Math.random() * chatResponses.returns.length)]
-  }
-  if (lowerMessage.includes('payment') || lowerMessage.includes('pay') || lowerMessage.includes('card')) {
-    return chatResponses.payment[Math.floor(Math.random() * chatResponses.payment.length)]
-  }
-  if (lowerMessage.includes('product') || lowerMessage.includes('collection') || lowerMessage.includes('store')) {
-    return chatResponses.products[Math.floor(Math.random() * chatResponses.products.length)]
-  }
-  if (lowerMessage.includes('help') || lowerMessage.includes('support') || lowerMessage.includes('question')) {
-    return chatResponses.help[Math.floor(Math.random() * chatResponses.help.length)]
-  }
-
-  // Default responses
-  const defaultResponses = [
-    'That\'s a great question! Is there anything specific about our products or services I can help with?',
-    'I appreciate your question. Can you tell me more about what you\'re looking for?',
-    'Thank you for your interest! Feel free to browse our collection or let me know if you need assistance.',
-    'I\'m here to help! Would you like to know about our products, shipping, or anything else?',
-  ]
-  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)]
-}
+const GPT_MODEL = process.env.GPT_MODEL || "gpt-3.5-turbo"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { message } = body
+    const { message, history = [] } = body
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -83,10 +16,53 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Simulate a small delay for realism
-    await new Promise(resolve => setTimeout(resolve, 500))
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      console.error('[API] OpenAI API Key is missing')
+      return NextResponse.json(
+        { success: false, error: 'AI Assistant currently unavailable' },
+        { status: 503 }
+      )
+    }
 
-    const response = generateResponse(message)
+    const openai = new OpenAI({ apiKey })
+
+    // Get current products for context
+    const products = getAllProducts()
+    const productsContext = products.map(p => `- ${p.name}: ${p.category} ($${p.price})`).join('\n')
+
+    const completion = await openai.chat.completions.create({
+      model: GPT_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: `You are a luxury fashion assistant for Butterfly Couture. 
+          Our brand is elegant, sophisticated, and premium.
+          Treat users with high-end hospitality.
+          
+          Our Shipping Policy: Free shipping on orders over $500. Standard shipping is $20. Expedited is $10 for orders over $200.
+          Our Return Policy: 30 days for unworn items in original condition.
+          
+          Here are some of our current products for reference:
+          ${productsContext}
+          
+          If a user asks about products, recommend something specific from the list above. 
+          Keep responses concise but polite and premium.`
+        },
+        ...history.map((m: any) => ({
+          role: m.role,
+          content: m.content
+        })),
+        {
+          role: "user",
+          content: message
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 300,
+    })
+
+    const response = completion.choices[0]?.message?.content || "I'm sorry, I couldn't process that. How else can I help you?"
 
     return NextResponse.json({
       success: true,
@@ -95,10 +71,10 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
       },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[API] Chat error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to process message' },
+      { success: false, error: error.message || 'Failed to process message' },
       { status: 500 }
     )
   }
