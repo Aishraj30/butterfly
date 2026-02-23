@@ -10,6 +10,14 @@ frontend:
         - echo "CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET" >> .env.production
         - echo "MONGODB_URI=$MONGODB_URI" >> .env.production
         - echo "JWT_SECRET=$JWT_SECRET" >> .env.production
+        - echo "FASHN_API_KEY=$FASHN_API_KEY" >> .env.production
+        - echo "REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN" >> .env.production
+        - echo "SEGMIND_API_KEY=$SEGMIND_API_KEY" >> .env.production
+        - echo "GPT_MODEL=$GPT_MODEL" >> .env.production
+        - echo "REDIS_HOST=$REDIS_HOST" >> .env.production
+        - echo "REDIS_PORT=$REDIS_PORT" >> .env.production
+        - echo "REDIS_USERNAME=$REDIS_USERNAME" >> .env.production
+        - echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> .env.production
     build:
       commands:
         - npm run build
