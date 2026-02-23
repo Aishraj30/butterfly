@@ -39,8 +39,8 @@ export default function AboutPage() {
         <div className="bg-gray-50 min-h-[600px] lg:h-auto flex items-center justify-center relative overflow-hidden group">
           <img 
             src={catalogBanners[0]} 
-            alt="Campaign Image: Black & White"
-            className="absolute inset-0 w-full h-full object-cover grayscale contrast-125"
+            alt="Campaign Image"
+            className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/20" />
         </div>

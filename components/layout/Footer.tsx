@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Instagram, Twitter, Facebook } from 'lucide-react'
 import { memo } from 'react'
@@ -48,8 +49,17 @@ const Footer = memo(function Footer() {
         ========================================= */}
         <div className="block md:hidden mb-8">
           <div className="space-y-4 mb-8">
+            <div className="flex items-center gap-4 mb-8">
+              <Image 
+                src="/Logo 2.png" 
+                alt="Butterfly Couture Logo" 
+                width={120} 
+                height={40}
+                className="h-10 w-auto"
+              />
+            </div>
             <p className="text-sm font-light leading-relaxed text-gray-200">
-              Butterfly is a premier contemporary label that aims at <span className="italic font-serif">reinterpreting</span> global heritage.
+              is a premier contemporary label that aims at <span className="italic font-serif">reinterpreting</span> global heritage.
             </p>
             {/* Social Icons - Mobile */}
             <div className="flex gap-4">
@@ -100,9 +110,17 @@ const Footer = memo(function Footer() {
           
           {/* Left Side: Brand Statement & Socials */}
           <div className="max-w-md">
-            <h2 className="text-2xl font-medium tracking-tight uppercase mb-6">Butterfly</h2>
+            <div className="flex items-center gap-4 mb-6">
+              <Image 
+                src="/Logo 2.png" 
+                alt="Butterfly Couture Logo" 
+                width={150} 
+                height={50}
+                className="h-12 w-auto"
+              />
+            </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-10">
-              Butterfly is a premier contemporary label that aims at <span className="italic font-serif text-gray-300">reinterpreting</span> global heritage and artisanship through a lens of strict minimalist architecture.
+              is a premier contemporary label that aims at <span className="italic font-serif text-gray-300">reinterpreting</span> global heritage and artisanship through a lens of strict minimalist architecture.
             </p>
             <div className="flex gap-8">
               <Link href="https://www.instagram.com/butterfly1official?igsh=MWxjeGo3ZGwxeHZuOA==" className="text-gray-500 hover:text-white transition-colors">
