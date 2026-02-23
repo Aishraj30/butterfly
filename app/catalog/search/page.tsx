@@ -63,7 +63,16 @@ function SearchContent() {
       return
     }
 
-    setLoading(true)
+    const cacheKey = `search_cache_${query.trim()}`;
+    const cachedData = sessionStorage.getItem(cacheKey);
+
+    if (cachedData) {
+      setProducts(JSON.parse(cachedData));
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
     setError(null)
 
     fetch(`/api/products/search?q=${encodeURIComponent(query.trim())}`)
@@ -71,6 +80,7 @@ function SearchContent() {
       .then(data => {
         if (data.success) {
           setProducts(data.products || [])
+          sessionStorage.setItem(cacheKey, JSON.stringify(data.products || []));
         } else {
           setError(data.message || 'Failed to fetch search results')
         }

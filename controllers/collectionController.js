@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Collection from "@/models/Collection";
 import { verifyToken } from "@/lib/jwt";
+import redis from "@/lib/redis";
+
+const CACHE_KEYS = {
+    COLLECTIONS_ALL: 'collections:all',
+    COLLECTIONS_ADMIN: 'collections:admin',
+    COLLECTION_DETAIL: (id) => `collection:${id}`
+};
+
+const CACHE_TTL = 3600; // 1 hour
 
 // Helper
 const getUser = (req) => {
@@ -21,8 +30,35 @@ export class CollectionController {
         try {
             await connectDB();
             const user = getUser(req);
-            const filter = user && user.role === "admin" ? {} : { isActive: true };
+            const isUserAdmin = user && user.role === "admin";
+            const filter = isUserAdmin ? {} : { isActive: true };
+            const cacheKey = isUserAdmin ? CACHE_KEYS.COLLECTIONS_ADMIN : CACHE_KEYS.COLLECTIONS_ALL;
+
+            // Try to get from cache
+            if (redis) {
+                try {
+                    const cachedData = await redis.get(cacheKey);
+                    if (cachedData) {
+                        console.log(`[Cache] Serving ${cacheKey} from Redis`);
+                        return NextResponse.json({ success: true, collections: JSON.parse(cachedData), fromCache: true });
+                    }
+                } catch (err) {
+                    console.error('[Redis] Get error:', err);
+                }
+            }
+
             const collections = await Collection.find(filter).populate("products").sort({ createdAt: -1 });
+
+            // Save to cache
+            if (redis) {
+                try {
+                    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(collections));
+                    console.log(`[Cache] Saved ${cacheKey} to Redis`);
+                } catch (err) {
+                    console.error('[Redis] Set error:', err);
+                }
+            }
+
             return NextResponse.json({ success: true, collections });
         } catch (error) {
             console.error('[API Collections] GET error:', error);
@@ -43,6 +79,16 @@ export class CollectionController {
             const body = await req.json();
             const collection = await Collection.create(body);
 
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.COLLECTIONS_ALL, CACHE_KEYS.COLLECTIONS_ADMIN);
+                    console.log('[Cache] Invalidated collection lists');
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
+
             return NextResponse.json(
                 { success: true, collection },
                 { status: 201 }
@@ -60,6 +106,20 @@ export class CollectionController {
         try {
             await connectDB();
             const { id } = await params;
+            const cacheKey = CACHE_KEYS.COLLECTION_DETAIL(id);
+
+            // Try to get from cache
+            if (redis) {
+                try {
+                    const cachedData = await redis.get(cacheKey);
+                    if (cachedData) {
+                        console.log(`[Cache] Serving ${cacheKey} from Redis`);
+                        return NextResponse.json({ success: true, collection: JSON.parse(cachedData), fromCache: true });
+                    }
+                } catch (err) {
+                    console.error('[Redis] Get error:', err);
+                }
+            }
 
             let collection;
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -73,6 +133,16 @@ export class CollectionController {
                     { message: "Collection not found" },
                     { status: 404 }
                 );
+            }
+
+            // Save to cache
+            if (redis) {
+                try {
+                    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(collection));
+                    console.log(`[Cache] Saved ${cacheKey} to Redis`);
+                } catch (err) {
+                    console.error('[Redis] Set error:', err);
+                }
             }
 
             return NextResponse.json({ success: true, collection });
@@ -103,6 +173,21 @@ export class CollectionController {
                 );
             }
 
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(
+                        CACHE_KEYS.COLLECTIONS_ALL,
+                        CACHE_KEYS.COLLECTIONS_ADMIN,
+                        CACHE_KEYS.COLLECTION_DETAIL(id),
+                        CACHE_KEYS.COLLECTION_DETAIL(collection.slug)
+                    );
+                    console.log(`[Cache] Invalidated collection info for ${id}`);
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
+
             return NextResponse.json({ success: true, collection });
         } catch (error) {
             return NextResponse.json({ message: error.message }, { status: 500 });
@@ -122,6 +207,21 @@ export class CollectionController {
                 { message: "Collection not found" },
                 { status: 404 }
             );
+        }
+
+        // Invalidate cache
+        if (redis) {
+            try {
+                await redis.del(
+                    CACHE_KEYS.COLLECTIONS_ALL,
+                    CACHE_KEYS.COLLECTIONS_ADMIN,
+                    CACHE_KEYS.COLLECTION_DETAIL(id),
+                    CACHE_KEYS.COLLECTION_DETAIL(result.slug)
+                );
+                console.log(`[Cache] Invalidated collection lists and detail for ${id}`);
+            } catch (err) {
+                console.error('[Redis] Invalidation error:', err);
+            }
         }
 
         return NextResponse.json({ success: true, message: "Collection deleted" });

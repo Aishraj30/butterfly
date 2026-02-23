@@ -3,8 +3,14 @@ import connectDB from "../lib/db.js";
 import Inventory from "../models/inventory.js";
 import Product from "../models/Product.js"; // Optional: to verify product existence
 import InventoryMovement from "../models/InventoryMovement.js";
-
 import Order from "../models/Order.js";
+import redis from "@/lib/redis";
+
+const CACHE_KEYS = {
+    PRODUCTS_ALL: 'products:all',
+    PRODUCTS_ADMIN: 'products:admin',
+    INVENTORY_ALL: 'inventory:all'
+};
 
 // Helper to log movement
 async function logMovement({ inventoryId, productId, type, quantity, previousStock, newStock, reason, referenceId, performedBy }) {
@@ -113,13 +119,25 @@ export class InventoryController {
             const lowStock = searchParams.get("lowStock");
             const status = searchParams.get("status");
 
+            // Only cache the full list for now to keep it simple
+            const isFullList = !productId && !lowStock && !status;
+
+            if (isFullList && redis) {
+                try {
+                    const cachedData = await redis.get(CACHE_KEYS.INVENTORY_ALL);
+                    if (cachedData) {
+                        console.log('[Cache] Serving inventory list from Redis');
+                        return NextResponse.json(JSON.parse(cachedData), { status: 200 });
+                    }
+                } catch (err) {
+                    console.error('[Redis] Get error:', err);
+                }
+            }
+
             let query = {};
             if (productId) query.productId = productId;
             if (status) query.status = status;
             if (lowStock === 'true') {
-                // Find where totalStock <= lowStockThreshold
-                // This is tricky because lowStockThreshold is a field in the doc.
-                // Mongoose allows $expr to compare fields.
                 query.$expr = { $lte: ["$totalStock", "$lowStockThreshold"] };
             }
 
@@ -131,6 +149,15 @@ export class InventoryController {
                 doc.availableStock = doc.totalStock - (doc.reservedStock || 0);
                 return doc;
             });
+
+            if (isFullList && redis) {
+                try {
+                    await redis.setex(CACHE_KEYS.INVENTORY_ALL, 3600, JSON.stringify(result));
+                    console.log('[Cache] Saved inventory list to Redis');
+                } catch (err) {
+                    console.error('[Redis] Set error:', err);
+                }
+            }
 
             return NextResponse.json(result, { status: 200 });
         } catch (error) {
@@ -186,6 +213,16 @@ export class InventoryController {
             const newItem = new Inventory(body);
             await newItem.save();
 
+            // Invalidate products and inventory cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.PRODUCTS_ALL, CACHE_KEYS.PRODUCTS_ADMIN, CACHE_KEYS.INVENTORY_ALL);
+                    console.log('[Cache] Invalidated caches due to inventory creation');
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
+
             // Log INITIAL creation
             await logMovement({
                 inventoryId: newItem._id,
@@ -225,6 +262,19 @@ export class InventoryController {
             Object.assign(originalItem, body);
             const updatedItem = await originalItem.save();
 
+            // Invalidate products and inventory cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.PRODUCTS_ALL, CACHE_KEYS.PRODUCTS_ADMIN, CACHE_KEYS.INVENTORY_ALL);
+                    if (updatedItem.productId) {
+                        await redis.del(`product:${updatedItem.productId}`);
+                    }
+                    console.log('[Cache] Invalidated caches due to inventory update');
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
+
             // Log if stock changed manually via update
             if (updatedItem.totalStock !== previousStock) {
                 const diff = updatedItem.totalStock - previousStock;
@@ -258,6 +308,19 @@ export class InventoryController {
 
             if (!deletedItem) {
                 return NextResponse.json({ error: "Inventory item not found" }, { status: 404 });
+            }
+
+            // Invalidate products and inventory cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.PRODUCTS_ALL, CACHE_KEYS.PRODUCTS_ADMIN, CACHE_KEYS.INVENTORY_ALL);
+                    if (deletedItem.productId) {
+                        await redis.del(`product:${deletedItem.productId}`);
+                    }
+                    console.log('[Cache] Invalidated caches due to inventory deletion');
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
             }
 
             return NextResponse.json({ message: "Inventory item deleted" }, { status: 200 });
@@ -403,6 +466,19 @@ export class InventoryController {
 
             const previousTotal = item.totalStock;
             await item.restock(quantity);
+
+            // Invalidate products and inventory cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.PRODUCTS_ALL, CACHE_KEYS.PRODUCTS_ADMIN, CACHE_KEYS.INVENTORY_ALL);
+                    if (item.productId) {
+                        await redis.del(`product:${item.productId}`);
+                    }
+                    console.log('[Cache] Invalidated caches due to restock');
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
 
             await logMovement({
                 inventoryId: item._id,

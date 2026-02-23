@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Category from "@/models/Category";
+import redis from "@/lib/redis";
+
+const CACHE_KEYS = {
+    CATEGORIES_ALL: 'categories:all',
+    CATEGORY_DETAIL: (id) => `category:${id}`
+};
+
+const CACHE_TTL = 3600; // 1 hour
 
 export class CategoryController {
 
@@ -8,7 +16,39 @@ export class CategoryController {
     static async getAll(req) {
         try {
             await connectDB();
+            const cacheKey = CACHE_KEYS.CATEGORIES_ALL;
+
+            // Try to get from cache
+            if (redis) {
+                try {
+                    const cachedData = await redis.get(cacheKey);
+                    if (cachedData) {
+                        console.log(`[Cache] Serving ${cacheKey} from Redis`);
+                        const parsed = JSON.parse(cachedData);
+                        return NextResponse.json({
+                            success: true,
+                            data: parsed,
+                            count: parsed.length,
+                            fromCache: true
+                        });
+                    }
+                } catch (err) {
+                    console.error('[Redis] Get error:', err);
+                }
+            }
+
             const categories = await Category.find({ isActive: true }).sort({ name: 1 });
+
+            // Save to cache
+            if (redis) {
+                try {
+                    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(categories));
+                    console.log(`[Cache] Saved ${cacheKey} to Redis`);
+                } catch (err) {
+                    console.error('[Redis] Set error:', err);
+                }
+            }
+
             return NextResponse.json({
                 success: true,
                 data: categories,
@@ -38,6 +78,17 @@ export class CategoryController {
             }
 
             const category = await Category.create(body);
+
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.CATEGORIES_ALL);
+                    console.log('[Cache] Invalidated category lists');
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
+
             return NextResponse.json({ success: true, data: category }, { status: 201 });
         } catch (error) {
             console.error('[API] Create category error:', error);
@@ -53,13 +104,20 @@ export class CategoryController {
         try {
             await connectDB();
             const { id } = await params;
-            // Depending on whether ID is ObjectId or numeric/string, handle it.
-            // The original code used parseInt(id) which implies numeric IDs, but Mongoose usually uses ObjectId.
-            // I will safely assume if it matches ObjectId use that, else if numeric use that, else fail?
-            // Since the model is Mongoose 'Category', it usually has _id (ObjectId).
-            // However the route was casting to parseInt. Let's check if the User meant to use Mongoose or a mock.
-            // Given 'Category.js' model exists, it likely uses ObjectId. 
-            // I will assume ObjectId or fallback.
+            const cacheKey = CACHE_KEYS.CATEGORY_DETAIL(id);
+
+            // Try to get from cache
+            if (redis) {
+                try {
+                    const cachedData = await redis.get(cacheKey);
+                    if (cachedData) {
+                        console.log(`[Cache] Serving ${cacheKey} from Redis`);
+                        return NextResponse.json({ success: true, data: JSON.parse(cachedData), fromCache: true });
+                    }
+                } catch (err) {
+                    console.error('[Redis] Get error:', err);
+                }
+            }
 
             let category;
             if (id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -72,6 +130,16 @@ export class CategoryController {
 
             if (!category) {
                 return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 });
+            }
+
+            // Save to cache
+            if (redis) {
+                try {
+                    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(category));
+                    console.log(`[Cache] Saved ${cacheKey} to Redis`);
+                } catch (err) {
+                    console.error('[Redis] Set error:', err);
+                }
             }
 
             return NextResponse.json({ success: true, data: category });
@@ -92,6 +160,16 @@ export class CategoryController {
                 return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 });
             }
 
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.CATEGORIES_ALL, CACHE_KEYS.CATEGORY_DETAIL(id));
+                    console.log(`[Cache] Invalidated category info for ${id}`);
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
+
             return NextResponse.json({ success: true, data: category });
         } catch (error) {
             return NextResponse.json({ success: false, error: 'Failed to update category' }, { status: 500 });
@@ -107,6 +185,16 @@ export class CategoryController {
 
             if (!result) {
                 return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 });
+            }
+
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.CATEGORIES_ALL, CACHE_KEYS.CATEGORY_DETAIL(id));
+                    console.log(`[Cache] Invalidated category lists and detail for ${id}`);
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
             }
 
             return NextResponse.json({ success: true });

@@ -70,8 +70,8 @@ function CatalogContent() {
         // Category filter
         if (categoryParam) {
             const category = decodeURIComponent(categoryParam);
-            filtered = filtered.filter(p => 
-                p.category === category || 
+            filtered = filtered.filter(p =>
+                p.category === category ||
                 p.subCategory === category
             );
         }
@@ -92,22 +92,22 @@ function CatalogContent() {
         if (activeFilters) {
             // Gender filter
             if (activeFilters.genders && activeFilters.genders.length > 0) {
-                filtered = filtered.filter(p => 
+                filtered = filtered.filter(p =>
                     p.gender && activeFilters.genders.includes(p.gender)
                 );
             }
 
             // Size filter
             if (activeFilters.sizes && activeFilters.sizes.length > 0) {
-                filtered = filtered.filter(p => 
+                filtered = filtered.filter(p =>
                     p.size && activeFilters.sizes.some(size => p.size.includes(size))
                 );
             }
 
             // Color filter
             if (activeFilters.colors && activeFilters.colors.length > 0) {
-                filtered = filtered.filter(p => 
-                    p.color && activeFilters.colors.some(color => 
+                filtered = filtered.filter(p =>
+                    p.color && activeFilters.colors.some(color =>
                         p.color.toLowerCase() === color.toLowerCase()
                     )
                 );
@@ -122,6 +122,7 @@ function CatalogContent() {
                     return price >= min && price <= max;
                 });
             }
+
 
             // Sorting
             const sortBy = activeFilters.sortBy || 'name';
@@ -165,9 +166,30 @@ function CatalogContent() {
 
     useEffect(() => {
         const loadPageData = async () => {
-            setIsLoading(true);
-            await Promise.all([fetchCollections(), fetchProducts()]);
-            setIsLoading(false);
+            try {
+                // Persistent Cache: Hydrate from local storage for better performance
+                const cachedProducts = localStorage.getItem('catalog_products_cache');
+                const cachedCollections = localStorage.getItem('catalog_collections_cache');
+
+                if (cachedProducts) {
+                    console.log('⚡ [Client Cache] Hydrating products from localStorage');
+                    setProducts(JSON.parse(cachedProducts));
+                    setIsLoading(false);
+                } else {
+                    setIsLoading(true);
+                }
+
+                if (cachedCollections) {
+                    setCollections(JSON.parse(cachedCollections));
+                }
+
+                // Background Refresh
+                await Promise.all([fetchCollections(), fetchProducts()]);
+            } catch (err) {
+                console.error('Failed to load page data:', err);
+            } finally {
+                setIsLoading(false);
+            }
         };
         loadPageData();
     }, []);
@@ -178,6 +200,7 @@ function CatalogContent() {
             const collectionsData = await collectionsRes.json();
             if (collectionsData.success) {
                 setCollections(collectionsData.collections || []);
+                localStorage.setItem('catalog_collections_cache', JSON.stringify(collectionsData.collections || []));
             }
         } catch (error) {
             console.error('Failed to fetch collections:', error);
@@ -189,7 +212,13 @@ function CatalogContent() {
             const res = await fetch('/api/products');
             const data = await res.json();
             if (data.success) {
+                if (data.fromCache) {
+                    console.log('💎 [Server Cache] Products served from Redis');
+                } else {
+                    console.log('🗄️ [Database] Products fetched from MongoDB');
+                }
                 setProducts(data.products || []);
+                localStorage.setItem('catalog_products_cache', JSON.stringify(data.products || []));
             }
         } catch (error) {
             console.error('Failed to fetch products:', error);
@@ -407,14 +436,14 @@ function CatalogContent() {
                 )}
 
                 {/* --- MOBILE FILTER BUTTON (Fixed Bottom - Just Button) --- */}
-            <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center md:hidden pointer-events-none">
-                <button
-                    onClick={() => setIsFilterOpen(true)}
-                    className="pointer-events-auto bg-white text-black px-10 py-4 shadow-lg border border-gray-300 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors"
-                >
-                    Filter & Sort
-                </button>
-            </div>
+                <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center md:hidden pointer-events-none">
+                    <button
+                        onClick={() => setIsFilterOpen(true)}
+                        className="pointer-events-auto bg-white text-black px-10 py-4 shadow-lg border border-gray-300 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors"
+                    >
+                        Filter & Sort
+                    </button>
+                </div>
             </div>
 
             {/* Filter Drawer */}

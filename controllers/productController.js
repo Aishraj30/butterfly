@@ -5,6 +5,15 @@ import Collection from "@/models/Collection";
 import Category from "@/models/Category";
 import Inventory from "@/models/inventory";
 import { verifyToken } from "@/lib/jwt";
+import redis from "@/lib/redis";
+
+const CACHE_KEYS = {
+    PRODUCTS_ALL: 'products:all',
+    PRODUCTS_ADMIN: 'products:admin',
+    PRODUCT_DETAIL: (id) => `product:${id}`
+};
+
+const CACHE_TTL = 3600; // 1 hour
 
 // Helper: admin check
 const isAdmin = (req) => {
@@ -23,11 +32,25 @@ export class ProductController {
     // GET ALL PRODUCTS
     static async getAll(req) {
         try {
-            await connectDB();
-
             const user = isAdmin(req);
-            const filter = user && user.role === "admin" ? {} : { isActive: true };
+            const isUserAdmin = user && user.role === "admin";
+            const filter = isUserAdmin ? {} : { isActive: true };
+            const cacheKey = isUserAdmin ? CACHE_KEYS.PRODUCTS_ADMIN : CACHE_KEYS.PRODUCTS_ALL;
 
+            // Try to get from cache
+            if (redis) {
+                try {
+                    const cachedData = await redis.get(cacheKey);
+                    if (cachedData) {
+                        console.log(`[Cache] Serving ${cacheKey} from Redis`);
+                        return NextResponse.json({ success: true, products: JSON.parse(cachedData), fromCache: true });
+                    }
+                } catch (err) {
+                    console.error('[Redis] Get error:', err);
+                }
+            }
+
+            await connectDB();
             const products = await Product.find(filter);
             const allInventory = await Inventory.find({});
 
@@ -50,7 +73,24 @@ export class ProductController {
                 };
             });
 
-            return NextResponse.json({ success: true, products: transformedProducts });
+            // Save to cache
+            if (redis) {
+                try {
+                    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(transformedProducts));
+                    console.log(`[Cache] Saved ${cacheKey} to Redis`);
+                } catch (err) {
+                    console.error('[Redis] Set error:', err);
+                }
+            }
+
+            return NextResponse.json(
+                { success: true, products: transformedProducts },
+                {
+                    headers: {
+                        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=59'
+                    }
+                }
+            );
         } catch (error) {
             console.error('[API Products] GET error:', error);
             return NextResponse.json({
@@ -93,6 +133,16 @@ export class ProductController {
             delete createData.id;
 
             const product = await Product.create(createData);
+
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.PRODUCTS_ALL, CACHE_KEYS.PRODUCTS_ADMIN);
+                    console.log('[Cache] Invalidated product lists');
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
 
             // Link product to collection if collectionName is provided
             if (body.collectionName) {
@@ -145,10 +195,24 @@ export class ProductController {
 
     // GET PRODUCT BY ID
     static async getById(req, { params }) {
-        await connectDB();
         const { id } = await params;
+        const cacheKey = CACHE_KEYS.PRODUCT_DETAIL(id);
 
         try {
+            // Try to get from cache
+            if (redis) {
+                try {
+                    const cachedData = await redis.get(cacheKey);
+                    if (cachedData) {
+                        console.log(`[Cache] Serving ${cacheKey} from Redis`);
+                        return NextResponse.json({ success: true, data: JSON.parse(cachedData), fromCache: true });
+                    }
+                } catch (err) {
+                    console.error('[Redis] Get error:', err);
+                }
+            }
+
+            await connectDB();
             const product = await Product.findById(id);
             if (!product) {
                 return NextResponse.json(
@@ -183,7 +247,24 @@ export class ProductController {
                 }))
             };
 
-            return NextResponse.json({ success: true, data: transformedProduct });
+            // Save to cache
+            if (redis) {
+                try {
+                    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(transformedProduct));
+                    console.log(`[Cache] Saved ${cacheKey} to Redis`);
+                } catch (err) {
+                    console.error('[Redis] Set error:', err);
+                }
+            }
+
+            return NextResponse.json(
+                { success: true, data: transformedProduct },
+                {
+                    headers: {
+                        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=59'
+                    }
+                }
+            );
         } catch (error) {
             console.error(`[ProductController] getById error for ${id}:`, error);
             return NextResponse.json({ success: false, message: error.message }, { status: 500 });
@@ -228,6 +309,20 @@ export class ProductController {
                     { message: "Product not found" },
                     { status: 404 }
                 );
+            }
+
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(
+                        CACHE_KEYS.PRODUCTS_ALL,
+                        CACHE_KEYS.PRODUCTS_ADMIN,
+                        CACHE_KEYS.PRODUCT_DETAIL(id)
+                    );
+                    console.log(`[Cache] Invalidated product info for ${id}`);
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
             }
 
             // Upsert Collection if provided
@@ -302,6 +397,20 @@ export class ProductController {
             // }
 
             await Product.findByIdAndDelete(id);
+
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(
+                        CACHE_KEYS.PRODUCTS_ALL,
+                        CACHE_KEYS.PRODUCTS_ADMIN,
+                        CACHE_KEYS.PRODUCT_DETAIL(id)
+                    );
+                    console.log(`[Cache] Invalidated product lists and detail for ${id}`);
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
 
             return NextResponse.json({
                 success: true,
