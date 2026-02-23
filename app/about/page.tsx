@@ -1,5 +1,13 @@
 import React from 'react';
 
+const catalogBanners = [
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400106/butterfly-couture/1771400105742-blob.jpg",
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400121/butterfly-couture/1771400121271-blob.jpg",
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400157/butterfly-couture/1771400156846-blob.jpg",
+    "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400180/butterfly-couture/1771400180246-blob.jpg"
+];
+
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-white text-black selection:bg-black selection:text-white">
@@ -28,11 +36,12 @@ export default function AboutPage() {
       {/* 2. Our Story: Split Layout with Sharp Edges */}
       <section className="grid grid-cols-1 lg:grid-cols-2 border-b border-gray-200">
         <div className="bg-gray-50 min-h-[600px] lg:h-auto flex items-center justify-center relative overflow-hidden group">
-          {/* Image Placeholder */}
-          <div className="absolute inset-0 bg-gray-100 grayscale contrast-125" />
-          <span className="relative z-10 italic text-2xl text-gray-400">
-            [Campaign Image: Black & White]
-          </span>
+          <img 
+            src={catalogBanners[0]} 
+            alt="Campaign Image: Black & White"
+            className="absolute inset-0 w-full h-full object-cover grayscale contrast-125"
+          />
+          <div className="absolute inset-0 bg-black/20" />
         </div>
         
         <div className="flex flex-col justify-center px-6 py-20 md:px-20 lg:py-32">
@@ -135,8 +144,11 @@ export default function AboutPage() {
               <div key={member.name} className="group cursor-pointer">
                 {/* Image Aspect Ratio 3:4 for portrait fashion look */}
                 <div className="aspect-[3/4] bg-gray-100 mb-6 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-105" />
-                  {/* Overlay on hover */}
+                  <img 
+                    src={catalogBanners[1]} 
+                    alt={member.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                 </div>
                 

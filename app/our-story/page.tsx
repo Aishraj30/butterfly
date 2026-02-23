@@ -1,235 +1,125 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Heart, Sparkles } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
+import { Inter } from 'next/font/google'
+
+// Initialize Inter font
+const inter = Inter({ subsets: ['latin'], display: 'swap' });
+
+const timeline = [
+  { year: '2018', title: 'The Foundation', desc: 'Started in a small workshop with a handful of dedicated artisans who shared a singular vision for uncompromising quality.' },
+  { year: '2020', title: 'Collection I', desc: 'Launched our debut collection featuring 12 handcrafted pieces that established our architectural silhouette.' },
+  { year: '2022', title: 'Global Recognition', desc: 'Featured in major fashion weeks and received our first sustainability award for zero-waste pattern drafting.' },
+  { year: '2024', title: 'Expansion', desc: 'Opened flagship ateliers in New York, Paris, and Tokyo while maintaining our strict commitment to sustainable practices.' },
+  { year: '2026', title: 'The Future', desc: 'Continuing our mission to redefine luxury fashion through material innovation and environmental responsibility.' },
+];
+
+const principles = [
+  { title: 'Artisan Excellence', desc: 'We partner exclusively with master craftspeople. Every seam, stitch, and hem is a deliberate act of design.' },
+  { title: 'Ethical Sourcing', desc: 'Every material is sourced responsibly, ensuring fair wages and safe working conditions across our entire supply chain.' },
+  { title: 'Environmental Stewardship', desc: 'Committed to a reduced footprint through sustainable fabrication, localized production, and timeless, anti-trend design.' },
+  { title: 'The Butterfly Effect', desc: 'The butterfly represents metamorphosis. We believe fashion has the power to transform not just the exterior, but the interior.' },
+];
 
 export default function OurStoryPage() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-gray-50 border-b border-gray-200 py-6">
-        <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-center">
-          <h1 className="text-2xl font-light tracking-wide text-gray-900">OUR STORY</h1>
-        </div>
-      </div>
+    <main className={`min-h-screen bg-white text-black selection:bg-black selection:text-white ${inter.className}`}>
+      
 
-      {/* Hero Section */}
-      <div className="relative h-[60vh] bg-gradient-to-br from-gray-900 to-black">
-        <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative max-w-[1400px] mx-auto px-6 h-full flex items-center">
-          <div className="text-center text-white max-w-3xl">
-            <div className="mb-6">
-              <Sparkles className="w-12 h-12 mx-auto mb-4" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-light tracking-wide mb-4">
-              Where Artistry
-              <br />
-              Meets
-              <br />
-              Innovation
+      {/* Stark Typographic Hero */}
+      <header className="px-6 md:px-12 pt-32 pb-24 max-w-[1600px] mx-auto border-b border-black">
+        <p className="text-xs font-bold tracking-[0.2em] uppercase text-gray-400 mb-6">
+          Est. 2018
+        </p>
+        <h1 className="text-2xl md:text-xl lg:text-[10rem] font-medium tracking-tighter uppercase leading-none">
+          Our Story
+        </h1>
+      </header>
+
+      {/* The Manifesto (Split Text Block) */}
+      <section className="px-6 md:px-12 py-24 max-w-[1600px] mx-auto border-b border-black">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
+          <div>
+            <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-8">
+              The Origin
             </h2>
-            <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
-              The story of Butterfly Couture begins with a simple belief: fashion should be both beautiful and meaningful.
+            <p className="text-2xl md:text-4xl font-medium tracking-tight uppercase leading-snug">
+              Butterfly Couture emerged from a singular obsession: to redefine luxury through the lens of strict metamorphosis and artistry.
+            </p>
+          </div>
+          <div className="flex flex-col justify-end">
+            <p className="text-lg text-gray-500 leading-relaxed mb-6">
+              Founded by a third-generation designer, we grew up surrounded by the rich, demanding traditions of couture craftsmanship. We reject mass production. We believe that true luxury is quiet, consisting of details that whisper rather than shout.
+            </p>
+            <p className="text-lg text-gray-500 leading-relaxed">
+              Just as a butterfly undergoes structural transformation to become something extraordinary, we engineer garments that celebrate the journey toward one's truest self.
             </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Content */}
-      <div className="max-w-[1400px] mx-auto px-6 py-16">
-        <div className="max-w-4xl mx-auto space-y-16">
-          {/* The Beginning */}
-          <section>
-            <h2 className="text-3xl font-light tracking-wide mb-6">The Beginning</h2>
-            <div className="space-y-6">
-              <p className="text-gray-600 leading-relaxed text-lg">
-                Butterfly Couture was born from a dream to redefine luxury fashion through the lens of sustainability and artistry. 
-                Our founder, a third-generation designer, grew up surrounded by the rich traditions of couture craftsmanship.
-              </p>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                In 2018, with a small workshop and a big vision, we set out to create pieces that would not only 
-                make people look beautiful, but feel beautiful about their choices.
-              </p>
-            </div>
-          </section>
-
-          {/* Our Philosophy */}
-          <section>
-            <h2 className="text-3xl font-light tracking-wide mb-6">Our Philosophy</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-medium mb-3">Passion</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Every stitch tells a story of dedication and love for the craft
-                </p>
+      {/* Chronology (Tabular Timeline) */}
+      <section className="px-6 md:px-12 py-24 max-w-[1600px] mx-auto border-b border-black">
+        <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-12">
+          Chronology
+        </h2>
+        
+        <div className="flex flex-col">
+          {timeline.map((item, index) => (
+            <div 
+              key={item.year} 
+              className={`grid grid-cols-1 md:grid-cols-12 gap-6 py-8 border-t border-black hover:bg-gray-50 transition-colors ${index === timeline.length - 1 ? 'border-b' : ''}`}
+            >
+              <div className="md:col-span-2">
+                <span className="text-sm font-bold tracking-widest uppercase">
+                  {item.year}
+                </span>
               </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-medium mb-3">Innovation</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Pushing boundaries while respecting timeless traditions
-                </p>
+              <div className="md:col-span-4">
+                <h3 className="text-xl font-medium tracking-tight uppercase">
+                  {item.title}
+                </h3>
               </div>
-              
-              <div className="text-center">
-                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl font-bold">🌍</span>
-                </div>
-                <h3 className="text-xl font-medium mb-3">Sustainability</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Creating beauty that doesn't cost the earth
+              <div className="md:col-span-6">
+                <p className="text-gray-500 text-sm leading-relaxed max-w-xl">
+                  {item.desc}
                 </p>
               </div>
             </div>
-          </section>
-
-          {/* The Butterfly Symbol */}
-          <section>
-            <h2 className="text-3xl font-light tracking-wide mb-6">Why Butterfly?</h2>
-            <div className="bg-gray-50 p-8 rounded-lg">
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0">
-                  <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center">
-                    <span className="text-white text-4xl">🦋</span>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-600 leading-relaxed mb-4">
-                    The butterfly represents transformation, beauty, and the delicate balance between strength and grace. 
-                    These are the very qualities we embed in every piece we create.
-                  </p>
-                  <p className="text-gray-600 leading-relaxed">
-                    Just as a butterfly undergoes metamorphosis to become something extraordinary, 
-                    we believe fashion has the power to transform not just how you look, but how you feel.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Our Journey */}
-          <section>
-            <h2 className="text-3xl font-light tracking-wide mb-6">Our Journey</h2>
-            <div className="space-y-8">
-              <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                  2018
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium mb-2">The Dream</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Started in a small workshop with a handful of dedicated artisans who shared our vision.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                  2020
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium mb-2">First Collection</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Launched our debut collection featuring 12 handcrafted pieces that sold out within weeks.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                  2022
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium mb-2">International Recognition</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Featured in major fashion weeks and received our first sustainability award.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                  2024
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium mb-2">Global Expansion</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Opened flagship stores in New York, Paris, and Tokyo while maintaining our commitment to sustainable practices.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-6">
-                <div className="w-12 h-12 bg-gray-300 text-black rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                  2026
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium mb-2">The Future</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Continuing our mission to redefine luxury fashion through innovation, inclusivity, and environmental responsibility.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Our Values */}
-          <section>
-            <h2 className="text-3xl font-light tracking-wide mb-6">Our Values</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-black text-white p-6 rounded-lg">
-                <h3 className="text-xl font-medium mb-4">Artisan Excellence</h3>
-                <p className="text-gray-300 leading-relaxed">
-                  We partner with master craftspeople who share our commitment to perfection. Every piece is a work of art.
-                </p>
-              </div>
-
-              <div className="bg-gray-100 p-6 rounded-lg">
-                <h3 className="text-xl font-medium mb-4">Ethical Sourcing</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Every material is sourced responsibly, ensuring fair wages and safe working conditions for all involved in our supply chain.
-                </p>
-              </div>
-
-              <div className="bg-gray-100 p-6 rounded-lg">
-                <h3 className="text-xl font-medium mb-4">Environmental Stewardship</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  We're committed to reducing our environmental footprint through sustainable materials and responsible production methods.
-                </p>
-              </div>
-
-              <div className="bg-black text-white p-6 rounded-lg">
-                <h3 className="text-xl font-medium mb-4">Customer Experience</h3>
-                <p className="text-gray-300 leading-relaxed">
-                  Our relationship with you extends beyond the purchase. We're here to ensure every experience with Butterfly Couture is exceptional.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Join Our Story */}
-          <div className="bg-black text-white p-8 rounded-lg mt-12">
-            <h3 className="text-xl font-light mb-4 text-center">Be Part of Our Story</h3>
-            <p className="text-gray-300 mb-6 text-center">
-              Butterfly Couture is more than a brand—it's a community of dreamers, creators, and lovers of beautiful things.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact-us" className="bg-white text-black px-6 py-3 rounded hover:bg-gray-100 transition-colors">
-                Share Your Story
-              </Link>
-              <Link href="/lookbook" className="border border-white text-white px-6 py-3 rounded hover:bg-white hover:text-black transition-colors">
-                Explore Collections
-              </Link>
-            </div>
-          </div>
+          ))}
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* Core Principles (Strict Grid) */}
+      <section className="px-6 md:px-12 py-24 max-w-[1600px] mx-auto">
+        <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-12">
+          Core Principles
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 border-t border-l border-black">
+          {principles.map((principle, index) => (
+            <div 
+              key={index} 
+              className="p-8 md:p-12 border-r border-b border-black flex flex-col justify-between min-h-[300px] hover:bg-black hover:text-white transition-colors duration-500 group"
+            >
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 group-hover:text-gray-400 mb-12 block">
+                0{index + 1}
+              </span>
+              <div>
+                <h3 className="text-2xl font-medium tracking-tight uppercase mb-4">
+                  {principle.title}
+                </h3>
+                <p className="text-gray-500 group-hover:text-gray-300 transition-colors leading-relaxed text-sm max-w-sm">
+                  {principle.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+ 
+    </main>
   )
 }

@@ -8,9 +8,6 @@ export default function RefundPolicyPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-gray-50 border-b border-gray-200 py-6">
-        <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-center">
-          <h1 className="text-2xl font-light tracking-wide text-gray-900">REFUND POLICY</h1>
-        </div>
       </div>
 
       {/* Content */}
