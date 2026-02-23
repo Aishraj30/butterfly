@@ -250,7 +250,7 @@ export default function TryOnPage() {
                                     <img
                                         src={resultImage}
                                         alt="Virtual Try-On Result"
-                                        className="w-full h-full object-contain"
+                                        className="w-full h-full object-cover"
                                     />
                                     <div className="absolute bottom-4 right-4 flex gap-2">
                                         <a
@@ -275,7 +275,7 @@ export default function TryOnPage() {
                                     <img
                                         src={userImage}
                                         alt="Your Upload"
-                                        className="w-full h-full object-contain"
+                                        className="w-full h-full object-cover"
                                     />
                                     {step < 3 && (
                                         <button
