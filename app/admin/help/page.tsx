@@ -179,8 +179,8 @@ export default function HelpPage() {
             </div>
             <div>
               <h3 className="font-medium text-gray-900 dark:text-white mb-2">Phone</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">+1 (555) 123-4567</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500">Mon-Fri: 9AM-6PM EST</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">6009360597</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">Mon-Fri: 9AM-6PM IST</p>
             </div>
             <div>
               <h3 className="font-medium text-gray-900 dark:text-white mb-2">Live Chat</h3>

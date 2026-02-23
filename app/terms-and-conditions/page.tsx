@@ -292,8 +292,8 @@ export default function TermsAndConditionsPage() {
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <div className="space-y-2">
                     <p><span className="font-medium">Email:</span> legal@butterflycouture.com</p>
-                    <p><span className="font-medium">Phone:</span> 1-555-BUTTERFLY</p>
-                    <p><span className="font-medium">Address:</span> 123 Fashion Avenue, New York, NY 10001</p>
+                    <p><span className="font-medium">Phone:</span> 6009360597</p>
+                    <p><span className="font-medium">Address:</span> Opposite Mattei Building, KFC, Nongthymmai, Nongkhyriem, Shillong (Meghalaya) 793014</p>
                   </div>
                 </div>
               </div>

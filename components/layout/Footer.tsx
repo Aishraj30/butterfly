@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Instagram, Twitter, Facebook } from 'lucide-react'
+import { memo } from 'react'
 
-export function Footer() {
+const Footer = memo(function Footer() {
   const pathname = usePathname()
   const isAuthPage = pathname === '/login' || pathname === '/signup'
 
@@ -52,18 +53,18 @@ export function Footer() {
             </p>
             {/* Social Icons - Mobile */}
             <div className="flex gap-4">
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="https://www.instagram.com/butterfly1official?igsh=MWxjeGo3ZGwxeHZuOA==" className="text-gray-400 hover:text-white transition-colors">
                 <Instagram className="w-4 h-4" />
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              {/* <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                 <Twitter className="w-4 h-4" />
                 <span className="sr-only">Twitter</span>
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              </Link> */}
+              {/* <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                 <Facebook className="w-4 h-4" />
                 <span className="sr-only">Facebook</span>
-              </Link>
+              </Link> */}
             </div>
           </div>
 
@@ -104,18 +105,18 @@ export function Footer() {
               Butterfly is a premier contemporary label that aims at <span className="italic font-serif text-gray-300">reinterpreting</span> global heritage and artisanship through a lens of strict minimalist architecture.
             </p>
             <div className="flex gap-8">
-              <Link href="#" className="text-gray-500 hover:text-white transition-colors">
+              <Link href="https://www.instagram.com/butterfly1official?igsh=MWxjeGo3ZGwxeHZuOA==" className="text-gray-500 hover:text-white transition-colors">
                 <Instagram className="w-5 h-5" />
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-gray-500 hover:text-white transition-colors">
+              {/* <Link href="#" className="text-gray-500 hover:text-white transition-colors">
                 <Twitter className="w-5 h-5" />
                 <span className="sr-only">Twitter</span>
-              </Link>
-              <Link href="#" className="text-gray-500 hover:text-white transition-colors">
+              </Link> */}
+              {/* <Link href="#" className="text-gray-500 hover:text-white transition-colors">
                 <Facebook className="w-5 h-5" />
                 <span className="sr-only">Facebook</span>
-              </Link>
+              </Link> */}
             </div>
           </div>
 
@@ -181,4 +182,6 @@ export function Footer() {
       </div>
     </footer>
   )
-}
+})
+
+export default Footer

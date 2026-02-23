@@ -179,16 +179,17 @@ export default function ContactUsPage() {
                   <Phone className="w-5 h-5 text-gray-400 mt-1" />
                   <div>
                     <p className="text-sm font-medium">Phone</p>
-                    <p className="text-gray-600">+1 (555) 123-4567</p>
-                    <p className="text-gray-500 text-xs">Mon-Fri 9AM-6PM EST</p>
+                    <p className="text-gray-600">6009360597</p>
+                    <p className="text-gray-500 text-xs">Mon-Fri 9AM-6PM IST</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-gray-400 mt-1" />
                   <div>
                     <p className="text-sm font-medium">Headquarters</p>
-                    <p className="text-gray-600">123 Fashion Avenue</p>
-                    <p className="text-gray-600">New York, NY 10001</p>
+                    <p className="text-gray-600">Opposite Mattei Building, KFC</p>
+                    <p className="text-gray-600">Nongthymmai, Nongkhyriem</p>
+                    <p className="text-gray-600">Shillong (Meghalaya) 793014</p>
                     <p className="text-gray-500 text-xs">By appointment only</p>
                   </div>
                 </div>

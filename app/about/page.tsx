@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 const catalogBanners = [
     "https://res.cloudinary.com/dgpm72swx/image/upload/v1771400048/butterfly-couture/1771400047722-blob.jpg",
@@ -176,10 +177,13 @@ export default function AboutPage() {
           </p>
           
           <div className="pt-8 flex justify-center">
-            <button className="group relative inline-flex h-12 items-center justify-center overflow-hidden border border-white bg-transparent px-8 font-medium text-white transition-all duration-300 hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 z-10">
+            <Link 
+              href="/press"
+              className="group relative inline-flex h-12 items-center justify-center overflow-hidden border border-white bg-transparent px-8 font-medium text-white transition-all duration-300 hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 z-10"
+            >
               <span className="mr-2 uppercase tracking-widest text-sm">View Press Kit</span>
               <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </button>
+            </Link>
           </div>
         </div>
       </section>
