@@ -4,11 +4,24 @@ import OpenAI from 'openai'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 const WHISPER_MODEL = process.env.WHISPER_MODEL || 'whisper-1'
 
+// Check if API key is available
+if (!OPENAI_API_KEY) {
+    console.error('OPENAI_API_KEY environment variable is not set')
+}
+
 const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY
+    apiKey: OPENAI_API_KEY || 'dummy-key' // Fallback to prevent crash
 })
 
 export async function POST(request: NextRequest) {
+    // Check if API key is available
+    if (!OPENAI_API_KEY) {
+        return NextResponse.json({ 
+            success: false, 
+            error: 'OpenAI API key is not configured' 
+        }, { status: 500 })
+    }
+
     try {
         const formData = await request.formData()
         const file = formData.get('file') as File
