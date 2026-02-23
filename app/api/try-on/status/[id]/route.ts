@@ -1,6 +1,7 @@
 
+
 import { NextResponse } from 'next/server';
-import { getTryOnPredictionStatus } from '@/lib/replicate';
+import { getTryOnStatus } from '@/lib/fashn';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
     const { id } = await params;
@@ -13,29 +14,18 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
 
     try {
-        const prediction = await getTryOnPredictionStatus(id);
+        const response = await getTryOnStatus(id);
 
-        console.log(`Replicate status for ${id}:`, prediction.status);
+        console.log(`Fashn status for ${id}:`, response.status);
 
-        // Map Replicate status to Frontend expectation
-        // Frontend expects: 'completed'
-        // Replicate returns: 'succeeded'
+        // Fashn response already has id, status, output, etc.
+        // Match the frontend expectation: 'completed'
+        // Fashn returns: 'starting', 'processing', 'completed', 'failed', 'cancelled'
 
-        let status = prediction.status;
-        if (status === 'succeeded') status = 'completed';
-
-        // Replicate output is usually an array of URLs [url]
-        // Check if output is string or array. For IDM-VTON it's typically an array.
-
-        return NextResponse.json({
-            id: prediction.id,
-            status: status,
-            output: prediction.output ? (Array.isArray(prediction.output) ? prediction.output : [prediction.output]) : null,
-            error: prediction.error
-        });
+        return NextResponse.json(response);
 
     } catch (error: any) {
-        console.error('Error fetching try-on status:', error);
+        console.error('Error fetching Fashn try-on status:', error);
         return NextResponse.json(
             { error: error.message || 'Internal server error' },
             { status: 500 }

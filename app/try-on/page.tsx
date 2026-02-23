@@ -22,6 +22,25 @@ export default function TryOnPage() {
     const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const productScrollRef = useRef<HTMLDivElement>(null);
+
+    // Isolate wheel scroll to the product box — prevents page scroll while cursor is inside
+    useEffect(() => {
+        const el = productScrollRef.current;
+        if (!el) return;
+        const handler = (e: WheelEvent) => {
+            const { scrollTop, scrollHeight, clientHeight } = el;
+            const atTop = scrollTop === 0 && e.deltaY < 0;
+            const atBottom = scrollTop + clientHeight >= scrollHeight - 1 && e.deltaY > 0;
+            // Only let scroll escape when the box is already at its boundary
+            if (!atTop && !atBottom) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        };
+        el.addEventListener('wheel', handler, { passive: false });
+        return () => el.removeEventListener('wheel', handler);
+    }, []);
 
     // Fetch products on mount
     useEffect(() => {
@@ -70,6 +89,13 @@ export default function TryOnPage() {
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Client-side 5MB size limit check
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image too large. Please use an image under 5MB.');
+            e.target.value = '';
+            return;
+        }
 
         setIsUploading(true);
         const formData = new FormData();
@@ -174,8 +200,8 @@ export default function TryOnPage() {
     });
 
     return (
-        <div className="min-h-screen bg-white pt-24 pb-12 px-4 md:px-8">
-            <div className="max-w-6xl mx-auto">
+        <div className="min-h-screen bg-white flex flex-col pt-20 pb-16">
+            <div className="max-w-6xl mx-auto flex flex-col flex-1 px-4 md:px-8">
                 <header className="mb-12 text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -214,17 +240,17 @@ export default function TryOnPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1 overflow-hidden">
 
                     {/* LEFT COLUMN: User Image & Result */}
-                    <div className="lg:sticky lg:top-32 space-y-8">
-                        <div className="relative aspect-[3/4] bg-gray-50 rounded-2xl overflow-hidden border border-gray-200 group">
+                    <div className="space-y-4 overflow-y-auto h-full pr-2">
+                        <div className="relative aspect-[3/4] bg-neutral-100 rounded-2xl overflow-hidden border border-gray-200 group">
                             {step === 3 && resultImage ? (
                                 <div className="relative w-full h-full">
                                     <img
                                         src={resultImage}
                                         alt="Virtual Try-On Result"
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-contain"
                                     />
                                     <div className="absolute bottom-4 right-4 flex gap-2">
                                         <a
@@ -249,7 +275,7 @@ export default function TryOnPage() {
                                     <img
                                         src={userImage}
                                         alt="Your Upload"
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-contain"
                                     />
                                     {step < 3 && (
                                         <button
@@ -269,7 +295,7 @@ export default function TryOnPage() {
                                         <Camera className="w-8 h-8 text-gray-400" />
                                     </div>
                                     <p className="text-sm font-bold tracking-widest uppercase">Upload Your Photo</p>
-                                    <p className="text-xs text-gray-500 mt-2">Full body shot works best</p>
+                                    <p className="text-xs text-gray-500 mt-2">Full body shot works best · Max 5MB</p>
                                 </div>
                             )}
 
@@ -315,7 +341,7 @@ export default function TryOnPage() {
                     </div>
 
                     {/* RIGHT COLUMN: Product Selection */}
-                    <div className="space-y-8">
+                    <div className="flex flex-col h-full overflow-hidden">
                         {step === 1 && (
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
@@ -361,11 +387,12 @@ export default function TryOnPage() {
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className={step === 3 ? 'opacity-50 pointer-events-none' : ''}
+                                className={`flex flex-col ${step === 3 ? 'opacity-50 pointer-events-none' : ''}`}
                             >
-                                <div className="flex items-center justify-between mb-6">
+                                {/* Header: Title + Filters */}
+                                <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-xl font-serif">Select Outfit</h2>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 flex-wrap">
                                         {['all', 'tops', 'bottoms', 'dresses'].map(cat => (
                                             <button
                                                 key={cat}
@@ -378,51 +405,61 @@ export default function TryOnPage() {
                                     </div>
                                 </div>
 
-                                {isLoadingProducts ? (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                        {[1, 2, 3, 4, 5, 6].map(i => (
-                                            <div key={i} className="aspect-[3/4] bg-gray-100 animate-pulse rounded-lg"></div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                                        {filteredProducts.map(product => (
-                                            <div
-                                                key={(product as any)._id || product.id}
-                                                onClick={() => setSelectedProduct(product)}
-                                                className={`group cursor-pointer relative rounded-lg overflow-hidden border-2 transition-all ${selectedProduct === product ? 'border-black ring-1 ring-black' : 'border-transparent hover:border-gray-200'}`}
-                                            >
-                                                <div className="aspect-[3/4] bg-gray-100 relative">
-                                                    <img
-                                                        src={product.images?.[0] || product.image || ""}
-                                                        alt={product.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    {selectedProduct === product && (
-                                                        <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                                                            <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
-                                                                <Sparkles size={14} />
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="p-3 bg-white">
-                                                    <p className="text-xs font-bold truncate">{product.name}</p>
-                                                    <p className="text-[10px] text-gray-500">₹{product.price}</p>
-                                                </div>
+                                {/* Scrollable Product Box */}
+                                <div className="border border-gray-200 rounded-2xl bg-gray-50 overflow-hidden">
+                                    <div
+                                        ref={productScrollRef}
+                                        className="overflow-y-auto p-4"
+                                        style={{ height: '480px', overscrollBehavior: 'contain' }}
+                                    >
+                                        {isLoadingProducts ? (
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                {[1, 2, 3, 4, 5, 6].map(i => (
+                                                    <div key={i} className="aspect-[3/4] bg-gray-200 animate-pulse rounded-lg"></div>
+                                                ))}
                                             </div>
-                                        ))}
+                                        ) : (
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                {filteredProducts.map(product => (
+                                                    <div
+                                                        key={(product as any)._id || product.id}
+                                                        onClick={() => setSelectedProduct(product)}
+                                                        className={`group cursor-pointer relative rounded-xl overflow-hidden border-2 transition-all bg-white shadow-sm ${selectedProduct === product ? 'border-black ring-1 ring-black' : 'border-transparent hover:border-gray-300 hover:shadow-md'}`}
+                                                    >
+                                                        <div className="aspect-[3/4] bg-gray-100 relative">
+                                                            <img
+                                                                src={product.images?.[0] || product.image || ""}
+                                                                alt={product.name}
+                                                                className="w-full h-full object-contain"
+                                                            />
+                                                            {selectedProduct === product && (
+                                                                <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                                                                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
+                                                                        <Sparkles size={14} />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="p-3">
+                                                            <p className="text-xs font-bold truncate">{product.name}</p>
+                                                            <p className="text-[10px] text-gray-500">₹{product.price}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </div>
 
+                                {/* Generate Look Bar */}
                                 {step === 2 && (
-                                    <div className="sticky bottom-0 bg-white/80 backdrop-blur-lg p-4 -mx-4 md:-mx-8 border-t border-gray-100 mt-8 flex items-center justify-between">
+                                    <div className="mt-4 bg-white border border-gray-100 rounded-xl p-4 flex items-center justify-between shadow-sm">
                                         <div className="flex items-center gap-3">
                                             {selectedProduct ? (
                                                 <>
                                                     <img
                                                         src={selectedProduct.images?.[0] || selectedProduct.image || ""}
-                                                        className="w-10 h-10 rounded object-cover border border-gray-200"
+                                                        className="w-10 h-10 rounded-lg object-cover border border-gray-200"
                                                         alt=""
                                                     />
                                                     <div className="hidden sm:block">
@@ -437,7 +474,7 @@ export default function TryOnPage() {
                                         <button
                                             onClick={handleGenerate}
                                             disabled={!selectedProduct || !userImage}
-                                            className="px-8 py-3 bg-black text-white font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            className="px-8 py-3 bg-black text-white font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 rounded-lg"
                                         >
                                             <Sparkles size={16} />
                                             Generate Look

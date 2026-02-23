@@ -4,9 +4,6 @@ export interface FashnTryOnParams {
     garment_image: string;
     category: 'tops' | 'bottoms' | 'one-pieces';
     cover_feet?: boolean;
-    adjust_hands?: boolean;
-    restore_background?: boolean;
-    restore_details?: boolean;
 }
 
 export interface FashnResponse {
@@ -17,6 +14,7 @@ export interface FashnResponse {
 }
 
 const FASHN_API_URL = 'https://api.fashn.ai/v1';
+
 
 export async function createTryOn(params: FashnTryOnParams): Promise<FashnResponse> {
     const apiKey = process.env.FASHN_API_KEY;
@@ -33,13 +31,15 @@ export async function createTryOn(params: FashnTryOnParams): Promise<FashnRespon
         body: JSON.stringify(params),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'Failed to start try-on generation');
+        throw new Error(data.error?.message || data.message || 'Failed to start try-on generation');
     }
 
-    return response.json();
+    return data;
 }
+
 
 export async function getTryOnStatus(id: string): Promise<FashnResponse> {
     const apiKey = process.env.FASHN_API_KEY;
@@ -54,10 +54,11 @@ export async function getTryOnStatus(id: string): Promise<FashnResponse> {
         },
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'Failed to get try-on status');
+        throw new Error(data.error?.message || data.message || 'Failed to get try-on status');
     }
 
-    return response.json();
+    return data;
 }

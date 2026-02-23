@@ -9,6 +9,9 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Increase Next.js route timeout
+export const maxDuration = 300; // 5 minutes
+
 export async function POST(req: Request) {
     try {
         const formData = await req.formData();
@@ -21,12 +24,25 @@ export async function POST(req: Request) {
             );
         }
 
+        // Check file size - cap at 5MB
+        if (file.size > 5 * 1024 * 1024) {
+            return NextResponse.json(
+                { error: 'Image too large. Please use an image under 5MB.' },
+                { status: 400 }
+            );
+        }
+
         const buffer = await file.arrayBuffer();
         const base64String = Buffer.from(buffer).toString('base64');
         const dataURI = `data:${file.type};base64,${base64String}`;
 
         const uploadResponse = await cloudinary.uploader.upload(dataURI, {
             folder: 'butterfly-couture/try-on',
+            // Resize on upload to keep it fast and within Cloudinary limits
+            transformation: [
+                { width: 1024, height: 1024, crop: 'limit', quality: 'auto:good' }
+            ],
+            timeout: 300000, // 5 minutes
         });
 
         return NextResponse.json({
@@ -36,7 +52,7 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error('Error uploading to Cloudinary:', error);
         return NextResponse.json(
-            { error: 'Failed to upload image' },
+            { error: 'Failed to upload image. Please try a smaller image.' },
             { status: 500 }
         );
     }
