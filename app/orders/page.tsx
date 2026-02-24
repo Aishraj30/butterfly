@@ -365,7 +365,7 @@ export default function OrdersPage() {
                           </div>
                         </div>
                         <div className="text-right ml-4">
-                          <span className="block text-sm font-semibold text-gray-900">Rp {item.price.toLocaleString()}</span>
+                          <span className="block text-sm font-semibold text-gray-900">₹{item.price.toLocaleString()}</span>
                           {(order.status !== 'cancelled') && (
                             <Button
                               variant="link"

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useToast } from '@/hooks/use-toast';
 
 interface Product {
     id: string; // Changed from number to string to match MongoDB ObjectId
@@ -52,6 +53,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     const router = useRouter();
     const { id } = use(params);
     const { addToCart } = useCart();
+    const { toast } = useToast();
     const { user } = useAuth();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
@@ -289,7 +291,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             );
 
             if (result.success) {
-                alert(`${product.name} added to cart!`);
+                toast({
+                    title: "Added to Cart",
+                    description: `${product.name} has been added to your cart.`,
+                });
             } else {
                 throw new Error(result.error || 'Failed to add to cart');
             }
