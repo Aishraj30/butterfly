@@ -121,31 +121,10 @@ export default function ProfilePage() {
 
                     {/* Header / Avatar Section */}
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12">
-                        <div className="relative group">
-                            <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shadow-gray-100">
-                                <Image
-                                    src={
-                                        avatarPreview ||
-                                        user.avatar ||
-                                        `https://ui-avatars.com/api/?name=${user.name}&background=000&color=fff`
-                                    }
-                                    alt={user.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            {/* Black edit dot (decorative) */}
-                            {isEditing && (
-                                <label className="absolute bottom-1 right-1 w-8 h-8 bg-black rounded-full flex items-center justify-center border-2 border-white text-white cursor-pointer hover:bg-gray-800 transition-colors shadow-md">
-                                    <Camera className="w-4 h-4" />
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleAvatarChange}
-                                        className="hidden"
-                                    />
-                                </label>
-                            )}
+                        <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shadow-gray-100 bg-black flex items-center justify-center">
+                            <span className="text-white text-2xl font-bold uppercase">
+                                {user?.name?.charAt(0) || 'U'}
+                            </span>
                         </div>
 
                         <div className="text-center md:text-left pt-2 flex-1">

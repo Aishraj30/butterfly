@@ -2,10 +2,14 @@
 
 import Link from 'next/link'
 import { ArrowLeft, FileText, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Inter } from 'next/font/google'
+
+// Initialize Inter font at module scope (required by Next.js)
+const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export default function TermsAndConditionsPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen bg-white ${inter.className}`}>
       {/* Header */}
       <div className="bg-gray-50 border-b border-gray-200 py-6">
         <div className="max-w-[1400px] mx-auto px-6 mt-8 flex items-center justify-center">

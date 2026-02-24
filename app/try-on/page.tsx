@@ -5,6 +5,10 @@ import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Camera, Shirt, Sparkles, RefreshCw, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/lib/products';
+import { Inter } from 'next/font/google';
+
+// Initialize Inter font
+const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export default function TryOnPage() {
     const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -200,7 +204,7 @@ export default function TryOnPage() {
     });
 
     return (
-        <div className="min-h-screen bg-white flex flex-col pt-20 pb-16">
+        <div className={`min-h-screen bg-white flex flex-col pt-20 pb-16 ${inter.className}`}>
             <div className="max-w-6xl mx-auto flex flex-col flex-1 px-4 md:px-8">
                 <header className="mb-12 text-center">
                     <motion.div

@@ -109,23 +109,11 @@ export default function OrderDetailsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
-                            <p className="text-sm text-gray-600 mt-1">View order information and status</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     {/* Desktop Sidebar */}
                     <div className="hidden lg:block lg:col-span-3">
-                        <AccountSidebar />
+                        <AccountSidebar activePage="orders" />
                     </div>
 
                     {/* Main Content */}
@@ -166,7 +154,7 @@ export default function OrderDetailsPage() {
                                                     <div className="text-sm text-gray-500 space-x-2">
                                                         <span>Qty: {item.quantity}</span>
                                                         <span>•</span>
-                                                        <span>Price: Rp {item.price.toLocaleString()}</span>
+                                                        <span>Price: ₹{item.price.toLocaleString()}</span>
                                                     </div>
                                                     {(item.size || item.color || item.customSize) && (
                                                         <div className="text-xs text-gray-400 mt-1">
@@ -187,7 +175,7 @@ export default function OrderDetailsPage() {
                                                 </div>
 
                                                 <div className="flex items-center gap-4 w-full sm:w-auto mt-2 sm:mt-0">
-                                                    <p className="font-medium">Rp {(item.price * item.quantity).toLocaleString()}</p>
+                                                    <p className="font-medium">₹{(item.price * item.quantity).toLocaleString()}</p>
 
                                                     {/* Review Button - Only if Delivered */}
                                                     {order.status === 'delivered' && (
@@ -273,16 +261,16 @@ export default function OrderDetailsPage() {
                                     <CardContent className="space-y-3">
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-500">Subtotal</span>
-                                            <span>Rp {order.total.toLocaleString()}</span>
+                                            <span>₹{order.total.toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between text-sm">
                                             <span className="text-gray-500">Shipping</span>
-                                            <span>Rp 0</span> {/* Assuming free shipping or included */}
+                                            <span>₹0</span> {/* Assuming free shipping or included */}
                                         </div>
                                         <Separator className="my-2" />
                                         <div className="flex justify-between font-bold text-lg">
                                             <span>Total</span>
-                                            <span>Rp {order.total.toLocaleString()}</span>
+                                            <span>₹{order.total.toLocaleString()}</span>
                                         </div>
                                     </CardContent>
                                 </Card>
