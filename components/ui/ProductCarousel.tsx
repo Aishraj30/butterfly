@@ -24,24 +24,31 @@ interface ProductCarouselProps {
 
 function CarouselItem({ product }: { product: Product }) {
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [timerFinished, setTimerFinished] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (product.videoUrl) {
-      const timer = setTimeout(() => {
-        setTimerFinished(true);
-      }, 5000);
-      return () => clearTimeout(timer);
+    if (videoRef.current) {
+      if (isHovered) {
+        videoRef.current.play().catch(() => { });
+      } else {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
     }
-  }, [product.videoUrl]);
+  }, [isHovered]);
 
   return (
-    <div className="flex-none w-[80vw] md:w-[calc(25%-2px)] sm:w-[calc(25%-2px)] md:w-[calc(30%-2px)] lg:w-[calc(22%-2px)] snap-start group px-[2px]">
+    <div
+      className="flex-none w-[80vw] md:w-[calc(25%-2px)] sm:w-[calc(25%-2px)] md:w-[calc(30%-2px)] lg:w-[calc(22%-2px)] snap-start group px-[2px]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Link href={`/product/${product.id}`} className="cursor-pointer group mb-1 flex flex-col h-full">
         {/* Main Media Container */}
         <div className="relative aspect-[3/4] md:h-[75vh] overflow-hidden rounded-sm bg-gray-100 group/img">
           {/* Images */}
-          <div className={`relative w-full h-full transition-opacity duration-1000 ${videoLoaded && timerFinished ? 'opacity-0' : 'opacity-100'}`}>
+          <div className={`relative w-full h-full transition-opacity duration-300 ${isHovered && videoLoaded ? 'opacity-0' : 'opacity-100'}`}>
             <Image
               src={product.images[0]}
               alt={product.name}
@@ -49,7 +56,7 @@ function CarouselItem({ product }: { product: Product }) {
               className="object-cover object-top"
               priority
             />
-            {product.images.length > 1 && !timerFinished && (
+            {product.images.length > 1 && !isHovered && (
               <Image
                 src={product.images[1]}
                 alt={`${product.name} - Alternate`}
@@ -61,25 +68,17 @@ function CarouselItem({ product }: { product: Product }) {
 
           {/* Video Overlay */}
           {product.videoUrl && (
-            <div className={`absolute inset-0 z-10 transition-opacity duration-1000 ${videoLoaded && timerFinished ? 'opacity-100' : 'opacity-0'}`}>
+            <div className={`absolute inset-0 z-10 transition-opacity duration-300 ${isHovered && videoLoaded ? 'opacity-100' : 'opacity-0'}`}>
               <video
+                ref={videoRef}
                 src={product.videoUrl}
-                autoPlay
                 muted
                 loop
                 playsInline
+                preload="auto"
                 onCanPlay={() => setVideoLoaded(true)}
                 className="w-full h-full object-cover"
               />
-            </div>
-          )}
-
-          {/* Experience Badge */}
-          {product.videoUrl && !timerFinished && (
-            <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="px-3 py-1 bg-black/40 backdrop-blur-sm text-white text-[8px] font-bold tracking-widest rounded-full uppercase">
-                Video Loading...
-              </div>
             </div>
           )}
         </div>
