@@ -1,6 +1,7 @@
 'use server'
 
 import { createContactSubmission, createOrder, getCart, clearCart, calculateCartTotal, getShippingCost, calculateTax } from '@/lib/db'
+import { sendEmail } from '@/lib/mail'
 
 export async function submitContactForm(formData: {
   name: string
@@ -15,6 +16,35 @@ export async function submitContactForm(formData: {
       subject: formData.subject,
       message: formData.message,
     })
+
+    // Send notification email to admin
+    await sendEmail({
+      to: "aishubamoriya@gmail.com",
+      subject: `New Contact Form Submission: ${formData.subject}`,
+      html: `
+          <h3>New Inquiry from ${formData.name}</h3>
+          <p><strong>Email:</strong> ${formData.email}</p>
+          <p><strong>Subject:</strong> ${formData.subject}</p>
+          <p><strong>Message:</strong></p>
+          <p>${formData.message}</p>
+      `,
+      text: `New Inquiry from ${formData.name}\nEmail: ${formData.email}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`,
+    });
+
+    // Send confirmation email to user
+    await sendEmail({
+      to: formData.email,
+      subject: `We've received your message - Butterfly Couture`,
+      html: `
+          <h3>Hello ${formData.name},</h3>
+          <p>Thank you for reaching out to Butterfly Couture.</p>
+          <p>We've received your inquiry regarding "<strong>${formData.subject}</strong>" and our team will get back to you within 24 hours.</p>
+          <br/>
+          <p>Best Regards,</p>
+          <p>Team Butterfly</p>
+      `,
+      text: `Hello ${formData.name},\n\nThank you for reaching out to Butterfly Couture. We've received your inquiry regarding "${formData.subject}" and our team will get back to you within 24 hours.\n\nBest Regards,\nTeam Butterfly`,
+    });
 
     return {
       success: true,

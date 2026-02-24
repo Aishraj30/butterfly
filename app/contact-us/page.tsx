@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Phone, MapPin, Send } from 'lucide-react'
 
@@ -13,6 +13,22 @@ export default function ContactUsPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState('')
+  const [settings, setSettings] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch('/api/settings')
+        const data = await res.json()
+        if (data.success) {
+          setSettings(data.data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch settings:', err)
+      }
+    }
+    fetchSettings()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,13 +80,12 @@ export default function ContactUsPage() {
           <div className="lg:col-span-2">
             <div className="max-w-2xl">
               <h2 className="text-3xl font-light tracking-wide mb-8">Get in Touch</h2>
-              
+
               {submitMessage && (
-                <div className={`p-4 rounded-lg mb-6 ${
-                  submitMessage.includes('Thank you') 
-                    ? 'bg-green-50 text-green-700 border border-green-200' 
-                    : 'bg-red-50 text-red-700 border border-red-200'
-                }`}>
+                <div className={`p-4 rounded-lg mb-6 ${submitMessage.includes('Thank you')
+                  ? 'bg-green-50 text-green-700 border border-green-200'
+                  : 'bg-red-50 text-red-700 border border-red-200'
+                  }`}>
                   {submitMessage}
                 </div>
               )}
@@ -171,7 +186,7 @@ export default function ContactUsPage() {
                   <Mail className="w-5 h-5 text-gray-400 mt-1" />
                   <div>
                     <p className="text-sm font-medium">Email</p>
-                    <p className="text-gray-600">hello@butterflycouture.com</p>
+                    <p className="text-gray-600">{settings?.contactEmail || 'hello@butterflycouture.com'}</p>
                     <p className="text-gray-500 text-xs">Response within 24 hours</p>
                   </div>
                 </div>
@@ -179,18 +194,28 @@ export default function ContactUsPage() {
                   <Phone className="w-5 h-5 text-gray-400 mt-1" />
                   <div>
                     <p className="text-sm font-medium">Phone</p>
-                    <p className="text-gray-600">6009360597</p>
-                    <p className="text-gray-500 text-xs">Mon-Fri 9AM-6PM IST</p>
+                    <p className="text-gray-600">{settings?.contactPhone || '6009360597'}</p>
+                    <p className="text-gray-500 text-xs">{settings?.businessHours?.weekday || 'Mon-Fri 9AM-6PM IST'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-gray-400 mt-1" />
                   <div>
                     <p className="text-sm font-medium">Headquarters</p>
-                    <p className="text-gray-600">Opposite Mattei Building, KFC</p>
-                    <p className="text-gray-600">Nongthymmai, Nongkhyriem</p>
-                    <p className="text-gray-600">Shillong (Meghalaya) 793014</p>
-                    <p className="text-gray-500 text-xs">By appointment only</p>
+                    {settings?.address ? (
+                      <>
+                        <p className="text-gray-600">{settings.address.line1}</p>
+                        <p className="text-gray-600">{settings.address.line2}</p>
+                        <p className="text-gray-600">{settings.address.city} ({settings.address.state}) {settings.address.pincode}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-gray-600">Opposite Mattei Building, KFC</p>
+                        <p className="text-gray-600">Nongthymmai, Nongkhyriem</p>
+                        <p className="text-gray-600">Shillong (Meghalaya) 793014</p>
+                      </>
+                    )}
+                    <p className="text-gray-500 text-xs">{settings?.businessHours?.weekend || 'By appointment only'}</p>
                   </div>
                 </div>
               </div>

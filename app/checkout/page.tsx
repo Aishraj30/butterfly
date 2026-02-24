@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { BackToHomeButton } from '@/components/ui/BackToHomeButton';
 
-const steps = ['Information', 'Shipping', 'Payment', 'Success'];
+const steps = ['Information', 'Payment', 'Success'];
 
 export default function CheckoutPage() {
   const { cart, clearCart, isLoading: isCartLoading } = useCart();
@@ -114,7 +114,7 @@ export default function CheckoutPage() {
       const result = await response.json();
       if (result.success) {
         setOrderData(result.data);
-        nextStep(); // Go to Shipping
+        nextStep(); // Go to Payment
       } else {
         alert(result.error || 'Failed to place order');
       }
@@ -229,36 +229,12 @@ export default function CheckoutPage() {
                 disabled={isSubmitting || cart.items.length === 0}
                 className="w-full bg-black text-white py-4 font-bold tracking-widest hover:bg-gray-800 transition-colors mt-8 flex justify-center items-center"
               >
-                {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : 'CONTINUE TO DELIVERY'}
+                {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : 'CONTINUE TO PAYMENT'}
               </button>
             </div>
           )}
 
           {currentStep === 1 && (
-            <div className="space-y-6">
-              <h2 className="font-sans text-3xl text-gray-800 mb-6 uppercase tracking-wider">SHIPPING DELIVERY</h2>
-              <div className="space-y-3">
-                <label className="flex items-center gap-4 bg-white p-4 border border-gray-200 cursor-pointer">
-                  <input type="radio" name="shippingMethod" defaultChecked />
-                  <span className="font-bold uppercase tracking-widest text-sm">JNE EXPRESS</span>
-                  <span className="ml-auto text-gray-500">INR 20,000</span>
-                </label>
-                <label className="flex items-center gap-4 bg-white p-4 border border-gray-200 cursor-pointer">
-                  <input type="radio" name="shippingMethod" />
-                  <span className="font-bold uppercase tracking-widest text-sm">J&T PRIORITY</span>
-                  <span className="ml-auto text-gray-500">INR 22,000</span>
-                </label>
-              </div>
-              <button
-                onClick={nextStep}
-                className="w-full bg-black text-white py-4 font-bold tracking-widest hover:bg-gray-800 transition-colors mt-8"
-              >
-                CONTINUE TO PAYMENT
-              </button>
-            </div>
-          )}
-
-          {currentStep === 2 && (
             <div className="space-y-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="font-sans text-3xl text-gray-800 uppercase tracking-wider">SECURE PAYMENT</h2>
@@ -337,7 +313,7 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          {currentStep === 3 && (
+          {currentStep === 2 && (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
               <CheckCircle size={64} className="text-green-500 mb-6" />
               <h2 className="font-sans text-4xl text-gray-800 mb-4">PAYMENT SUCCESS!</h2>
@@ -356,7 +332,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Order Summary Sidebar (Hidden on success) */}
-        {currentStep < 3 && (
+        {currentStep < 2 && (
           <div className="w-full lg:w-[350px]">
             <h3 className="text-xs font-bold text-gray-400 mb-6 tracking-[0.2em]">ORDER SUMMARY</h3>
             <div className="space-y-6">
