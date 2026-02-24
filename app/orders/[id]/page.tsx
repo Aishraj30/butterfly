@@ -109,23 +109,11 @@ export default function OrderDetailsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
-                            <p className="text-sm text-gray-600 mt-1">View order information and status</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     {/* Desktop Sidebar */}
                     <div className="hidden lg:block lg:col-span-3">
-                        <AccountSidebar />
+                        <AccountSidebar activePage="orders" />
                     </div>
 
                     {/* Main Content */}

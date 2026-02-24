@@ -39,13 +39,10 @@ export function AccountSidebar({ activePage }: AccountSidebarProps) {
             
             {/* Profile Summary */}
             <div className="text-center mb-8 px-6">
-                <div className="relative h-16 w-16 mx-auto mb-3">
-                    <Image
-                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=f9fafb&color=111827`}
-                        alt={user?.name || 'User'}
-                        fill
-                        className="rounded-full object-cover border border-gray-100"
-                    />
+                <div className="relative h-16 w-16 mx-auto mb-3 rounded-full overflow-hidden border-2 border-gray-100 bg-black flex items-center justify-center">
+                    <span className="text-white text-xl font-bold uppercase">
+                        {user?.name?.charAt(0) || 'U'}
+                    </span>
                 </div>
                 <h3 className="text-sm font-medium text-gray-900 tracking-wide mb-0.5">
                     {user?.name || 'Guest User'}
