@@ -17,7 +17,7 @@ export default function AboutPage() {
       <section className="border-b border-gray-200">
         <div className="max-w-[1400px] mx-auto px-6 md:px-12 pt-32 pb-20">
           <p className="text-xs font-bold tracking-[0.2em] uppercase text-gray-500 mb-6">
-            Est. 2018
+            Est. 2022
           </p>
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-medium tracking-tighter leading-[0.9] mb-12">
             BUTTERFLY <br />

@@ -162,34 +162,6 @@ export default function LookbookDetailPage() {
               {collection.description}
             </p>
           </div>
-          
-          <div>
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-6">
-              Credits
-            </h2>
-            <dl className="space-y-3">
-              <div className="flex justify-between">
-                <dt className="text-sm text-gray-500">Photographer</dt>
-                <dd className="text-sm font-medium">{collection.details.photographer}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-sm text-gray-500">Stylist</dt>
-                <dd className="text-sm font-medium">{collection.details.stylist}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-sm text-gray-500">Model</dt>
-                <dd className="text-sm font-medium">{collection.details.model}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-sm text-gray-500">Location</dt>
-                <dd className="text-sm font-medium">{collection.details.location}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-sm text-gray-500">Date</dt>
-                <dd className="text-sm font-medium">{collection.details.date}</dd>
-              </div>
-            </dl>
-          </div>
         </div>
       </section>
 

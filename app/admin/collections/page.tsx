@@ -75,10 +75,6 @@ export default function AdminCollectionsPage() {
     products: [] as string[]
   })
 
-  // Product Selection State
-  const [productSearch, setProductSearch] = useState('')
-  const [showProductSelector, setShowProductSelector] = useState(false)
-
   // Image Upload State
   const [uploadingImage, setUploadingImage] = useState(false)
   const [compressionInfo, setCompressionInfo] = useState('')
@@ -94,14 +90,10 @@ export default function AdminCollectionsPage() {
   const fetchCollections = async () => {
     try {
       const response = await fetch('/api/collections', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       })
       const data = await response.json()
-      if (data.success) {
-        setCollections(data.collections)
-      }
+      if (data.success) setCollections(data.collections)
     } catch (error) {
       console.error('Failed to fetch collections:', error)
     } finally {
@@ -112,54 +104,12 @@ export default function AdminCollectionsPage() {
   const fetchAllProducts = async () => {
     try {
       const response = await fetch('/api/products', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       })
       const data = await response.json()
-      if (data.success) {
-        setAllProducts(data.products)
-      }
+      if (data.success) setAllProducts(data.products)
     } catch (error) {
       console.error('Failed to fetch products:', error)
-    }
-  }
-
-  const moveReorder = async (index: number, direction: 'up' | 'down') => {
-    if (searchTerm) return; // disable during search
-    if (direction === 'up' && index === 0) return;
-    if (direction === 'down' && index === collections.length - 1) return;
-
-    const newCollections = [...collections];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-
-    const temp = newCollections[index];
-    newCollections[index] = newCollections[targetIndex];
-    newCollections[targetIndex] = temp;
-
-    setCollections(newCollections);
-    setHasUnsavedOrder(true);
-  }
-
-  const saveOrder = async () => {
-    setIsSavingOrder(true);
-    try {
-      const response = await fetch('/api/collections/reorder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ orderedIds: collections.map(c => c._id) })
-      });
-      if (!response.ok) throw new Error('Failed to reorder');
-      setHasUnsavedOrder(false);
-      fetchCollections();
-    } catch (error) {
-      console.error('Failed to save reorder:', error);
-      fetchCollections();
-    } finally {
-      setIsSavingOrder(false);
     }
   }
 
@@ -168,60 +118,71 @@ export default function AdminCollectionsPage() {
     setFormData({ ...formData, name, slug })
   }
 
+  const moveReorder = (index: number, direction: 'up' | 'down') => {
+    if (searchTerm) return
+    if (direction === 'up' && index === 0) return
+    if (direction === 'down' && index === collections.length - 1) return
+
+    const newCollections = [...collections]
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    const temp = newCollections[index]
+    newCollections[index] = newCollections[targetIndex]
+    newCollections[targetIndex] = temp
+
+    setCollections(newCollections)
+    setHasUnsavedOrder(true)
+  }
+
+  const saveOrder = async () => {
+    setIsSavingOrder(true)
+    try {
+      const response = await fetch('/api/collections/reorder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ orderedIds: collections.map(c => c._id) })
+      })
+      if (!response.ok) throw new Error('Failed to reorder')
+      setHasUnsavedOrder(false)
+      toast({ title: "Success", description: "Collection order saved" })
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to save order", variant: "destructive" })
+      fetchCollections()
+    } finally {
+      setIsSavingOrder(false)
+    }
+  }
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     if (!isValidImageFile(file)) {
-      alert('Please select a valid image file (JPEG, PNG, or WebP)')
+      toast({ title: "Invalid File", description: "Please use JPEG, PNG, or WebP", variant: "destructive" })
       return
     }
 
     setUploadingImage(true)
-    setCompressionInfo('')
-
     try {
-      const compressedFile = await compressImage(file, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        quality: 0.8,
-        useWebWorker: true
-      })
-
-      const originalSize = formatFileSize(file.size)
-      const compressedSize = formatFileSize(compressedFile.size)
-      const compressionRatio = ((file.size - compressedFile.size) / file.size * 100).toFixed(1)
-      setCompressionInfo(`Original: ${originalSize} → Compressed: ${compressedSize} (${compressionRatio}% reduction)`)
-
+      const compressedFile = await compressImage(file, { maxSizeMB: 1, maxWidthOrHeight: 1920 })
       const formDataUpload = new FormData()
       formDataUpload.append('file', compressedFile)
 
       const response = await fetch('/api/upload', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formDataUpload
       })
 
       const data = await response.json()
-
       if (data.success) {
-        setFormData(prev => ({
-          ...prev,
-          bannerImage: data.url,
-          selectedVariant: null, // Reset selected variant when new image is uploaded
-          aiEnhanced: false,
-          aiVariants: []
-        }))
-        // Automatically open AI Enhancer after successful upload
+        setFormData(prev => ({ ...prev, bannerImage: data.url, aiEnhanced: false, aiVariants: [] }))
         setShowAIEnhancer(true)
-      } else {
-        alert(data.error || 'Failed to upload image')
       }
     } catch (error) {
-      console.error('Error uploading image:', error)
-      alert('Failed to upload image')
+      toast({ title: "Upload Failed", description: "Image could not be uploaded", variant: "destructive" })
     } finally {
       setUploadingImage(false)
     }
@@ -229,38 +190,12 @@ export default function AdminCollectionsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.name.trim() || !formData.slug.trim()) return
+
     setIsSubmitting(true)
-
-    console.log('Form data being submitted:', formData)
-    console.log('Editing ID:', editingId)
-
-    // Basic validation
-    if (!formData.name.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Collection name is required",
-        variant: "destructive"
-      })
-      setIsSubmitting(false)
-      return
-    }
-
-    if (!formData.slug.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Collection slug is required",
-        variant: "destructive"
-      })
-      setIsSubmitting(false)
-      return
-    }
-
     try {
       const url = editingId ? `/api/collections/${editingId}` : '/api/collections'
       const method = editingId ? 'PUT' : 'POST'
-      
-      console.log('Request URL:', url)
-      console.log('Request method:', method)
 
       const response = await fetch(url, {
         method,
@@ -271,28 +206,29 @@ export default function AdminCollectionsPage() {
         body: JSON.stringify(formData),
       })
 
-      console.log('Response status:', response.status)
       const data = await response.json()
-      console.log('Response data:', data)
       if (data.success) {
+        toast({ title: editingId ? "Updated" : "Created", description: `Collection "${formData.name}" saved.` })
         fetchCollections()
         resetForm()
-        toast({
-          title: editingId ? "Collection Updated" : "Collection Created",
-          description: `Collection "${formData.name}" has been ${editingId ? 'updated' : 'created'} successfully.`,
-        })
       } else {
-        toast({
-          title: "Error",
-          description: data.message || 'Action failed',
-          variant: "destructive"
-        })
+        throw new Error(data.message || 'Action failed')
       }
-    } catch (error) {
-      console.error('Error saving collection:', error)
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" })
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const resetForm = () => {
+    setShowForm(false)
+    setEditingId(null)
+    setFormData({
+      name: '', slug: '', description: '', bannerImage: '',
+      aiVariants: [], selectedVariant: null, aiEnhanced: false,
+      isFeatured: false, isActive: true, products: []
+    })
   }
 
   const handleEdit = (col: Collection) => {
@@ -314,91 +250,36 @@ export default function AdminCollectionsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure? This cannot be undone.')) return
-
     try {
       const response = await fetch(`/api/collections/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      const data = await response.json()
-      if (data.success) fetchCollections()
+      if ((await response.json()).success) fetchCollections()
     } catch (error) {
       console.error('Delete failed:', error)
     }
-  }
-
-  const resetForm = () => {
-    setShowForm(false)
-    setEditingId(null)
-    setFormData({
-      name: '',
-      slug: '',
-      description: '',
-      bannerImage: '',
-      aiVariants: [],
-      selectedVariant: null,
-      aiEnhanced: false,
-      isFeatured: false,
-      isActive: true,
-      products: []
-    })
-  }
-
-  const handleAIVariantSelect = (variant: AIVariant) => {
-    setFormData(prev => ({
-      ...prev,
-      selectedVariant: variant.url,
-      aiEnhanced: true
-    }))
-  }
-
-  const handleAIEnhancementComplete = (enhancement: BannerEnhancement) => {
-    setFormData(prev => ({
-      ...prev,
-      aiVariants: enhancement.variants,
-      aiEnhanced: true
-    }))
-    // Keep the enhancer open so they can see variants, 
-    // or close it if they already selected one.
-    // For now, let's keep it open to allow selection.
-  }
-
-  const toggleProduct = (productId: string) => {
-    const current = [...formData.products]
-    const index = current.indexOf(productId)
-    if (index > -1) {
-      current.splice(index, 1)
-    } else {
-      current.push(productId)
-    }
-    setFormData({ ...formData, products: current })
   }
 
   const filteredCollections = collections.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const filteredProducts = allProducts.filter(p =>
-    p.name.toLowerCase().includes(productSearch.toLowerCase())
-  )
-
   return (
     <div className="p-3 sm:p-4 lg:p-6">
       <div className="max-w-full">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-black dark:text-white">
-              Collections
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Manage your fashion collections</p>
+            <h1 className="text-xl sm:text-2xl font-bold">Collections</h1>
+            <p className="text-sm text-gray-500">Manage your fashion collections</p>
           </div>
           <div className="flex gap-2">
             {hasUnsavedOrder && (
               <button
                 onClick={saveOrder}
                 disabled={isSavingOrder}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
                 {isSavingOrder ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
                 Save Order
@@ -406,271 +287,156 @@ export default function AdminCollectionsPage() {
             )}
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black border border-gray-300 dark:border-gray-600 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black rounded-lg"
             >
-              <Plus size={18} />
-              New Collection
+              <Plus size={18} /> New Collection
             </button>
           </div>
         </div>
 
-        {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 sm:mb-8">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search collections..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent text-black dark:text-white placeholder-gray-500"
-            />
-          </div>
+        {/* Search */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <input
+            type="text"
+            placeholder="Search collections..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border rounded-lg outline-none focus:ring-2 focus:ring-black"
+          />
         </div>
 
-        {/* Collections Grid */}
-        <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+        {/* Collections Table */}
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
-              <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-black dark:text-white">
-                    Collection
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-black dark:text-white">
-                    Products
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-black dark:text-white">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-black dark:text-white">
-                    Actions
-                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold">Collection</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold">Products</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold">Status</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                      Loading collections...
+                  <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-500">Loading...</td></tr>
+                ) : filteredCollections.map((col, idx) => (
+                  <tr key={col._id} className="border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden border">
+                          {col.bannerImage && <img src={col.bannerImage} className="w-full h-full object-cover" alt="" />}
+                        </div>
+                        <div>
+                          <p className="font-medium">{col.name}</p>
+                          <p className="text-xs text-gray-500 font-mono">{col.slug}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm">{col.products?.length || 0} items</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 text-xs font-bold rounded-full ${col.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                        {col.isActive ? 'Active' : 'Hidden'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-1">
+                        <button onClick={() => moveReorder(idx, 'up')} disabled={idx === 0} className="p-2 hover:bg-gray-100 rounded disabled:opacity-20"><ArrowUp size={16} /></button>
+                        <button onClick={() => moveReorder(idx, 'down')} disabled={idx === collections.length - 1} className="p-2 hover:bg-gray-100 rounded disabled:opacity-20"><ArrowDown size={16} /></button>
+                        <button onClick={() => handleEdit(col)} className="p-2 hover:bg-gray-100 rounded"><Edit size={16} /></button>
+                        <button onClick={() => handleDelete(col._id)} className="p-2 text-red-600 hover:bg-red-50 rounded"><Trash2 size={16} /></button>
+                      </div>
                     </td>
                   </tr>
-                ) : filteredCollections.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                      No collections found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredCollections.map((col) => (
-                    <tr
-                      key={col._id}
-                      className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          {col.bannerImage && (
-                            <div className="w-10 h-10 rounded-sm overflow-hidden border border-gray-300 dark:border-gray-600 flex-shrink-0 bg-gray-100 dark:bg-gray-800">
-                              <img src={col.bannerImage} alt={col.name} className="w-full h-full object-cover" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-medium text-black dark:text-white">{col.name}</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{col.slug}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                        {col.products?.length || 0} products
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-2">
-                          {col.isFeatured && (
-                            <span className="px-2 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full">
-                              Featured
-                            </span>
-                          )}
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${col.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                            }`}>
-                            {col.isActive ? 'Active' : 'Hidden'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {!searchTerm && (
-                            <>
-                              <button
-                                onClick={() => moveReorder(collections.indexOf(col), 'up')}
-                                disabled={collections.indexOf(col) === 0}
-                                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                title="Move Up"
-                              >
-                                <ArrowUp size={16} />
-                              </button>
-                              <button
-                                onClick={() => moveReorder(collections.indexOf(col), 'down')}
-                                disabled={collections.indexOf(col) === collections.length - 1}
-                                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                title="Move Down"
-                              >
-                                <ArrowDown size={16} />
-                              </button>
-                              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                            </>
-                          )}
-                          <button
-                            onClick={() => handleEdit(col)}
-                            className="p-2 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(col._id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      {/* Slide-over Form Overlay */}
+      {/* Slide-over Form */}
       {showForm && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-white/30 backdrop-blur-sm" onClick={resetForm} />
-          <div className="absolute inset-y-0 right-0 max-w-xl w-full bg-white dark:bg-black shadow-xl flex flex-col">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <div>
-                <h2 className="text-lg font-semibold text-black dark:text-white">
-                  {editingId ? 'Edit Collection' : 'Create Collection'}
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Define your collection details</p>
-              </div>
-              <button onClick={resetForm} className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                <X size={20} />
-              </button>
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={resetForm} />
+          <div className="relative w-full max-w-xl bg-white dark:bg-black h-full shadow-2xl flex flex-col animate-in slide-in-from-right">
+            <div className="p-6 border-b flex justify-between items-center">
+              <h2 className="text-lg font-bold">{editingId ? 'Edit Collection' : 'Create Collection'}</h2>
+              <button onClick={resetForm} className="p-2 hover:bg-gray-100 rounded-full"><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form id="collection-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-black dark:text-white">Name</label>
+                  <label className="text-sm font-medium">Name</label>
                   <input
-                    type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent text-black dark:text-white"
-                    placeholder="Collection name"
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-900 outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-black dark:text-white">Slug</label>
+                  <label className="text-sm font-medium">Slug</label>
                   <input
-                    type="text"
                     required
                     value={formData.slug}
                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent text-black dark:text-white font-mono text-sm"
-                    placeholder="collection-slug"
+                    className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-900 font-mono text-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-black dark:text-white">Description</label>
+                <label className="text-sm font-medium">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent text-black dark:text-white resize-none h-24"
-                  placeholder="Collection description..."
+                  className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-900 h-24 resize-none"
                 />
               </div>
 
               <div className="space-y-4">
-                <label className="text-sm font-medium text-black dark:text-white">Banner Image</label>
+                <label className="text-sm font-medium">Banner Image</label>
                 <div className="flex items-center gap-3">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                    className="hidden"
-                    id="banner-upload"
-                  />
-                  <label
-                    htmlFor="banner-upload"
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer disabled:opacity-50 text-sm font-medium"
-                  >
-                    {uploadingImage ? 'Uploading...' : 'Choose Image'}
+                  <input type="file" id="upload" hidden onChange={handleImageUpload} />
+                  <label htmlFor="upload" className="px-4 py-2 bg-gray-100 border rounded-lg cursor-pointer hover:bg-gray-200 text-sm">
+                    {uploadingImage ? 'Uploading...' : 'Upload Image'}
                   </label>
                   {formData.bannerImage && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData({ ...formData, bannerImage: '' })
-                        setCompressionInfo('')
-                      }}
-                      className="px-4 py-2 border border-red-500 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
-                    >
-                      Remove
-                    </button>
+                    <button type="button" onClick={() => setFormData({ ...formData, bannerImage: '' })} className="text-red-600 text-sm font-medium">Remove</button>
                   )}
                 </div>
-                {compressionInfo && (
-                  <div className="text-sm text-green-600 font-medium bg-green-50 p-3 rounded-lg">
-                    {compressionInfo}
-                  </div>
+                {formData.bannerImage && (
+                   <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+                      <img src={formData.bannerImage} className="object-cover w-full h-full" alt="Banner" />
+                   </div>
                 )}
               </div>
 
               <div className="flex gap-6">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.isFeatured}
-                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                    className="rounded border-gray-300 text-black focus:ring-black dark:border-gray-600 dark:bg-gray-800"
-                  />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</span>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={formData.isFeatured} onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })} />
+                  <span className="text-sm font-medium">Featured</span>
                 </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="rounded border-gray-300 text-black focus:ring-black dark:border-gray-600 dark:bg-gray-800"
-                  />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} />
+                  <span className="text-sm font-medium">Active</span>
                 </label>
               </div>
             </form>
 
-            <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                Cancel
-              </button>
+            <div className="p-6 border-t flex gap-3">
+              <button type="button" onClick={resetForm} className="flex-1 py-2 border rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
               <button
                 type="submit"
+                form="collection-form"
                 disabled={isSubmitting}
-                className="flex-1 px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50"
+                className="flex-1 py-2 bg-black text-white dark:bg-white dark:text-black rounded-lg disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isSubmitting ? 'Saving...' : (editingId ? 'Update Collection' : 'Create Collection')}
+                {isSubmitting && <Loader2 className="animate-spin" size={18} />}
+                {editingId ? 'Update Collection' : 'Create Collection'}
               </button>
             </div>
           </div>

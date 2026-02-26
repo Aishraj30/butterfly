@@ -166,7 +166,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Phone</h3>
                     <p className="text-foreground/70">6009360597</p>
-                    <p className="text-sm text-foreground/60 mt-1">Monday - Friday: 9am - 6pm IST</p>
+                    <p className="text-sm text-foreground/60 mt-1">Monday - Saturday: 11:00 AM - 8:30 PM</p>
                   </div>
                 </div>
               </div>
@@ -193,8 +193,7 @@ export default function ContactPage() {
                   <Clock className="text-primary mt-1 flex-shrink-0" size={24} />
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Business Hours</h3>
-                    <p className="text-foreground/70">Monday - Friday: 9:00 AM - 6:00 PM</p>
-                    <p className="text-foreground/70">Saturday: 10:00 AM - 4:00 PM</p>
+                    <p className="text-foreground/70">Monday - Saturday: 11:00 AM - 8:30 PM</p>
                     <p className="text-foreground/70">Sunday: Closed</p>
                   </div>
                 </div>
