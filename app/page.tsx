@@ -57,7 +57,7 @@ export default async function Home() {
   console.log("📦 Initializing models:", Product.modelName, Collection.modelName)
   const collections = await Collection.find({ isActive: true })
     .populate('products')
-    .sort({ createdAt: -1 })
+    .sort({ order: 1, createdAt: -1 })
     .limit(7)
 
   // Fetch global highlights as fallback for empty collections
