@@ -5,12 +5,22 @@ import { connectDB } from "@/lib/db";
 import Order from "@/models/Order";
 import Inventory from "@/models/inventory";
 
-// GET ORDER BY ID
+// GET ORDER BY ID OR TRACKING ID
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         await connectDB();
         const { id } = await params;
-        const order = await Order.findById(id);
+
+        // Try finding by MongoDB _id first if it's a valid ObjectId
+        let order = null;
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            order = await Order.findById(id);
+        }
+
+        // If not found or not a valid ObjectId, try finding by custom orderId (e.g., ORD-XXXX)
+        if (!order) {
+            order = await Order.findOne({ orderId: id });
+        }
 
         if (!order) {
             return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });

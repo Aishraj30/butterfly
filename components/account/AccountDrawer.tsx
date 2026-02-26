@@ -5,14 +5,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    User, Package, Heart, MapPin, Settings, LogOut, X, Menu
+    User, Package, Heart, MapPin, Settings, LogOut, X, Menu, Truck
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface AccountDrawerProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    activePage?: 'profile' | 'orders' | 'wishlist' | 'addresses' | 'settings';
+    activePage?: 'profile' | 'orders' | 'wishlist' | 'addresses' | 'settings' | 'track-order';
 }
 
 export function AccountDrawer({ isOpen, onOpenChange, activePage }: AccountDrawerProps) {
@@ -54,6 +54,7 @@ export function AccountDrawer({ isOpen, onOpenChange, activePage }: AccountDrawe
     const navigationItems = [
         { href: '/profile', icon: User, label: 'Profile', section: 'account' },
         { href: '/orders', icon: Package, label: 'Orders', section: 'shopping' },
+        { href: '/track-order', icon: Truck, label: 'Track Order', section: 'shopping' },
         { href: '/wishlist', icon: Heart, label: 'Wishlist', section: 'shopping' },
         { href: '/addresses', icon: MapPin, label: 'Addresses', section: 'settings' },
         { href: '/settings', icon: Settings, label: 'Settings', section: 'settings' }
@@ -115,8 +116,7 @@ export function AccountDrawer({ isOpen, onOpenChange, activePage }: AccountDrawe
                                             key={link.label}
                                             href={link.href}
                                             onClick={() => onOpenChange(false)}
-                                            className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${
-                                                isActive
+                                            className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${isActive
                                                     ? 'bg-black text-white shadow-md'
                                                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                                 }`}

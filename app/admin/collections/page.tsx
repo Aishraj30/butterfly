@@ -14,7 +14,9 @@ import {
   Loader2,
   LayoutGrid,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/hooks/use-toast'
@@ -53,6 +55,8 @@ export default function AdminCollectionsPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [hasUnsavedOrder, setHasUnsavedOrder] = useState(false)
+  const [isSavingOrder, setIsSavingOrder] = useState(false)
 
   // Form State
   const [showForm, setShowForm] = useState(false)
@@ -118,6 +122,44 @@ export default function AdminCollectionsPage() {
       }
     } catch (error) {
       console.error('Failed to fetch products:', error)
+    }
+  }
+
+  const moveReorder = async (index: number, direction: 'up' | 'down') => {
+    if (searchTerm) return; // disable during search
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === collections.length - 1) return;
+
+    const newCollections = [...collections];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+    const temp = newCollections[index];
+    newCollections[index] = newCollections[targetIndex];
+    newCollections[targetIndex] = temp;
+
+    setCollections(newCollections);
+    setHasUnsavedOrder(true);
+  }
+
+  const saveOrder = async () => {
+    setIsSavingOrder(true);
+    try {
+      const response = await fetch('/api/collections/reorder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ orderedIds: collections.map(c => c._id) })
+      });
+      if (!response.ok) throw new Error('Failed to reorder');
+      setHasUnsavedOrder(false);
+      fetchCollections();
+    } catch (error) {
+      console.error('Failed to save reorder:', error);
+      fetchCollections();
+    } finally {
+      setIsSavingOrder(false);
     }
   }
 
@@ -351,13 +393,25 @@ export default function AdminCollectionsPage() {
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">Manage your fashion collections</p>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black border border-gray-300 dark:border-gray-600 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
-          >
-            <Plus size={18} />
-            New Collection
-          </button>
+          <div className="flex gap-2">
+            {hasUnsavedOrder && (
+              <button
+                onClick={saveOrder}
+                disabled={isSavingOrder}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                {isSavingOrder ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
+                Save Order
+              </button>
+            )}
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black border border-gray-300 dark:border-gray-600 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+            >
+              <Plus size={18} />
+              New Collection
+            </button>
+          </div>
         </div>
 
         {/* Search and Filter */}
@@ -436,25 +490,45 @@ export default function AdminCollectionsPage() {
                               Featured
                             </span>
                           )}
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            col.isActive 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${col.isActive
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                            }`}>
                             {col.isActive ? 'Active' : 'Hidden'}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => handleEdit(col)} 
+                          {!searchTerm && (
+                            <>
+                              <button
+                                onClick={() => moveReorder(collections.indexOf(col), 'up')}
+                                disabled={collections.indexOf(col) === 0}
+                                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                title="Move Up"
+                              >
+                                <ArrowUp size={16} />
+                              </button>
+                              <button
+                                onClick={() => moveReorder(collections.indexOf(col), 'down')}
+                                disabled={collections.indexOf(col) === collections.length - 1}
+                                className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                title="Move Down"
+                              >
+                                <ArrowDown size={16} />
+                              </button>
+                              <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                            </>
+                          )}
+                          <button
+                            onClick={() => handleEdit(col)}
                             className="p-2 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                           >
                             <Edit size={16} />
                           </button>
-                          <button 
-                            onClick={() => handleDelete(col._id)} 
+                          <button
+                            onClick={() => handleDelete(col._id)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           >
                             <Trash2 size={16} />

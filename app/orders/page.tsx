@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Inter } from "next/font/google";
 import {
-  Loader2, Package, User, Heart, MapPin, Settings, LogOut, Star, ChevronLeft, Menu, Home
+  Loader2, Package, User, Heart, MapPin, Settings, LogOut, Star, ChevronLeft, Menu, Home, Truck
 } from "lucide-react";
 import { BackToHomeButton } from "@/components/ui/BackToHomeButton";
 import { AccountDrawer } from "@/components/account/AccountDrawer";
@@ -28,7 +28,7 @@ export default function OrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [productImages, setProductImages] = useState<{[key: string]: string}>({});
+  const [productImages, setProductImages] = useState<{ [key: string]: string }>({});
   const [isAccountDrawerOpen, setIsAccountDrawerOpen] = useState(false);
 
   // Review Modal State
@@ -180,7 +180,7 @@ export default function OrdersPage() {
           const data = await response.json();
           if (data.success) {
             setOrders(data.data);
-            
+
             // After orders are loaded, fetch product images
             const allProductIds = new Set<string>();
             data.data.forEach((order: any) => {
@@ -192,8 +192,8 @@ export default function OrdersPage() {
             });
 
             const fetchProductImages = async () => {
-              const imageMap: {[key: string]: string} = {};
-              
+              const imageMap: { [key: string]: string } = {};
+
               for (const productId of allProductIds) {
                 try {
                   const response = await fetch(`/api/products/${productId}`);
@@ -209,7 +209,7 @@ export default function OrdersPage() {
                   console.error(`Failed to fetch product ${productId}:`, error);
                 }
               }
-              
+
               setProductImages(imageMap);
             };
 
@@ -270,7 +270,7 @@ export default function OrdersPage() {
         </div>
 
         <div className="max-w-6xl px-4 sm:px-6">
-          
+
           {/* Desktop Header Title */}
           <div className="hidden lg:flex items-baseline justify-between mb-10 border-b border-gray-100 pb-6">
             <div>
@@ -324,11 +324,11 @@ export default function OrdersPage() {
                         const firstItem = order.items[0];
                         const productId = typeof firstItem.productId === 'object' ? (firstItem.productId as any)._id : firstItem.productId;
                         const imageUrl = productImages[productId] || `https://ui-avatars.com/api/?name=${encodeURIComponent(firstItem?.name || 'Product')}&background=000&color=fff&size=64`;
-                        
+
                         return (
                           <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            <img 
-                              src={imageUrl} 
+                            <img
+                              src={imageUrl}
                               alt={firstItem?.name || 'Product'}
                               className="w-full h-full object-cover"
                             />
@@ -338,10 +338,10 @@ export default function OrdersPage() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-lg text-gray-900 truncate">{order.items[0]?.name || 'Product'}</h3>
                         <p className="text-sm text-gray-500 mt-1 font-medium">
-                          {new Date(order.createdAt).toLocaleDateString('en-US', { 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
+                          {new Date(order.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
                           })}
                         </p>
                       </div>
@@ -401,6 +401,13 @@ export default function OrdersPage() {
                         View Details
                       </Link>
                     </Button>
+                    {order.status !== 'cancelled' && (
+                      <Button variant="outline" size="sm" asChild className="bg-black text-white hover:bg-gray-800 border-black transition-all duration-300 font-medium w-full sm:w-auto">
+                        <Link href={`/track-order?orderId=${order.orderId}`}>
+                          Track
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -413,6 +420,9 @@ export default function OrdersPage() {
       <div className="lg:hidden fixed bottom-6 right-6 flex flex-col gap-3">
         <Button size="icon" className="h-12 w-12 rounded-full bg-white text-gray-600 shadow-lg border border-gray-200" asChild>
           <Link href="/profile"><User className="h-5 w-5" /></Link>
+        </Button>
+        <Button size="icon" className="h-12 w-12 rounded-full bg-white text-gray-600 shadow-lg border border-gray-200" asChild>
+          <Link href="/track-order"><Truck className="h-5 w-5" /></Link>
         </Button>
         <Button size="icon" className="h-12 w-12 rounded-full bg-white text-gray-600 shadow-lg border border-gray-200" asChild>
           <Link href="/wishlist"><Heart className="h-5 w-5" /></Link>

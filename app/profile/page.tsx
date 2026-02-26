@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     Loader2, User, Mail, LogOut, Camera, Settings, MapPin,
-    Heart, ChevronRight, Package, Edit3, Shield, Bell, LogIn, ChevronLeft, Menu, Home
+    Heart, ChevronRight, Package, Edit3, Shield, Bell, LogIn, ChevronLeft, Menu, Home, Truck
 } from "lucide-react";
 import Image from "next/image";
 import { Inter } from "next/font/google";
@@ -258,6 +258,9 @@ export default function ProfilePage() {
                 <div className="lg:hidden fixed bottom-6 right-6 flex flex-col gap-3">
                     <Button size="icon" className="h-12 w-12 rounded-full bg-white text-gray-600 shadow-lg border border-gray-200" asChild>
                         <Link href="/orders"><Package className="h-5 w-5" /></Link>
+                    </Button>
+                    <Button size="icon" className="h-12 w-12 rounded-full bg-white text-gray-600 shadow-lg border border-gray-200" asChild>
+                        <Link href="/track-order"><Truck className="h-5 w-5" /></Link>
                     </Button>
                     <Button size="icon" className="h-12 w-12 rounded-full bg-white text-gray-600 shadow-lg border border-gray-200" asChild>
                         <Link href="/wishlist"><Heart className="h-5 w-5" /></Link>

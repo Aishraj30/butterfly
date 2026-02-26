@@ -47,7 +47,7 @@ export class CollectionController {
                 }
             }
 
-            const collections = await Collection.find(filter).populate("products").sort({ createdAt: -1 });
+            const collections = await Collection.find(filter).populate("products").sort({ order: 1, createdAt: -1 });
 
             // Save to cache
             if (redis) {
@@ -229,5 +229,52 @@ export class CollectionController {
         }
 
         return NextResponse.json({ success: true, message: "Collection deleted" });
+    }
+
+    // REORDER COLLECTIONS
+    static async reorder(req) {
+        try {
+            await connectDB();
+            const { orderedIds } = await req.json();
+
+            if (!orderedIds || !Array.isArray(orderedIds)) {
+                return NextResponse.json(
+                    { message: "Invalid payload: orderedIds must be an array" },
+                    { status: 400 }
+                );
+            }
+
+            const bulkOps = orderedIds.map((id, index) => ({
+                updateOne: {
+                    filter: { _id: id },
+                    update: { $set: { order: index } }
+                }
+            }));
+
+            console.log('[API Collections] Reordering collections with ops:', JSON.stringify(bulkOps));
+
+            if (bulkOps.length > 0) {
+                const result = await Collection.bulkWrite(bulkOps, { strict: false });
+                console.log('[API Collections] BulkWrite result:', result);
+            }
+
+            // Invalidate cache
+            if (redis) {
+                try {
+                    await redis.del(CACHE_KEYS.COLLECTIONS_ALL, CACHE_KEYS.COLLECTIONS_ADMIN);
+                    console.log('[Cache] Invalidated collection lists after reorder');
+                } catch (err) {
+                    console.error('[Redis] Invalidation error:', err);
+                }
+            }
+
+            return NextResponse.json({ success: true, message: "Collections reordered successfully" });
+        } catch (error) {
+            console.error('[API Collections] Reorder error:', error);
+            return NextResponse.json(
+                { message: error.message || "Failed to reorder collections" },
+                { status: 500 }
+            );
+        }
     }
 }
