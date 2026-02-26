@@ -76,8 +76,12 @@ export class CollectionController {
             // const user = getUser(req);
             // if (!user || user.role !== "admin") return NextResponse.json({ message: "Admin access only" }, { status: 403 });
 
+            console.log('Collection create request received');
             const body = await req.json();
+            console.log('Request body:', body);
+            
             const collection = await Collection.create(body);
+            console.log('Created collection:', collection);
 
             // Invalidate cache
             if (redis) {
@@ -90,7 +94,7 @@ export class CollectionController {
             }
 
             return NextResponse.json(
-                { success: true, collection },
+                { success: true, data: collection },
                 { status: 201 }
             );
         } catch (error) {

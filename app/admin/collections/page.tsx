@@ -17,6 +17,7 @@ import {
   Sparkles
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
 import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
 import { AIBannerEnhancer } from '@/components/admin/AIBannerEnhancer'
@@ -47,6 +48,7 @@ interface Collection {
 
 export default function AdminCollectionsPage() {
   const { token } = useAuth()
+  const { toast } = useToast()
   const [collections, setCollections] = useState<Collection[]>([])
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -187,9 +189,36 @@ export default function AdminCollectionsPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
+    console.log('Form data being submitted:', formData)
+    console.log('Editing ID:', editingId)
+
+    // Basic validation
+    if (!formData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Collection name is required",
+        variant: "destructive"
+      })
+      setIsSubmitting(false)
+      return
+    }
+
+    if (!formData.slug.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Collection slug is required",
+        variant: "destructive"
+      })
+      setIsSubmitting(false)
+      return
+    }
+
     try {
       const url = editingId ? `/api/collections/${editingId}` : '/api/collections'
       const method = editingId ? 'PUT' : 'POST'
+      
+      console.log('Request URL:', url)
+      console.log('Request method:', method)
 
       const response = await fetch(url, {
         method,
@@ -200,12 +229,22 @@ export default function AdminCollectionsPage() {
         body: JSON.stringify(formData),
       })
 
+      console.log('Response status:', response.status)
       const data = await response.json()
+      console.log('Response data:', data)
       if (data.success) {
         fetchCollections()
         resetForm()
+        toast({
+          title: editingId ? "Collection Updated" : "Collection Created",
+          description: `Collection "${formData.name}" has been ${editingId ? 'updated' : 'created'} successfully.`,
+        })
       } else {
-        alert(data.message || 'Action failed')
+        toast({
+          title: "Error",
+          description: data.message || 'Action failed',
+          variant: "destructive"
+        })
       }
     } catch (error) {
       console.error('Error saving collection:', error)
