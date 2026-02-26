@@ -1,22 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-const monthlyData = [
-  { month: 'Jan', revenue: 25000 },
-  { month: 'Feb', revenue: 30000 },
-  { month: 'Mar', revenue: 28000 },
-  { month: 'Apr', revenue: 35000 },
-  { month: 'May', revenue: 40000 },
-  { month: 'Jun', revenue: 45000 },
-  { month: 'Jul', revenue: 42000 },
-  { month: 'Aug', revenue: 38000 },
-  { month: 'Sep', revenue: 41000 },
-  { month: 'Oct', revenue: 39000 },
-  { month: 'Nov', revenue: 43000 },
-  { month: 'Dec', revenue: 47000 },
-]
+interface SalesData {
+  month: string
+  revenue: number
+  orders: number
+}
+
+interface DashboardData {
+  metrics: any[]
+  topProducts: any[]
+  customerData: any[]
+  recentOrders: any[]
+  salesData: SalesData[]
+}
 
 const timeFilters = [
   { label: '1D', value: '1d' },
@@ -27,6 +26,49 @@ const timeFilters = [
 
 export function SalesRevenueChart() {
   const [selectedFilter, setSelectedFilter] = useState('1y')
+  const [salesData, setSalesData] = useState<SalesData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      try {
+        const response = await fetch('/api/admin/dashboard')
+        const data = await response.json()
+        if (data.success) {
+          setSalesData(data.data.salesData)
+        }
+      } catch (error) {
+        console.error('Failed to fetch sales data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSalesData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
+          <div>
+            <h2 className="text-base sm:text-lg font-semibold text-black dark:text-white">
+              Sales Revenue
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600">
+              Monthly sales overview
+            </p>
+          </div>
+        </div>
+        <div className="h-48 sm:h-56 lg:h-64 flex items-center justify-center">
+          <div className="animate-pulse w-full">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
@@ -60,7 +102,7 @@ export function SalesRevenueChart() {
       {/* Chart */}
       <div className="h-48 sm:h-56 lg:h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={monthlyData}>
+          <BarChart data={salesData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
             <XAxis
               dataKey="month"

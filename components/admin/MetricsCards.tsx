@@ -1,19 +1,50 @@
 'use client'
 
 import { Users, DollarSign, ShoppingCart, TrendingUp, TrendingDown } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+interface MetricData {
+  title: string
+  value: string
+  change: number
+  changeText: string
+  icon: string
+  color: string
+}
+
+interface DashboardData {
+  metrics: MetricData[]
+  topProducts: any[]
+  customerData: any[]
+  recentOrders: any[]
+  salesData: any[]
+}
 
 interface MetricCardProps {
   title: string
   value: string
   change: number
   changeText: string
-  icon: React.ReactNode
+  icon: string
   color: string
 }
 
 function MetricCard({ title, value, change, changeText, icon, color }: MetricCardProps) {
   const isPositive = change > 0
   const isNegative = change < 0
+
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'users':
+        return <Users size={20} className="text-black dark:text-white" />
+      case 'dollar':
+        return <DollarSign size={20} className="text-black dark:text-white" />
+      case 'cart':
+        return <ShoppingCart size={20} className="text-black dark:text-white" />
+      default:
+        return <Users size={20} className="text-black dark:text-white" />
+    }
+  }
 
   return (
     <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
@@ -22,7 +53,7 @@ function MetricCard({ title, value, change, changeText, icon, color }: MetricCar
           {title}
         </span>
         <div className={`p-1.5 sm:p-2 rounded-lg ${color}`}>
-          {icon}
+          {getIcon(icon)}
         </div>
       </div>
 
@@ -47,32 +78,40 @@ function MetricCard({ title, value, change, changeText, icon, color }: MetricCar
 }
 
 export function MetricsCards() {
-  const metrics = [
-    {
-      title: 'Customers',
-      value: '45,000',
-      change: 7,
-      changeText: 'vs. previous month',
-      icon: <Users size={20} className="text-black dark:text-white" />,
-      color: 'bg-gray-100 dark:bg-gray-800'
-    },
-    {
-      title: 'Total Sales',
-      value: '₹45,000',
-      change: 7,
-      changeText: 'vs. previous month',
-      icon: <DollarSign size={20} className="text-black dark:text-white" />,
-      color: 'bg-gray-100 dark:bg-gray-800'
-    },
-    {
-      title: 'Total Order',
-      value: '65,000',
-      change: -3.5,
-      changeText: 'vs. previous month',
-      icon: <ShoppingCart size={20} className="text-black dark:text-white" />,
-      color: 'bg-gray-100 dark:bg-gray-800'
+  const [metrics, setMetrics] = useState<MetricData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch('/api/admin/dashboard')
+        const data = await response.json()
+        if (data.success) {
+          setMetrics(data.data.metrics)
+        }
+      } catch (error) {
+        console.error('Failed to fetch metrics:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    fetchMetrics()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+        {[...Array(3)].map((_, index) => (
+          <div key={index} className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm animate-pulse">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">

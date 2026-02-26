@@ -1,13 +1,65 @@
 'use client'
 
-const regionData = [
-  { name: 'Asia', percentage: 90, color: 'bg-black' },
-  { name: 'America', percentage: 30, color: 'bg-gray-600' },
-  { name: 'Europe', percentage: 40, color: 'bg-gray-400' },
-  { name: 'Others', percentage: 25, color: 'bg-gray-300' },
-]
+import { useEffect, useState } from 'react'
+
+interface RegionData {
+  name: string
+  percentage: string
+  color: string
+}
+
+interface DashboardData {
+  metrics: any[]
+  topProducts: any[]
+  customerData: any[]
+  recentOrders: any[]
+  salesData: any[]
+  distributionData: RegionData[]
+}
 
 export function DistributionMap() {
+  const [distributionData, setDistributionData] = useState<RegionData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchDistributionData = async () => {
+      try {
+        const response = await fetch('/api/admin/dashboard')
+        const data = await response.json()
+        if (data.success) {
+          setDistributionData(data.data.distributionData)
+        }
+      } catch (error) {
+        console.error('Failed to fetch distribution data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDistributionData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+            Distribution Maps
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            Geographic distribution
+          </p>
+        </div>
+        <div className="h-48 sm:h-56 lg:h-64 flex items-center justify-center">
+          <div className="animate-pulse w-full">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
       <div className="mb-4 sm:mb-6">
@@ -52,7 +104,7 @@ export function DistributionMap() {
         <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
           Distribution by Region
         </h3>
-        {regionData.map((region) => (
+        {distributionData.map((region) => (
           <div key={region.name} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className={`w-4 h-4 rounded ${region.color}`}></div>

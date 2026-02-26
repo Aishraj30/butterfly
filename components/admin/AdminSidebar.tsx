@@ -22,7 +22,7 @@ import { useState, useEffect } from 'react'
 
 const menuItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { label: 'Messages', href: '/admin/messages', icon: MessageSquare, badge: '150' },
+  { label: 'Messages', href: '/admin/messages', icon: MessageSquare, badge: 'dynamic' },
   { label: 'Products', href: '/admin/products', icon: Package },
   { label: 'Bulk Upload', href: '/admin/products/bulk', icon: Clipboard },
   { label: 'Inventory', href: '/admin/inventory', icon: Clipboard },
@@ -37,6 +37,28 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const { logout } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch('/api/contact')
+        const data = await response.json()
+        if (data.success) {
+          const unreadMessages = data.data.filter((msg: any) => !msg.read)
+          setUnreadCount(unreadMessages.length)
+        }
+      } catch (error) {
+        console.error('Failed to fetch unread count:', error)
+      }
+    }
+
+    fetchUnreadCount()
+    // Set up interval to refresh count every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000)
+    
+    return () => clearInterval(interval)
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -113,7 +135,7 @@ export function AdminSidebar() {
                 </div>
                 {item.badge && (
                   <span className="bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                    {item.badge}
+                    {item.badge === 'dynamic' ? unreadCount : item.badge}
                   </span>
                 )}
               </Link>

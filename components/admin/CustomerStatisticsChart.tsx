@@ -1,16 +1,67 @@
 'use client'
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import { useEffect, useState } from 'react'
 
-const customerData = [
-  { name: 'Male', value: 942, percentage: 27.7 },
-  { name: 'Female', value: 2452, percentage: 72.3 },
-]
+interface CustomerData {
+  name: string
+  value: number
+  percentage: number
+}
+
+interface DashboardData {
+  metrics: any[]
+  topProducts: any[]
+  customerData: CustomerData[]
+  recentOrders: any[]
+  salesData: any[]
+}
 
 const COLORS = ['#000000', '#808080']
 
 export function CustomerStatisticsChart() {
+  const [customerData, setCustomerData] = useState<CustomerData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCustomerData = async () => {
+      try {
+        const response = await fetch('/api/admin/dashboard')
+        const data = await response.json()
+        if (data.success) {
+          setCustomerData(data.data.customerData)
+        }
+      } catch (error) {
+        console.error('Failed to fetch customer data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCustomerData()
+  }, [])
+
   const totalCustomers = customerData.reduce((sum, item) => sum + item.value, 0)
+
+  if (loading) {
+    return (
+      <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-lg font-semibold text-black dark:text-white">
+            Customers Statistics
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-600">
+            Active vs Inactive customers
+          </p>
+        </div>
+        <div className="h-48 sm:h-56 lg:h-64 flex items-center justify-center">
+          <div className="animate-pulse">
+            <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
