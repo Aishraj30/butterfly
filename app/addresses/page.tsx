@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { showToast } from '@/lib/toast-utils';
 import { Label } from "@/components/ui/label";
 import {
   Loader2, MapPin, Pencil, Plus, User, Package,
@@ -110,11 +111,11 @@ export default function AddressesPage() {
         });
         setDialogOpen(false);
       } else {
-        alert("Failed to save address");
+        showToast.error("Failed to save address");
       }
     } catch (error) {
       console.error("Error saving address:", error);
-      alert("An error occurred while saving the address.");
+      showToast.error("An error occurred while saving the address.");
     } finally {
       setIsSaving(false);
     }

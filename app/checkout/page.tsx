@@ -8,6 +8,7 @@ import { useCart } from '@/hooks/useCart';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { BackToHomeButton } from '@/components/ui/BackToHomeButton';
+import { showToast } from '@/lib/toast-utils';
 
 const steps = ['Information', 'Payment', 'Success'];
 
@@ -116,11 +117,11 @@ export default function CheckoutPage() {
         setOrderData(result.data);
         nextStep(); // Go to Payment
       } else {
-        alert(result.error || 'Failed to place order');
+        showToast.error(result.error || 'Failed to place order');
       }
     } catch (error) {
       console.error('Order creation failed:', error);
-      alert('Network error. Please try again.');
+      showToast.error('Network error. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

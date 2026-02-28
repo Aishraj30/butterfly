@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, ArrowLeft, MapPin, CreditCard, Package, Star } from "lucide-react";
+import { showToast } from '@/lib/toast-utils';
 import { AccountSidebar } from "@/components/account/AccountSidebar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -73,16 +74,16 @@ export default function OrderDetailsPage() {
 
             const data = await response.json();
             if (response.ok) {
-                alert("Review submitted successfully!");
+                showToast.success("Review submitted successfully!");
                 setModalOpen(false);
                 setReviewText("");
                 setRating(5);
             } else {
-                alert(data.message || "Failed to submit review");
+                showToast.error(data.message || "Failed to submit review");
             }
         } catch (error) {
             console.error("Error submitting review:", error);
-            alert("An error occurred. Please try again.");
+            showToast.error("An error occurred. Please try again.");
         } finally {
             setIsSubmittingReview(false);
         }

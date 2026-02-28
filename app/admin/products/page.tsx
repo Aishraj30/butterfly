@@ -6,13 +6,26 @@ import { useState, useEffect } from 'react'
 import { Search, Plus, Edit, Trash2, ChevronDown, Filter, X } from 'lucide-react'
 import { Suspense } from 'react'
 import { Product } from '@/lib/products'
+import { showToast } from '@/lib/toast-utils'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const Loading = () => <div className="p-8 text-center text-gray-500">Loading products...</div>
 
 export default function AdminProductsPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [productToDelete, setProductToDelete] = useState<string | null>(null)
   const [products, setProducts] = useState<Product[]>([])
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [categories, setCategories] = useState<any[]>([])
@@ -62,21 +75,31 @@ export default function AdminProductsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return
+    setProductToDelete(id)
+    setDeleteDialogOpen(true)
+  }
 
+  const confirmDelete = async () => {
+    if (!productToDelete) return
+    
     try {
-      const response = await fetch(`/api/products/${id}`, {
+      const response = await fetch(`/api/products/${productToDelete}`, {
         method: 'DELETE',
       })
       const data = await response.json()
       if (data.success) {
         fetchProducts()
-        setSelectedProducts(prev => prev.filter(p => p !== id))
+        setSelectedProducts(prev => prev.filter(p => p !== productToDelete))
+        showToast.success('Product deleted successfully')
       } else {
-        alert('Failed to delete product')
+        showToast.error('Failed to delete product')
       }
     } catch (error) {
       console.error('Error deleting product:', error)
+      showToast.error('Failed to delete product')
+    } finally {
+      setDeleteDialogOpen(false)
+      setProductToDelete(null)
     }
   }
 
@@ -427,6 +450,24 @@ export default function AdminProductsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Product?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this product? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

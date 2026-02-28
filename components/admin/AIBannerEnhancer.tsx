@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Sparkles, Image as ImageIcon, Check, Loader2, Wand2, Lightbulb, Palette } from 'lucide-react'
 import Image from 'next/image'
 import { AIVariant, BannerEnhancement, ENHANCEMENT_TYPES } from '@/lib/ai-enhancement'
+import { showToast } from '@/lib/toast-utils'
 
 interface AIBannerEnhancerProps {
     originalImage: string
@@ -41,7 +42,7 @@ export function AIBannerEnhancer({ originalImage, collectionName, onVariantSelec
             })
         } catch (error: any) {
             console.error('Enhancement failed:', error)
-            alert(`AI Enhancement failed: ${error.message}. Please try again.`)
+            showToast.error(`AI Enhancement failed: ${error.message}. Please try again.`)
         } finally {
             setIsEnhancing(false)
         }

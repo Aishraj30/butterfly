@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Search, ChevronDown, Filter, Eye } from 'lucide-react'
 import { Suspense } from 'react'
 import Link from 'next/link'
+import { showToast } from '@/lib/toast-utils'
 
 const Loading = () => <div className="p-8 text-center text-gray-500">Loading orders...</div>
 
@@ -37,11 +38,11 @@ export default function AdminOrdersPage() {
             if (data.success) {
                 setOrders(prev => prev.map(o => o.id === orderId || o._id === orderId ? { ...o, status: newStatus } : o));
             } else {
-                alert('Failed to update status: ' + data.error);
+                showToast.error('Failed to update status: ' + data.error);
             }
         } catch (error) {
             console.error('Error updating status:', error);
-            alert('Failed to update status');
+            showToast.error('Failed to update status');
         }
     };
 

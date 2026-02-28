@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Plus, Trash2, Loader2, Upload, Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { showToast } from '@/lib/toast-utils'
 import {
     Command,
     CommandEmpty,
@@ -239,7 +240,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             const newImages: string[] = []
             for (const file of Array.from(files)) {
                 if (!isValidImageFile(file)) {
-                    alert(`${file.name} is not a valid image file. Skipping.`)
+                    showToast.warning(`${file.name} is not a valid image file. Skipping.`)
                     continue
                 }
 
@@ -277,7 +278,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
             }
         } catch (error) {
             console.error('Error uploading images:', error)
-            alert('Failed to upload some images')
+            showToast.error('Failed to upload some images')
         } finally {
             setUploadingImage(false)
         }
@@ -318,11 +319,11 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 router.push('/admin/products')
                 router.refresh()
             } else {
-                alert(data.error || 'Something went wrong')
+                showToast.error(data.error || 'Something went wrong')
             }
         } catch (error) {
             console.error('Error saving product:', error)
-            alert('Failed to save product')
+            showToast.error('Failed to save product')
         } finally {
             setLoading(false)
         }
@@ -713,11 +714,11 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                                         if (data.success) {
                                             setFormData(prev => ({ ...prev, videoUrl: data.url }))
                                         } else {
-                                            alert(data.error || 'Video upload failed')
+                                            showToast.error(data.error || 'Video upload failed')
                                         }
                                     } catch (err: any) {
                                         console.error('Video upload error:', err)
-                                        alert(err.message || 'Video upload failed')
+                                        showToast.error(err.message || 'Video upload failed')
                                     } finally {
                                         setUploadingVideo(false)
                                         setUploadProgress(0)

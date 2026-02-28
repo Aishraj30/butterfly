@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Plus, Trash2, Save, ArrowLeft, Loader2, Upload, ImageIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { compressImage, isValidImageFile } from '@/lib/imageCompression'
+import { showToast } from '@/lib/toast-utils'
 
 // Stable ID generator
 let idCounter = 0
@@ -144,7 +145,7 @@ export default function BulkProductAddPage() {
         if (!file) return
 
         if (!isValidImageFile(file)) {
-            alert('Please select a valid image file')
+            showToast.error('Please select a valid image file')
             return
         }
 
@@ -176,11 +177,11 @@ export default function BulkProductAddPage() {
                     p.tempId === tempId ? { ...p, images: [...(p.images || []), data.url] } : p
                 ))
             } else {
-                alert(data.error || 'Upload failed')
+                showToast.error(data.error || 'Upload failed')
             }
         } catch (error) {
             console.error('Error uploading row image:', error)
-            alert('Failed to upload image')
+            showToast.error('Failed to upload image')
         } finally {
             setUploadingRows(prev => prev.filter(id => id !== tempId))
         }
@@ -215,14 +216,14 @@ export default function BulkProductAddPage() {
 
             const data = await response.json()
             if (data.success) {
-                alert(`Successfully added ${products.length} products`)
+                showToast.success(`Successfully added ${products.length} products`)
                 router.push('/admin/products')
             } else {
-                alert(data.message || 'Failed to add products')
+                showToast.error(data.message || 'Failed to add products')
             }
         } catch (error) {
             console.error('Bulk submission error:', error)
-            alert('An error occurred during bulk submission')
+            showToast.error('An error occurred during bulk submission')
         } finally {
             setIsSubmitting(false)
         }

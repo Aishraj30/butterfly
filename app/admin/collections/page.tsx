@@ -18,6 +18,17 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react'
+import { showToast } from '@/lib/toast-utils'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/hooks/use-toast'
 import Image from 'next/image'
@@ -60,6 +71,8 @@ export default function AdminCollectionsPage() {
 
   // Form State
   const [showForm, setShowForm] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [collectionToDelete, setCollectionToDelete] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -249,15 +262,30 @@ export default function AdminCollectionsPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure? This cannot be undone.')) return
+    setCollectionToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!collectionToDelete) return
+    
     try {
-      const response = await fetch(`/api/collections/${id}`, {
+      const response = await fetch(`/api/collections/${collectionToDelete}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      if ((await response.json()).success) fetchCollections()
+      if ((await response.json()).success) {
+        fetchCollections()
+        showToast.success('Collection deleted successfully')
+      } else {
+        showToast.error('Failed to delete collection')
+      }
     } catch (error) {
       console.error('Delete failed:', error)
+      showToast.error('Failed to delete collection')
+    } finally {
+      setDeleteDialogOpen(false)
+      setCollectionToDelete(null)
     }
   }
 
@@ -442,6 +470,24 @@ export default function AdminCollectionsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the collection and remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

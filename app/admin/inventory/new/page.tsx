@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { InventoryService } from "@/lib/inventoryService";
+import { showToast } from '@/lib/toast-utils';
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
 interface VariantRow {
@@ -100,7 +101,7 @@ export default function NewInventoryPage() {
 
     const removeVariantRow = (id: string) => {
         if (variants.length === 1) {
-            alert("You must have at least one variant");
+            showToast.error("You must have at least one variant");
             return;
         }
         setVariants(variants.filter(v => v.id !== id));
@@ -116,14 +117,14 @@ export default function NewInventoryPage() {
         e.preventDefault();
 
         if (!productId) {
-            alert("Please select a product");
+            showToast.error("Please select a product");
             return;
         }
 
         // Validate all variants have SKU
         const invalidVariants = variants.filter(v => !v.sku.trim());
         if (invalidVariants.length > 0) {
-            alert("All variants must have a SKU");
+            showToast.error("All variants must have a SKU");
             return;
         }
 
@@ -147,10 +148,10 @@ export default function NewInventoryPage() {
             );
 
             await Promise.all(promises);
-            alert(`Successfully created ${variants.length} inventory record(s)`);
+            showToast.success(`Successfully created ${variants.length} inventory record(s)`);
             router.push("/admin/inventory");
         } catch (err: any) {
-            alert(err.message || "Failed to create inventory");
+            showToast.error(err.message || "Failed to create inventory");
         } finally {
             setSubmitting(false);
         }

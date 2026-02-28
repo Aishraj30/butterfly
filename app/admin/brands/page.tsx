@@ -5,11 +5,24 @@ import { Search, Plus, Edit, Trash2 } from 'lucide-react'
 import { Brand } from '@/lib/brands'
 import { compressImage, isValidImageFile, formatFileSize } from '@/lib/imageCompression'
 import Image from 'next/image'
+import { showToast } from '@/lib/toast-utils'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function AdminBrandsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [brands, setBrands] = useState<Brand[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [brandToDelete, setBrandToDelete] = useState<number | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
   const [formData, setFormData] = useState({
@@ -47,7 +60,7 @@ export default function AdminBrandsPage() {
     if (!file) return
 
     if (!isValidImageFile(file)) {
-      alert('Please select a valid image file (JPEG, PNG, or WebP)')
+      showToast.error('Please select a valid image file (JPEG, PNG, or WebP)')
       return
     }
 
@@ -83,11 +96,11 @@ export default function AdminBrandsPage() {
           logo: data.url
         }))
       } else {
-        alert(data.error || 'Failed to upload image')
+        showToast.error(data.error || 'Failed to upload image')
       }
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Failed to upload image')
+      showToast.error('Failed to upload image')
     } finally {
       setUploadingImage(false)
     }
@@ -114,11 +127,11 @@ export default function AdminBrandsPage() {
         setEditingBrand(null)
         setFormData({ name: '', description: '', logo: '' })
       } else {
-        alert(data.error || 'Something went wrong')
+        showToast.error(data.error || 'Something went wrong')
       }
     } catch (error) {
       console.error('Error saving brand:', error)
-      alert('Failed to save brand')
+      showToast.error('Failed to save brand')
     }
   }
 
@@ -133,20 +146,30 @@ export default function AdminBrandsPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this brand?')) return
+    setBrandToDelete(id)
+    setDeleteDialogOpen(true)
+  }
 
+  const confirmDelete = async () => {
+    if (!brandToDelete) return
+    
     try {
-      const response = await fetch(`/api/brands/${id}`, {
+      const response = await fetch(`/api/brands/${brandToDelete}`, {
         method: 'DELETE',
       })
       const data = await response.json()
       if (data.success) {
         fetchBrands()
+        showToast.success('Brand deleted successfully')
       } else {
-        alert('Failed to delete brand')
+        showToast.error('Failed to delete brand')
       }
     } catch (error) {
       console.error('Error deleting brand:', error)
+      showToast.error('Failed to delete brand')
+    } finally {
+      setDeleteDialogOpen(false)
+      setBrandToDelete(null)
     }
   }
 
@@ -386,6 +409,24 @@ export default function AdminBrandsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Brand?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this brand? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

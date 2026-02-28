@@ -6,6 +6,7 @@ import { Upload, X, Camera, Shirt, Sparkles, RefreshCw, ChevronRight } from 'luc
 import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '@/lib/products';
 import { Inter } from 'next/font/google';
+import { showToast } from '@/lib/toast-utils';
 
 // Initialize Inter font
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
@@ -96,7 +97,7 @@ export default function TryOnPage() {
 
         // Client-side 5MB size limit check
         if (file.size > 5 * 1024 * 1024) {
-            alert('Image too large. Please use an image under 5MB.');
+            showToast.error('Image too large. Please use an image under 5MB.');
             e.target.value = '';
             return;
         }
@@ -115,11 +116,11 @@ export default function TryOnPage() {
             if (data.url) {
                 setUserImage(data.url);
             } else {
-                alert('Upload failed: ' + (data.error || 'Unknown error'));
+                showToast.error('Upload failed: ' + (data.error || 'Unknown error'));
             }
         } catch (err) {
             console.error(err);
-            alert('Upload failed');
+            showToast.error('Upload failed');
         } finally {
             setIsUploading(false);
         }
@@ -150,7 +151,7 @@ export default function TryOnPage() {
             const garmentImage = selectedProduct.images?.[0] || selectedProduct.image;
 
             if (!garmentImage) {
-                alert('Selected product has no image');
+                showToast.error('Selected product has no image');
                 setIsGenerating(false);
                 setStep(2);
                 return;
@@ -171,7 +172,7 @@ export default function TryOnPage() {
             const data = await res.json();
 
             if (data.error) {
-                alert('Generation error: ' + data.error);
+                showToast.error('Generation error: ' + data.error);
                 setIsGenerating(false);
                 setStep(2); // Go back
             } else if (data.status === 'completed' && data.output && data.output.length > 0) {
@@ -185,7 +186,7 @@ export default function TryOnPage() {
             }
         } catch (err) {
             console.error(err);
-            alert('Failed to start generation');
+            showToast.error('Failed to start generation');
             setIsGenerating(false);
             setStep(2);
         }

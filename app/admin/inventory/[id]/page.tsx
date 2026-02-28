@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { showToast } from '@/lib/toast-utils';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -41,7 +42,7 @@ export default function InventoryDetailPage({ params }: { params: { id: string }
             // SWR revalidation might be needed on that key or just reload page.
             window.location.reload();
         } catch (err: any) {
-            alert(err.message);
+            showToast.error(err.message);
         }
     };
 

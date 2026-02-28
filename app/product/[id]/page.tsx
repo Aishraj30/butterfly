@@ -237,7 +237,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             }
         } catch (error) {
             console.error('Wishlist error:', error);
-            alert('Failed to update wishlist. Please try again.');
+            const { toast } = useToast();
+            toast({
+                title: 'Error',
+                description: 'Failed to update wishlist. Please try again.',
+                variant: 'destructive',
+            });
         }
     };
 
@@ -741,7 +746,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             <button
                                 onClick={() => {
                                     if (isCustomSizeEmpty()) {
-                                        alert("Please fill all mandatory fields (Chest, Waist, Shoulder, Sleeve, Length)");
+                                        const { toast } = useToast();
+                                        toast({
+                                            title: 'Validation Error',
+                                            description: 'Please fill all mandatory fields (Chest, Waist, Shoulder, Sleeve, Length)',
+                                            variant: 'destructive',
+                                        });
                                         return;
                                     }
                                     setShowMeasurementModal(false);
