@@ -53,12 +53,27 @@ export default function AboutPage() {
               creating fashion that transcends the ephemeral nature of trends. 
               We believe that true luxury is quiet, consisting of details that whisper rather than shout.
             </p>
-            <p>
-              Inspired by the structural beauty of nature and the stark contrast of 
-              light and shadow, every garment we produce is a study in form. 
-              We curate the finest raw materials to craft pieces that celebrate 
-              the journey toward one's truest self.
-            </p>
+            
+            <div className="border-l-4 border-black pl-6 space-y-4">
+              <h4 className="font-semibold text-black text-xl">Signature Style</h4>
+              <p>
+                The brand specializes in <strong>Indo-Western wear</strong>, blending contemporary global silhouettes with traditional influences unique to the Northeast. Each piece represents a harmonious fusion of modern design sensibilities with rich cultural heritage.
+              </p>
+            </div>
+            
+            <div className="border-l-4 border-gray-400 pl-6 space-y-4">
+              <h4 className="font-semibold text-black text-xl">Premium Focus</h4>
+              <p>
+                <strong>Butterfly Collection Couture</strong> is positioned as a luxury brand, known for its intricate craftsmanship and "timeless elegance." We curate the finest raw materials and employ master artisans to create pieces that celebrate the journey toward one's truest self.
+              </p>
+            </div>
+            
+            <div className="border-l-4 border-gray-400 pl-6 space-y-4">
+              <h4 className="font-semibold text-black text-xl">Impact and Recognition</h4>
+              <p>
+                Mr. Marwein has become a prominent figure in the Northeast Indian fashion circuit, frequently invited as an esteemed judge and mentor for major beauty pageants. Under his leadership, the brand has grown into a "beacon of style" that promotes the region's artistic heritage through high-fashion garments.
+              </p>
+            </div>
           </div>
           
           <div className="mt-12 pt-8 border-t border-gray-200 grid grid-cols-2 gap-8">
@@ -125,43 +140,50 @@ export default function AboutPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: 'Isabelle Laurent',
-                role: 'Founder / Creative Director',
-                bio: '20 years defining the silhouette of modern luxury.',
-              },
-              {
-                name: 'Marcus Chen',
-                role: 'Chief Operations Officer',
-                bio: 'Bridging the gap between art and logistical precision.',
-              },
-              {
-                name: 'Sophie Beaumont',
-                role: 'Head of Collections',
-                bio: 'Award-winning architect of fabric and form.',
-              },
-            ].map((member) => (
-              <div key={member.name} className="group cursor-pointer">
-                {/* Image Aspect Ratio 3:4 for portrait fashion look */}
-                <div className="aspect-[3/4] bg-gray-100 mb-6 relative overflow-hidden">
+            {/* Founder Section - Full Width */}
+            <div className="md:col-span-3 group cursor-pointer">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                {/* Founder Image */}
+                <div className="aspect-[4/5] lg:aspect-[3/4] bg-gray-100 relative overflow-hidden order-2 lg:order-1">
                   <img 
-                    src={catalogBanners[1]} 
-                    alt={member.name}
+                    src="/founderbutterfly.jpeg" 
+                    alt="Mr. Strennousland Marwein - Founder of Butterfly Couture"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                 </div>
                 
-                <h3 className="text-xl mb-1">{member.name}</h3>
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
-                  {member.role}
-                </p>
-                <p className="text-gray-600 text-sm">
-                  {member.bio}
-                </p>
+                {/* Founder Story */}
+                <div className="order-1 lg:order-2 space-y-6">
+                  <div>
+                    <h3 className="text-3xl lg:text-4xl mb-2">Mr. Strennousland Marwein</h3>
+                    <p className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6">
+                      Founder & Visionary
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-4 text-gray-600 leading-relaxed">
+                    <p className="text-lg">
+                      Mr. Strennousland Marwein is the visionary founder behind <strong>Butterfly Clothing and Accessories</strong>, also known as <strong>Butterfly Collection Couture</strong>, a premium fashion label rooted in the cultural heart of Northeast India.
+                    </p>
+                    
+                    <div className="border-l-4 border-black pl-6 space-y-4">
+                      <h4 className="font-semibold text-black text-xl">Journey from Hobby to Haute Couture</h4>
+                      <p>
+                        What began as a personal hobby for Mr. Marwein transformed into a professional venture after he identified a distinct gap in the luxury fashion market. His deep involvement in both regional and national pageantry served as a catalyst, providing him with firsthand insight into the demand for high-end, stage-worthy attire.
+                      </p>
+                      <p>
+                        While participating in and judging prestigious events, Mr. Marwein recognized a need for premium, specialized garments that could represent the region on a national stage. This revelation sparked the metamorphosis of his passion into Butterfly Couture—a brand that would bridge traditional Northeast Indian craftsmanship with contemporary luxury fashion.
+                      </p>
+                    </div>
+                    
+                    <p>
+                      Under his creative direction, Butterfly Couture has become synonymous with elegance, innovation, and cultural pride, creating pieces that not only adorn but also tell stories of heritage and artistic excellence.
+                    </p>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>

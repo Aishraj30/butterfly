@@ -43,26 +43,6 @@ export function CustomerStatisticsChart() {
 
   const totalCustomers = customerData.reduce((sum, item) => sum + item.value, 0)
 
-  if (loading) {
-    return (
-      <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
-        <div className="mb-4 sm:mb-6">
-          <h2 className="text-base sm:text-lg font-semibold text-black dark:text-white">
-            Customers Statistics
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-600">
-            Active vs Inactive customers
-          </p>
-        </div>
-        <div className="h-48 sm:h-56 lg:h-64 flex items-center justify-center">
-          <div className="animate-pulse">
-            <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -101,57 +81,79 @@ export function CustomerStatisticsChart() {
           Customers Statistics
         </h2>
         <p className="text-xs sm:text-sm text-gray-600">
-          Gender distribution
+          Active vs Inactive customers
         </p>
       </div>
 
       {/* Donut Chart */}
       <div className="h-48 sm:h-56 lg:h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={customerData}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={80}
-              paddingAngle={2}
-              dataKey="value"
-              labelLine={false}
-              label={renderCustomLabel}
-            >
-              {customerData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-          </PieChart>
-        </ResponsiveContainer>
+        {loading ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="animate-pulse">
+              <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            </div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={customerData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={2}
+                dataKey="value"
+                labelLine={false}
+                label={renderCustomLabel}
+              >
+                {customerData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Legend */}
       <div className="mt-4 space-y-2">
-        {customerData.map((item, index) => (
-          <div key={item.name} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: COLORS[index] }}
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {item.name}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                {item.value.toLocaleString()}
-              </span>
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
-                ({item.percentage}%)
-              </span>
-            </div>
+        {loading ? (
+          <div className="space-y-2">
+            {[1, 2].map((i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                  <div className="w-16 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                </div>
+                <div className="w-12 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          customerData.map((item, index) => (
+            <div key={item.name} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: COLORS[index] }}
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {item.name}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  {item.value.toLocaleString()}
+                </span>
+                <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
+                  ({item.percentage}%)
+                </span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   )

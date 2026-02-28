@@ -99,33 +99,29 @@ export function MetricsCards() {
     fetchMetrics()
   }, [])
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-        {[...Array(3)].map((_, index) => (
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+      {loading ? (
+        [...Array(3)].map((_, index) => (
           <div key={index} className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm animate-pulse">
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
           </div>
-        ))}
-      </div>
-    )
-  }
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-      {metrics.map((metric, index) => (
-        <MetricCard
-          key={index}
-          title={metric.title}
-          value={metric.value}
-          change={metric.change}
-          changeText={metric.changeText}
-          icon={metric.icon}
-          color={metric.color}
-        />
-      ))}
+        ))
+      ) : (
+        metrics.map((metric, index) => (
+          <MetricCard
+            key={index}
+            title={metric.title}
+            value={metric.value}
+            change={metric.change}
+            changeText={metric.changeText}
+            icon={metric.icon}
+            color={metric.color}
+          />
+        ))
+      )}
     </div>
   )
 }

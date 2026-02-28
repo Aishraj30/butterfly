@@ -47,29 +47,6 @@ export function SalesRevenueChart() {
     fetchSalesData()
   }, [])
 
-  if (loading) {
-    return (
-      <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
-          <div>
-            <h2 className="text-base sm:text-lg font-semibold text-black dark:text-white">
-              Sales Revenue
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-600">
-              Monthly sales overview
-            </p>
-          </div>
-        </div>
-        <div className="h-48 sm:h-56 lg:h-64 flex items-center justify-center">
-          <div className="animate-pulse w-full">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
@@ -101,35 +78,44 @@ export function SalesRevenueChart() {
 
       {/* Chart */}
       <div className="h-48 sm:h-56 lg:h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={salesData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
-            <XAxis
-              dataKey="month"
-              tick={{ fill: '#6b7280', fontSize: 10 }}
-              axisLine={{ stroke: '#d1d5db' }}
-            />
-            <YAxis
-              tick={{ fill: '#6b7280', fontSize: 10 }}
-              axisLine={{ stroke: '#d1d5db' }}
-              tickFormatter={(value) => `₹${(value / 1000)}k`}
-            />
-            <Tooltip
-              formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Revenue']}
-              contentStyle={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '12px'
-              }}
-            />
-            <Bar
-              dataKey="revenue"
-              fill="#000000"
-              radius={[8, 8, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        {loading ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="animate-pulse w-full">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+              <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={salesData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
+              <XAxis
+                dataKey="month"
+                tick={{ fill: '#6b7280', fontSize: 10 }}
+                axisLine={{ stroke: '#d1d5db' }}
+              />
+              <YAxis
+                tick={{ fill: '#6b7280', fontSize: 10 }}
+                axisLine={{ stroke: '#d1d5db' }}
+                tickFormatter={(value) => `₹${(value / 1000)}k`}
+              />
+              <Tooltip
+                formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Revenue']}
+                contentStyle={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '12px'
+                }}
+              />
+              <Bar
+                dataKey="revenue"
+                fill="#000000"
+                radius={[8, 8, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   )

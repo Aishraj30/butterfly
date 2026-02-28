@@ -64,31 +64,6 @@ export function TopProductsTable() {
     fetchTopProducts()
   }, [])
 
-  if (loading) {
-    return (
-      <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
-          <div>
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-              Top Products
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-              Best performing products
-            </p>
-          </div>
-        </div>
-        <div className="space-y-3">
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="animate-pulse">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
@@ -131,30 +106,53 @@ export function TopProductsTable() {
             </tr>
           </thead>
           <tbody>
-            {topProducts.map((product, index) => (
-              <tr
-                key={product.id}
-                className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm text-gray-900 dark:text-white">
-                  {index + 1}
-                </td>
-                <td className="py-2 sm:py-3 px-2">
-                  <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
-                    {product.name}
-                  </div>
-                </td>
-                <td className="py-2 sm:py-3 px-2">
-                  <StarRating rating={product.review} />
-                </td>
-                <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm text-gray-900 dark:text-white">
-                  {product.sold}
-                </td>
-                <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
-                  {product.profit}
-                </td>
-              </tr>
-            ))}
+            {loading ? (
+              [...Array(5)].map((_, index) => (
+                <tr key={index} className="border-b border-gray-200 dark:border-gray-600">
+                  <td className="py-2 sm:py-3 px-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  </td>
+                  <td className="py-2 sm:py-3 px-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
+                  </td>
+                  <td className="py-2 sm:py-3 px-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  </td>
+                  <td className="py-2 sm:py-3 px-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  </td>
+                  <td className="py-2 sm:py-3 px-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              topProducts.map((product, index) => (
+                <tr
+                  key={product.id}
+                  className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm text-gray-900 dark:text-white">
+                    {index + 1}
+                  </td>
+                  <td className="py-2 sm:py-3 px-2">
+                    <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
+                      {product.name}
+                    </div>
+                  </td>
+                  <td className="py-2 sm:py-3 px-2">
+                    <StarRating rating={product.review} />
+                  </td>
+                  <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm text-gray-900 dark:text-white">
+                    {product.sold}
+                  </td>
+                  <td className="py-2 sm:py-3 px-2 text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
+                    {product.profit}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
