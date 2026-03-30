@@ -1,28 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { uploadToCloudinary } from '@/lib/cloudinary'
-import { verifyToken } from '@/lib/jwt'
+import { uploadToCloudinary, uploadLargeToCloudinary } from '@/lib/cloudinary'
+import { uploadToS3 } from '@/lib/s3'
 
 export async function POST(request: NextRequest) {
   try {
-    /* Temporarily disabled
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const token = authHeader.split(' ')[1]
-    const decoded = verifyToken(token) as any
-
-    if (!decoded || decoded.role !== 'admin') {
-      return NextResponse.json(
-        { success: false, error: 'Admin access only' },
-        { status: 403 }
-      )
-    }
-    */
+    const storageStrategy = process.env.IMAGE_STORAGE || 'cloudinary'
 
     const formData = await request.formData()
     const file = formData.get('file') as File
@@ -35,7 +17,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`[Upload] Received file: ${file.name}, Size: ${(file.size / (1024 * 1024)).toFixed(2)} MB, Type: ${file.type}`)
+    console.log(`[Upload] Received file: ${file.name}, Strategy: ${storageStrategy}`)
 
     // Validate file type
     const isImage = file.type.startsWith('image/')
@@ -48,75 +30,46 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file size (500MB limit for videos, 10MB for images)
-    const maxSize = isVideo ? 500 * 1024 * 1024 : 10 * 1024 * 1024
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { success: false, error: `File size must be less than ${isVideo ? '500MB' : '10MB'}` },
-        { status: 400 }
-      )
-    }
-
     let bytes = await file.arrayBuffer()
     let buffer: any = Buffer.from(bytes)
     let finalFilename = file.name.replace(/\s+/g, '-')
     let finalContentType = file.type
 
-    // If it's a video, compress it
-    if (isVideo) {
-      const { compressVideo } = await import('@/lib/videoCompression')
-      try {
-        console.log(`[Upload] Starting video compression for: ${finalFilename}`)
-        const compressed = await compressVideo(buffer, finalFilename)
-        buffer = compressed.buffer
-        finalFilename = compressed.filename
-        finalContentType = 'video/mp4'
-
-        // Upload using large file method since it's on disk
-        const { uploadLargeToCloudinary } = await import('@/lib/cloudinary')
-        const url = await uploadLargeToCloudinary(compressed.outputPath, `${Date.now()}-${finalFilename}`) as string
-
-        // Cleanup temp file
-        const fs = await import('fs')
-        if (fs.existsSync(compressed.outputPath)) {
-          fs.unlinkSync(compressed.outputPath)
-        }
-
-        return NextResponse.json({
-          success: true,
-          url,
-          filename: finalFilename
-        })
-      } catch (err) {
-        console.error('[Upload] Video compression failed, uploading original:', err)
-
-        // If it's a large video, use large upload even for the original
-        if (buffer.length > 10 * 1024 * 1024) {
-          const fs = await import('fs')
-          const os = await import('os')
-          const path = await import('path')
-          const tempPath = path.join(os.tmpdir(), `original-${Date.now()}-${finalFilename}`)
-          await fs.promises.writeFile(tempPath, buffer)
-
-          try {
-            const { uploadLargeToCloudinary } = await import('@/lib/cloudinary')
-            const url = await uploadLargeToCloudinary(tempPath, `${Date.now()}-${finalFilename}`) as string
-            await fs.promises.unlink(tempPath).catch(() => { })
-            return NextResponse.json({ success: true, url, filename: finalFilename })
-          } catch (uploadErr) {
-            await fs.promises.unlink(tempPath).catch(() => { })
-            throw uploadErr
-          }
-        }
-      }
-    }
-
     // Create unique filename with timestamp
     const timestamp = Date.now()
     const filename = `${timestamp}-${finalFilename}`
 
-    // Upload to Cloudinary (Standard method for images or fallback)
-    const url = await uploadToCloudinary(buffer, filename, finalContentType)
+    let url: string = ''
+
+    if (storageStrategy === 's3') {
+      // S3 Logic
+      url = await uploadToS3(buffer, filename, finalContentType)
+    } else {
+      // Cloudinary Logic
+      if (isVideo) {
+        const { compressVideo } = await import('@/lib/videoCompression')
+        try {
+          const compressed = await compressVideo(buffer, finalFilename)
+          const outPath = compressed.outputPath
+          // Assume uploadLargeToCloudinary returns string or cast it
+          const uploadedUrl = await uploadLargeToCloudinary(outPath, filename)
+          url = typeof uploadedUrl === 'string' ? uploadedUrl : (uploadedUrl as any).secure_url || ''
+          
+          // Cleanup temp file
+          const fs = await import('fs')
+          if (fs.existsSync(outPath)) {
+            fs.unlinkSync(outPath)
+          }
+        } catch (err) {
+          console.error('[Upload] Video processing failed:', err)
+          const uploadedUrl = await uploadToCloudinary(buffer, filename, finalContentType)
+          url = typeof uploadedUrl === 'string' ? uploadedUrl : (uploadedUrl as any).secure_url || ''
+        }
+      } else {
+        const uploadedUrl = await uploadToCloudinary(buffer, filename, finalContentType)
+        url = typeof uploadedUrl === 'string' ? uploadedUrl : (uploadedUrl as any).secure_url || ''
+      }
+    }
 
     return NextResponse.json({
       success: true,

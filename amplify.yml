@@ -26,10 +26,10 @@ frontend:
         - echo "SMTP_PASS=$SMTP_PASS" >> .env.production
         - echo "SMTP_USERNAME=$SMTP_USERNAME" >> .env.production
         - echo "SMTP_FROM=$SMTP_FROM" >> .env.production
-        - echo "AWS_REGION=$AWS_REGION" >> .env.production
-        - echo "AWS_ACCESS_KEY=$AWS_ACCESS_KEY" >> .env.production
-        - echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> .env.production
-        - echo "AWS_BUCKET_NAME=$AWS_BUCKET_NAME" >> .env.production
+        - echo "S3_REGION=$S3_REGION" >> .env.production
+        - echo "S3_ACCESS_KEY=$S3_ACCESS_KEY" >> .env.production
+        - echo "S3_SECRET_KEY=$S3_SECRET_KEY" >> .env.production
+        - echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> .env.production
         - echo "NODE_ENV=$NODE_ENV" >> .env.production
         - echo "NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL" >> .env.production
         - echo "NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID" >> .env.production
